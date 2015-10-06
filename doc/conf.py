@@ -65,7 +65,7 @@ master_doc = 'index'
 
 # General information about the project.
 Argonne = u'Argonne National Laboratory'
-project = u'TomoPy'
+project = u'data-management'
 copyright = u'2013-2015, ' + Argonne
 
 # The version info for the project you're documenting, acts as replacement for
@@ -279,7 +279,7 @@ texinfo_documents = [
   project+u' Documentation',
   Argonne, 
   project, 
-  'TomoPy: Tomographic Reconstruction in Python.',
+  'Data Management: APS Data Management in Python.',
   'Miscellaneous'),
 ]
 
