@@ -9,7 +9,7 @@ This section contains the API reference and usage information for data-managemen
 
    api/data-management.scheduling
 
-.. automodule:: data-management
+.. automodule:: src
    :members:
    :undoc-members:
    :show-inheritance: 
