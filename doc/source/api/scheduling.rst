@@ -10,5 +10,4 @@
 
    .. autosummary::
    
-      findRunName
-      findBeamlineSchedule
+      get_users
