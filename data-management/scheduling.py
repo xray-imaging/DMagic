@@ -47,7 +47,25 @@
 # #########################################################################
 
 """
-Module for describing beamline/experiment specific data recipes.
+Module containing routines to access the APS scheduling system.
+
+You must use the APS web password. You can check it by logging into
+the proposal system. Be careful because this system also accepts LDAP
+account info.
+
+The credentials are stored in a '.ini' file and read by python.
+ - Create a file called 'credentials.ini',
+ - Put the following text in it:
+ [credentials]
+ username = YOUR BADGE NUMBER
+ password = YOUR APS WEB PASSWORD
+
+ [hosts]
+ internal = https: ....
+ external = https: .... 
+ 
+ that's it.
+
 """
 
 import os
@@ -72,30 +90,9 @@ __author__ = "Francesco De Carlo"
 __credits__ = "John Hammonds"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['findRunName',
-           'findBeamlineSchedule',
-           'get_users']
+__all__ = ['get_users']
 
 debug = False
-
-""" You must use the APS web password. You can check it by logging into
-the proposal system. Be careful because this system also accepts LDAP
-account info.
-
-The credentials are stored in a '.ini' file and read by python.
- - Create a file called 'credentials.ini',
- - Put the following text in it:
- [credentials]
- username = YOUR BADGE NUMBER
- password = YOUR APS WEB PASSWORD
-
- [hosts]
- internal = https: ....
- external = https: .... 
- 
- that's it.
-
-"""
 
 cf = ConfigParser.ConfigParser()
 cf.read('credentials.ini')
