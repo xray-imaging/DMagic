@@ -2,7 +2,7 @@
 
 .. image:: source/img/tomopy-logo.png
    :width: 320px
-   :alt: TomoPy
+   :alt: Data Management
 
 `Data management <https://github.com/decarlof/data-management.git>`_ is an open-sourced Python
 toolbox to perform data management and data sharing for users of 
