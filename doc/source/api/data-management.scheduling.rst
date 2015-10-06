@@ -1,5 +1,5 @@
 :mod:`data-management.scheduling`
-================================
+=================================
 
 .. automodule:: data-management.scheduling
    :members:
