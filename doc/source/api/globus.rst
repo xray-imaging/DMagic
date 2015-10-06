@@ -1,5 +1,5 @@
 :mod:`data-management.globus`
-=========================
+=============================
 
 .. automodule:: data-management.globus
    :members:
