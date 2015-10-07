@@ -27,10 +27,12 @@ exp_id = sch.create_experiment_id(beamline, now)
 print "Unique experiment ID: ", exp_id
                   
 unique_directory = gb.create_unique_directory(exp_start, exp_id)
+
+gb.upload(unique_directory)
+
 users = sch.find_users(beamline, now)
 
 #sch.print_users(users)
-#gb.local_share(unique_directory, users)
-
-gb.upload(unique_directory, users)
+gb.share_local(unique_directory, users)
+gb.share_remote(unique_directory, users)
 
