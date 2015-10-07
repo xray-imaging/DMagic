@@ -96,7 +96,6 @@ def main(argv):
 
     globus_scp = "scp -r " + local_user + local_share1 + ":" + os.sep + input_folder + " " + remote_user + remote_share + ":" + remote_shared_folder
     globus_add = "acl-add " + local_user + local_share2  + os.sep + input_folder + " --perm r --email " + input_email
-    print "python globus_copy_remote_share.py -f test -e decarlof@gmail.com"
     if validate_email(input_email) and os.path.isdir(local_shared_folder + input_folder):
         cmd_1 = "ssh " + globus_user + globus_address + " " + globus_scp
         cmd_2 = "ssh " + globus_user + globus_address + " " + globus_add
@@ -110,6 +109,8 @@ def main(argv):
         print "Download link sent to: ", input_email
     else:
         print "ERROR: "
+        print "EXAMPLE: python globus_copy_remote_share.py -f test -e decarlof@gmail.com"
+
         if not validate_email(input_email):
             print "email is not valid ..."
         else:

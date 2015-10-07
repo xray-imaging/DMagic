@@ -68,8 +68,6 @@ The credentials are stored in a '.ini' file and read by python.
 
 """
 
-import os
-import pytz
 import datetime
 from suds.wsse import Security, UsernameToken
 from suds.client import Client
@@ -84,8 +82,6 @@ import ipdb
 from collections import defaultdict
 import ConfigParser
 
-from validate_email import validate_email
-
 __author__ = "Francesco De Carlo"
 __credits__ = "John Hammonds"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
@@ -98,6 +94,7 @@ cf = ConfigParser.ConfigParser()
 cf.read('credentials.ini')
 username = cf.get('credentials', 'username')
 password = cf.get('credentials', 'password')
+beamline = cf.get('settings', 'beamline')
 
 # Uncomment one if using ANL INTERNAL or EXTERNAL network
 #base = cf.get('hosts', 'internal')
@@ -108,7 +105,6 @@ cf = ConfigParser.ConfigParser()
 cf.read('globus.ini')
 globus_address = cf.get('settings', 'cli_address')
 globus_user = cf.get('settings', 'cli_user')
-beamline = cf.get('settings', 'beamline')
 scp_options = cf.get('settings', 'scp_options')
 
 local_user = cf.get('globus connect personal', 'user') 
@@ -402,17 +398,50 @@ def create_experiment_id(beamline='2-BM-A,B', date=None):
     datetime_format = '%Y-%m-%dT%H:%M:%S%z'
    
     # scheduling system settings
-    print "\n\tAccessing the APS Scheduling System ... "
+    print "\nCrating a unique experiment ID... "
     runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
     proposal_id = get_proposal_id(beamline, date.replace(tzinfo=None))
     beamtime_request = get_beamtime_request(beamline, date.replace(tzinfo=None))
     
     experiment_id = 'g' + str(proposal_id) + 'r' + str(beamtime_request)
-    print "\tUnique experiment ID: ",  experiment_id     
 
     return experiment_id
 
-def list_experiment_info(beamline='2-BM-A,B', date=None):
+def find_experiment_start(beamline='2-BM-A,B', date=None):
+
+    datetime_format = '%Y-%m-%dT%H:%M:%S%z'
+
+    # scheduling system settings
+    print "\nFinding experiment start date ... "
+    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
+
+    experiment_start = get_experiment_start(beamline, date.replace(tzinfo=None))
+ 
+    return experiment_start
+    
+def find_users(beamline='2-BM-A,B', date=None):
+    # scheduling system settings
+    print "\nFinding users ... "
+    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
+    users = get_users(beamline, date.replace(tzinfo=None))
+    
+    return users
+
+def print_users(users):
+    # find the Principal Investigator
+    for tag in users:
+        if users[tag].get('piFlag') != None:
+            name = str(users[tag]['firstName'] + ' ' + users[tag]['lastName'])            
+            role = "*"
+            institution = str(users[tag]['institution'])
+            badge = str(users[tag]['badge'])
+            email = str(users[tag]['email'])
+            print "", role, badge, name, institution, email
+        else:            
+            print "", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], users[tag]['institution'], users[tag]['email']
+    print "(*) Proposal PI"        
+
+def print_experiment_info(beamline='2-BM-A,B', date=None):
     print "Inputs: "
     datetime_format = '%Y-%m-%dT%H:%M:%S%z'
     print "\tTime of Day: ", date.strftime(datetime_format)
@@ -440,106 +469,3 @@ def list_experiment_info(beamline='2-BM-A,B', date=None):
             print "\t\t", email
         else:            
             print "\tMissing e-mail for:", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], users[tag]['institution']
-
-def find_experiment_start(beamline='2-BM-A,B', date=None):
-
-    datetime_format = '%Y-%m-%dT%H:%M:%S%z'
-
-    # scheduling system settings
-    print "\n\tAccessing the APS Scheduling System ... "
-    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
-
-    experiment_start = get_experiment_start(beamline, date.replace(tzinfo=None))
-    print "\tExperiment Start: ", experiment_start
- 
-    return experiment_start
-    
-def find_users(beamline='2-BM-A,B', date=None):
-    # scheduling system settings
-    print "\n\tAccessing the APS Scheduling System ... "
-    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
-
-    users = get_users(beamline, date.replace(tzinfo=None))
-
-    # find the Principal Investigator
-    for tag in users:
-        if users[tag].get('piFlag') != None:
-            name = str(users[tag]['firstName'] + ' ' + users[tag]['lastName'])            
-            role = "*"
-            institution = str(users[tag]['institution'])
-            badge = str(users[tag]['badge'])
-            email = str(users[tag]['email'])
-            print "\t\t", role, badge, name, institution, email
-        else:            
-            print "\t\t", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], users[tag]['institution'], users[tag]['email']
-    print "\t(*) Proposal PI"        
-    
-    return users
-
-def create_unique_directory(exp_start, exp_id):
-    
-    datetime_format = '%Y-%m'
-    unique_directory = local_shared_folder + str(exp_start.strftime(datetime_format)) + os.sep + exp_id
-
-    if os.path.exists(unique_directory) == False: 
-        os.makedirs(unique_directory)    
-        print "\n\tCreating unique data directory: ", unique_directory
-    else:
-        print "\n\tDirectory already exists: ", unique_directory
-    
-    return unique_directory
-
-def globus_local_share(directory, users):
-
-    path_list = directory.split(os.sep)
-    data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1] + os.sep
-
-    print "\n\tSend a token to share the globus connect personal folder called: ", data_share
-    for tag in users:
-        if users[tag].get('email') != None:
-            email = str(users[tag]['email'])
-            globus_add = "acl-add " + local_user + local_share1 + os.sep + data_share  + " --perm r --email " + email
-            if validate_email(email) and os.path.isdir(directory):
-                cmd = "ssh " + globus_user + globus_address + " " + globus_add
-                print cmd
-
-    # for demo
-    email = 'decarlo@aps.anl.gov'
-    globus_add = "acl-add " + local_user + local_share1 + os.sep + data_share  + " --perm r --email " + email
-    cmd = "ssh " + globus_user + globus_address + " " + globus_add
-    #print "ssh decarlo@cli.globusonline.org acl-add decarlo#data/2014-10/g40065r94918/ --perm r --email decarlof@gmail.com"
-    print cmd
-    #os.system(cmd)
-    print "\n\n=================================================================="
-    print "Check your email to download the data from globus connect personal"
-    print "=================================================================="
-
-def globus_cp(directory, users):
-        
-    path_list = directory.split(os.sep)
-    data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1] + os.sep
-
-    globus_scp = "scp -r " + local_user + local_share1 + ":" + os.sep + data_share + " " + remote_user + remote_share + ":" + remote_shared_folder
-    if os.path.isdir(directory):
-        cmd = "ssh " + globus_user + globus_address + " " + globus_scp + " " + scp_options
-        #print "ssh decarlo@cli.globusonline.org scp -r decarlo#data:/txm/ petrel#tomography:dm/"
-        print cmd
-        #os.system(cmd1)
-        print "Done data trasfer to: ", remote_user
-       
-if __name__ == "__main__":
-
-    # Input parameters
-    #now = datetime.datetime.now(pytz.timezone('US/Central'))
-    now = datetime.datetime(2014, 10, 18, 10, 10, 30).replace(tzinfo=pytz.timezone('US/Central'))
-
-    print "Input (experiment date): ", now
-    #list_experiment_info(beamline, now)
-    exp_id = create_experiment_id(beamline, now)
-    exp_start = find_experiment_start(beamline, now)
-                      
-    unique_directory = create_unique_directory(exp_start, exp_id)
-
-    users = find_users(beamline, now)
-    globus_local_share(unique_directory, users)
-    globus_cp(unique_directory, users)
