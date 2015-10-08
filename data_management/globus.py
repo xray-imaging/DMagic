@@ -62,6 +62,7 @@ __docformat__ = 'restructuredtext en'
 cf = ConfigParser.ConfigParser()
 cf.read('globus.ini')
 globus_address = cf.get('settings', 'cli_address')
+print globus_address
 globus_user = cf.get('settings', 'cli_user')
 scp_options = cf.get('settings', 'scp_options')
 

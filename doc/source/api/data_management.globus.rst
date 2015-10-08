@@ -1,4 +1,4 @@
-:mod:`data-management.globus`
+:mod:`data_management.globus`
 =============================
 
 .. automodule:: data_management.globus

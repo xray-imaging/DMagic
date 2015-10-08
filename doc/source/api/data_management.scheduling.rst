@@ -1,4 +1,4 @@
-:mod:`data-management.scheduling`
+:mod:`data_management.scheduling`
 =================================
 
 .. automodule:: data_management.scheduling
