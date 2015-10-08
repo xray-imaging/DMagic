@@ -7,9 +7,9 @@ This section contains the API reference and usage information for data-managemen
 
 .. toctree::
 
-   api/data-management.scheduling
+   api/data_management.scheduling
 
-.. automodule:: data-management
+.. automodule:: data_management
    :members:
    :undoc-members:
    :show-inheritance: 

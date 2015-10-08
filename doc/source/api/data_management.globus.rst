@@ -1,7 +1,7 @@
 :mod:`data-management.globus`
 =============================
 
-.. automodule:: data-management.globus
+.. automodule:: data_management.globus
    :members:
    :show-inheritance:
    :undoc-members:
