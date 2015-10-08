@@ -53,17 +53,21 @@ You must use the APS web password. You can check it by logging into
 the proposal system. Be careful because this system also accepts LDAP
 account info.
 
-The credentials are stored in a '.ini' file and read by python.
+The credentials are stored in a 'credentials.ini' file and read by python.
  - Create a file called 'credentials.ini',
  - Put the following text in it:
- [credentials]
- username = YOUR BADGE NUMBER
- password = YOUR APS WEB PASSWORD
 
- [hosts]
- internal = https: ....
- external = https: .... 
- 
+[credentials]
+username = YOUR BADGE NUMBER
+password = YOUR APS WEB PASSWORD
+
+[hosts]
+internal = https: ....
+external = https: .... 
+
+[settings]
+beamline = 32-ID-B,C
+
  that's it.
 
 """
@@ -99,24 +103,6 @@ beamline = cf.get('settings', 'beamline')
 # Uncomment one if using ANL INTERNAL or EXTERNAL network
 #base = cf.get('hosts', 'internal')
 base = cf.get('hosts', 'external')
-
-# see README.txt to set a globus personal shared folder
-cf = ConfigParser.ConfigParser()
-cf.read('globus.ini')
-globus_address = cf.get('settings', 'cli_address')
-globus_user = cf.get('settings', 'cli_user')
-scp_options = cf.get('settings', 'scp_options')
-
-local_user = cf.get('globus connect personal', 'user') 
-local_share1 = cf.get('globus connect personal', 'share1') 
-local_share2 = cf.get('globus connect personal', 'share2') 
-local_shared_folder = cf.get('globus connect personal', 'shared_folder')  
-
-remote_user = cf.get('globus remote server', 'user') 
-remote_share = cf.get('globus remote server', 'share') 
-remote_shared_folder = cf.get('globus remote server', 'shared_folder')  
-
-globus_ssh = "ssh " + globus_user + globus_address
 
 class HTTPSConnectionV3(httplib.HTTPSConnection):
     def __init__(self, *args, **kwargs):

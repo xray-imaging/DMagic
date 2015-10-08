@@ -47,14 +47,18 @@
 # #########################################################################
 
 """
-Module for describing beamline/experiment specific data recipes.
+Module to share a Globus Personal shared folder with a user by sending an e-mail.
 """
 
 import os
 import sys, getopt
 import ConfigParser
 from validate_email import validate_email
+import globus as gb
 
+__author__ = "Francesco De Carlo"
+__copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
+__docformat__ = 'restructuredtext en'
 
 # see README.txt to set a globus personal shared folder
 cf = ConfigParser.ConfigParser()
@@ -64,12 +68,9 @@ globus_user = cf.get('settings', 'cli_user')
 
 local_user = cf.get('globus connect personal', 'user') 
 local_share1 = cf.get('globus connect personal', 'share1') 
-local_share2 = cf.get('globus connect personal', 'share2') 
-local_shared_folder = cf.get('globus connect personal', 'shared_folder')  
+local_folder = cf.get('globus connect personal', 'folder')  
 
-remote_user = cf.get('globus remote server', 'user') 
-remote_share = cf.get('globus remote server', 'share') 
-remote_shared_folder = cf.get('globus remote server', 'shared_folder')  
+globus_ssh = "ssh " + globus_user + globus_address
 
 def main(argv):
     input_folder = ''
@@ -79,7 +80,6 @@ def main(argv):
         opts, args = getopt.getopt(argv,"hf:e:",["ffolder=","eemail="])
     except getopt.GetoptError:
         print 'test.py -f <folder> -e <email>'
-        #print 'test.py -i <inputfile> -o <outputfile>'
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
@@ -91,23 +91,22 @@ def main(argv):
             input_email = arg
     
     input_folder = os.path.normpath(input_folder) + os.sep # will add the trailing slash if it's not already there.
+    if validate_email(input_email) and os.path.isdir(local_folder + input_folder):
 
-    globus_add = "acl-add " + local_user + local_share1 + os.sep + input_folder  + " --perm r --email " + input_email
-#    globus_add = "acl-add " + local_user + local_share2  + os.sep + input_folder + " --perm r --email " + input_email
-
-    print "python globus_local_share.py -f test -e decarlof@gmail.com"
-    if validate_email(input_email) and os.path.isdir(local_shared_folder + input_folder):
-        cmd = "ssh " + globus_user + globus_address + " " + globus_add
+        globus_add = "acl-add " + local_user + local_share1 + os.sep + input_folder  + " --perm r --email " + input_email
+        cmd =  globus_ssh + " " + globus_add
         print cmd
         print "ssh decarlo@cli.globusonline.org acl-add decarlo#data/test/ --perm r --email decarlof@gmail.com"
         #os.system(cmd)
         print "Download link sent to: ", input_email
     else:
         print "ERROR: "
+        print "EXAMPLE: python globus_local_share.py -f test -e decarlof@gmail.com"
         if not validate_email(input_email):
             print "email is not valid ..."
         else:
-            print local_shared_folder + input_folder, "does not exists on the local server", 
+            print local_folder + input_folder, "does not exists under the Globus Personal Share folder"
+        gb.settings()
 
     
 if __name__ == "__main__":
