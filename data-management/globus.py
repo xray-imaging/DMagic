@@ -108,11 +108,13 @@ def settings():
     print "\tLocal Share2: " + local_user + local_share2 + "; Host Endpoint: " + remote_folder + " on " + remote_user + "#" + remote_host
     print "\tLocal Share2 is used to share data on the remote server with users"
     print "Globus Server Configuration: "
+    print "\tRemote Host: ", remote_host
+
     path_list = remote_folder.split(os.sep)
     remote_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1]
-    print "\tRemote Host: ", remote_host
     print "\tRemote Share: " + remote_user + remote_share + "; sharing the remote folder: " + remote_data_share 
-    print "\n\tEdit globus2.ini to match your globus configuration"
+
+    print "\n\tEdit globus.ini to match your globus configuration"
 
 def upload(local_directory):
         
