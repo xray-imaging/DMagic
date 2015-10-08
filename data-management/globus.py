@@ -47,7 +47,7 @@
 # #########################################################################
 
 """
-Module containing basic routines to use globus 
+Module containing basic routines to use globus CLI
 """
 
 import os

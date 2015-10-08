@@ -47,7 +47,9 @@
 # #########################################################################
 
 """
-Module for describing ...
+Module containing an example on how to use globus.py and scheduling.py to manage and 
+distribute data
+
 """
 
 import pytz
