@@ -1,8 +1,3 @@
-Please read 
-
-http://TinyURL.com/readme-globus 
-
-
-for instructions
+Project Home Page: http://img-data-management.readthedocs.org/
 
 
