@@ -7,6 +7,15 @@ This section covers the basics of how to download and install data-management.
 .. contents:: Contents:
    :local:
 
+Pre-requisites
+==============
+
+Before using the Data Management toolbox  you need to have setup an account 
+on `Globus <https://www.globus.org/>`__ and installed a 
+`Globus Connect Personal endpoint <https://www.globus.org/globus-connect-personal/>`__
+on the APS computer you want to share data from. You also need valid 
+APS credentials to access the `APS scheduling system <https://schedule.aps.anl.gov/>`__.
+
 Installing from Conda/Binstar
 =============================
 
