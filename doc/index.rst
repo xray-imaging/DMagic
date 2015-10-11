@@ -1,11 +1,11 @@
-.. title:: Data Management
+.. title:: IMG Data Management
 
-.. image:: source/img/tomopy-logo.png
+.. image:: source/img/data-management-logo.png
    :width: 320px
-   :alt: Data Management
+   :alt: IMG Data Management
 
 `Data management <https://github.com/decarlof/data-management.git>`_ is an open-sourced Python
-toolbox to perform data management and data sharing for users of 
+toolbox to perform data management and data sharing for users of the Imaging Group of
 the `Advanced Photon Source <http://www.aps.anl.gov>`_.
 
 This guide is maintained on 
