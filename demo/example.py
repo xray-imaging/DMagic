@@ -47,68 +47,45 @@
 # #########################################################################
 
 """
-Module to share a Globus Personal shared folder with a user by sending an e-mail.
+Module containing an example on how to use globus.py and scheduling.py to manage and 
+distribute data
+
 """
 
 import os
-import sys, getopt
+from os.path import expanduser
+import pytz
+import datetime
 import ConfigParser
-from validate_email import validate_email
-import globus as gb
 
-__author__ = "Francesco De Carlo"
-__copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
-__docformat__ = 'restructuredtext en'
+import data_management.scheduling as sch
+import data_management.globus as gb
 
-# see README.txt to set a globus personal shared folder
+home = expanduser("~")
+credentials = os.path.join(home, 'credentials.ini')
+
 cf = ConfigParser.ConfigParser()
-cf.read('globus.ini')
-globus_address = cf.get('settings', 'cli_address')
-globus_user = cf.get('settings', 'cli_user')
+cf.read(str(credentials))
+beamline = cf.get('settings', 'beamline')
 
-local_user = cf.get('globus connect personal', 'user') 
-local_share1 = cf.get('globus connect personal', 'share1') 
-local_folder = cf.get('globus connect personal', 'folder')  
+gb.settings()
 
-globus_ssh = "ssh " + globus_user + globus_address
+now = datetime.datetime(2014, 10, 18, 10, 10, 30).replace(tzinfo=pytz.timezone('US/Central'))
+print "\n\nExperiment date: ", now
 
-def main(argv):
-    input_folder = ''
-    input_email = ''
+exp_start = sch.find_experiment_start(beamline, now)
+print "Experiment starting date/time: ", exp_start
 
-    try:
-        opts, args = getopt.getopt(argv,"hf:e:",["ffolder=","eemail="])
-    except getopt.GetoptError:
-        print 'test.py -f <folder> -e <email>'
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print 'globus_share.py -f <folder> -e <email>'
-            sys.exit()
-        elif opt in ("-f", "--ffolder"):
-            input_folder = arg
-        elif opt in ("-e", "--eemail"):
-            input_email = arg
-    
-    input_folder = os.path.normpath(input_folder) + os.sep # will add the trailing slash if it's not already there.
-    if validate_email(input_email) and os.path.isdir(local_folder + input_folder):
+exp_id = sch.create_experiment_id(beamline, now)
+print "Unique experiment ID: ", exp_id
+                  
+unique_directory = gb.create_unique_directory(exp_start, exp_id)
 
-        globus_add = "acl-add " + local_user + local_share1 + os.sep + input_folder  + " --perm r --email " + input_email
-        cmd =  globus_ssh + " " + globus_add
-        print cmd
-        print "ssh decarlo@cli.globusonline.org acl-add decarlo#data/test/ --perm r --email decarlof@gmail.com"
-        #os.system(cmd)
-        print "Download link sent to: ", input_email
-    else:
-        print "ERROR: "
-        print "EXAMPLE: python globus_local_share.py -f test -e decarlof@gmail.com"
-        if not validate_email(input_email):
-            print "email is not valid ..."
-        else:
-            print local_folder + input_folder, "does not exists under the Globus Personal Share folder"
-        gb.settings()
+gb.upload(unique_directory)
 
-    
-if __name__ == "__main__":
-    main(sys.argv[1:])
+users = sch.find_users(beamline, now)
+
+#sch.print_users(users)
+gb.share_local(unique_directory, users)
+gb.share_remote(unique_directory, users)
 

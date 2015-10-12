@@ -72,6 +72,8 @@ beamline = 32-ID-B,C
 
 """
 
+import os
+from os.path import expanduser
 import datetime
 from suds.wsse import Security, UsernameToken
 from suds.client import Client
@@ -94,8 +96,11 @@ __all__ = ['get_users']
 
 debug = False
 
+home = expanduser("~")
+credentials = os.path.join(home, 'credentials.ini')
+
 cf = ConfigParser.ConfigParser()
-cf.read('credentials.ini')
+cf.read(credentials)
 username = cf.get('credentials', 'username')
 password = cf.get('credentials', 'password')
 beamline = cf.get('settings', 'beamline')

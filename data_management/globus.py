@@ -51,6 +51,7 @@ Module containing basic routines to use globus CLI
 """
 
 import os
+from os.path import expanduser
 import ConfigParser
 from validate_email import validate_email
 
@@ -58,9 +59,12 @@ __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 
+home = expanduser("~")
+globus = os.path.join(home, 'globus.ini')
+
 # see README.txt to set a globus personal shared folder
 cf = ConfigParser.ConfigParser()
-cf.read('globus.ini')
+cf.read(globus)
 globus_address = cf.get('settings', 'cli_address')
 print globus_address
 globus_user = cf.get('settings', 'cli_user')
