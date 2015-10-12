@@ -48,6 +48,32 @@
 
 """
 Module containing basic routines to use globus CLI
+
+The globus configuration is stored in a 'globus.ini' file and read by python.
+ - Create a file called 'globus.ini' in your home directory
+ - Customize the following text to match your configuration:
+ 
+[globus connect personal]
+user = decarlo
+host = nectar
+folder = /Users/decarlo/data/
+share1 = #data
+share2 = #img
+
+[globus remote server]
+user = petrel
+host = petrel
+folder = /gpfs/globus-fs0/projects/tomography/img/
+share = #tomography
+
+[settings]
+cli_address = @cli.globusonline.org
+cli_user = decarlo
+beamline = 32-ID-B,C
+scp_options = --preserve-mtime -s 1
+
+
+
 """
 
 import os
@@ -59,32 +85,13 @@ __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 
-home = expanduser("~")
-globus = os.path.join(home, 'globus.ini')
-
-# see README.txt to set a globus personal shared folder
-cf = ConfigParser.ConfigParser()
-cf.read(globus)
-globus_address = cf.get('settings', 'cli_address')
-print globus_address
-globus_user = cf.get('settings', 'cli_user')
-scp_options = cf.get('settings', 'scp_options')
-
-local_user = cf.get('globus connect personal', 'user') 
-local_host = cf.get('globus connect personal', 'host') 
-local_share1 = cf.get('globus connect personal', 'share1') 
-local_share2 = cf.get('globus connect personal', 'share2') 
-local_folder = cf.get('globus connect personal', 'folder')  
-
-remote_user = cf.get('globus remote server', 'user') 
-remote_host = cf.get('globus remote server', 'host') 
-remote_share = cf.get('globus remote server', 'share') 
-remote_folder = cf.get('globus remote server', 'folder')  
-
-globus_ssh = "ssh " + globus_user + globus_address
-
-
 def create_unique_directory(exp_start, exp_id):
+
+    home = expanduser("~")
+    globus = os.path.join(home, 'globus.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(globus)
+    local_folder = cf.get('globus connect personal', 'folder')  
     
     datetime_format = '%Y-%m'
     unique_directory = local_folder + str(exp_start.strftime(datetime_format)) + os.sep + exp_id
@@ -99,11 +106,32 @@ def create_unique_directory(exp_start, exp_id):
 
 def settings():
     
+    home = expanduser("~")
+    globus = os.path.join(home, 'globus.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(globus)
+    globus_address = cf.get('settings', 'cli_address')
+    print globus_address
+    globus_user = cf.get('settings', 'cli_user')
+    scp_options = cf.get('settings', 'scp_options')
+    print scp_options
+    local_user = cf.get('globus connect personal', 'user') 
+    local_host = cf.get('globus connect personal', 'host') 
+    local_share1 = cf.get('globus connect personal', 'share1') 
+    local_share2 = cf.get('globus connect personal', 'share2') 
+    local_folder = cf.get('globus connect personal', 'folder')  
+    
+    remote_user = cf.get('globus remote server', 'user') 
+    remote_host = cf.get('globus remote server', 'host') 
+    remote_share = cf.get('globus remote server', 'share') 
+    remote_folder = cf.get('globus remote server', 'folder')  
+    
+    globus_ssh = "ssh " + globus_user + globus_address
+    print globus_ssh
     print "\n\nCurrent Globus Settings:"
 
     print "\tCLI user: ", globus_user
     print "\tCLI address: ", globus_address
-    #print scp_options
 
     print "Globus Connect Personal Configuration: "
     print "\tGlobus User: ", local_user
@@ -118,11 +146,28 @@ def settings():
     path_list = remote_folder.split(os.sep)
     remote_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1]
     print "\tRemote Share: " + remote_user + remote_share + "; sharing the remote folder: " + remote_data_share 
-
     print "\n\tEdit globus.ini to match your globus configuration"
 
 def upload(local_directory):
         
+    home = expanduser("~")
+    globus = os.path.join(home, 'globus.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(globus)
+    globus_address = cf.get('settings', 'cli_address')
+    print globus_address
+    globus_user = cf.get('settings', 'cli_user')
+    scp_options = cf.get('settings', 'scp_options')
+    
+    local_user = cf.get('globus connect personal', 'user') 
+    local_share1 = cf.get('globus connect personal', 'share1') 
+    
+    remote_user = cf.get('globus remote server', 'user') 
+    remote_share = cf.get('globus remote server', 'share') 
+    remote_folder = cf.get('globus remote server', 'folder')  
+    
+    globus_ssh = "ssh " + globus_user + globus_address
+
     path_list = local_directory.split(os.sep)
     local_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1] + os.sep 
     local_date_folder = path_list[len(path_list)-2]
@@ -144,6 +189,19 @@ def upload(local_directory):
         print "Done data trasfer to: ", remote_user
        
 def share_local(directory, users):
+
+    home = expanduser("~")
+    globus = os.path.join(home, 'globus.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(globus)
+    globus_address = cf.get('settings', 'cli_address')
+    print globus_address
+    globus_user = cf.get('settings', 'cli_user')
+    
+    local_user = cf.get('globus connect personal', 'user') 
+    local_share1 = cf.get('globus connect personal', 'share1') 
+    
+    globus_ssh = "ssh " + globus_user + globus_address
 
     path_list = directory.split(os.sep)
     local_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1] + os.sep
@@ -171,6 +229,19 @@ def share_local(directory, users):
       
 def share_remote(directory, users):
 
+    home = expanduser("~")
+    globus = os.path.join(home, 'globus.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(globus)
+    globus_address = cf.get('settings', 'cli_address')
+    print globus_address
+    globus_user = cf.get('settings', 'cli_user')
+    scp_options = cf.get('settings', 'scp_options')
+    print scp_options
+    local_user = cf.get('globus connect personal', 'user') 
+    local_share2 = cf.get('globus connect personal', 'share2') 
+    globus_ssh = "ssh " + globus_user + globus_address
+
     path_list = directory.split(os.sep)
     local_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1] + os.sep
 
@@ -194,4 +265,3 @@ def share_remote(directory, users):
     print cmd
     #os.system(cmd)
     return cmd
-      

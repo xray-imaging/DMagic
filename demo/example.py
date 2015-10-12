@@ -52,38 +52,28 @@ distribute data
 
 """
 
-import os
-from os.path import expanduser
 import pytz
 import datetime
-import ConfigParser
 
 import data_management.scheduling as sch
 import data_management.globus as gb
-
-home = expanduser("~")
-credentials = os.path.join(home, 'credentials.ini')
-
-cf = ConfigParser.ConfigParser()
-cf.read(str(credentials))
-beamline = cf.get('settings', 'beamline')
 
 gb.settings()
 
 now = datetime.datetime(2014, 10, 18, 10, 10, 30).replace(tzinfo=pytz.timezone('US/Central'))
 print "\n\nExperiment date: ", now
 
-exp_start = sch.find_experiment_start(beamline, now)
+exp_start = sch.find_experiment_start(now)
 print "Experiment starting date/time: ", exp_start
 
-exp_id = sch.create_experiment_id(beamline, now)
+exp_id = sch.create_experiment_id(now)
 print "Unique experiment ID: ", exp_id
                   
 unique_directory = gb.create_unique_directory(exp_start, exp_id)
 
 gb.upload(unique_directory)
 
-users = sch.find_users(beamline, now)
+users = sch.find_users(now)
 
 #sch.print_users(users)
 gb.share_local(unique_directory, users)

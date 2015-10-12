@@ -54,7 +54,7 @@ the proposal system. Be careful because this system also accepts LDAP
 account info.
 
 The credentials are stored in a 'credentials.ini' file and read by python.
- - Create a file called 'credentials.ini',
+ - Create a file called 'credentials.ini' in your home directory
  - Put the following text in it:
 
 [credentials]
@@ -92,22 +92,11 @@ __author__ = "Francesco De Carlo"
 __credits__ = "John Hammonds"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['get_users']
+__all__ = ['get_users',
+           'setup_connection',
+           'get_experiment_start']
 
 debug = False
-
-home = expanduser("~")
-credentials = os.path.join(home, 'credentials.ini')
-
-cf = ConfigParser.ConfigParser()
-cf.read(credentials)
-username = cf.get('credentials', 'username')
-password = cf.get('credentials', 'password')
-beamline = cf.get('settings', 'beamline')
-
-# Uncomment one if using ANL INTERNAL or EXTERNAL network
-#base = cf.get('hosts', 'internal')
-base = cf.get('hosts', 'external')
 
 class HTTPSConnectionV3(httplib.HTTPSConnection):
     def __init__(self, *args, **kwargs):
@@ -146,7 +135,7 @@ def findRunName(startDate, endDate):
     given startDate and endDate
 
     Returns string."""
-    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     try:
         result = runScheduleServiceClient.service.findAllRuns()
     except Exception:
@@ -179,7 +168,7 @@ def findRunName(startDate, endDate):
 def findBeamlineSchedule(beamlineName, runName):
     """Find beamline schedule for given beamlineName and runName"""
 
-    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     try:
         result  = beamlineScheduleServiceClient.service.findBeamlineSchedule(beamlineName, runName)
     except SAXParseException as ex:
@@ -204,6 +193,20 @@ def findBeamtimeRequestsByBeamline(beamlineName, runName):
     return result
 
 def setup_connection():
+    
+    home = expanduser("~")
+    credentials = os.path.join(home, 'credentials.ini')
+    
+    cf = ConfigParser.ConfigParser()
+    cf.read(credentials)
+    username = cf.get('credentials', 'username')
+    password = cf.get('credentials', 'password')
+    beamline = cf.get('settings', 'beamline')
+    
+    # Uncomment one if using ANL INTERNAL or EXTERNAL network
+    #base = cf.get('hosts', 'internal')
+    base = cf.get('hosts', 'external')
+
     result = urllib2.install_opener(urllib2.build_opener(HTTPSHandlerV3()))
     logging.raiseExceptions = 0
 
@@ -230,9 +233,9 @@ def setup_connection():
         raise
         exit(-1)
 
-    return runScheduleServiceClient, beamlineScheduleServiceClient
+    return runScheduleServiceClient, beamlineScheduleServiceClient, beamline
 
-def get_users(beamline='2-BM-A,B', date=None):
+def get_users(date=None):
     """
     Get users running at beamline at a specific date 
     Parameters
@@ -246,7 +249,7 @@ def get_users(beamline='2-BM-A,B', date=None):
     users        
     """
     
-    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     if not date:
         date = datetime.datetime.now()
     run_name = findRunName(date, date)
@@ -267,11 +270,11 @@ def get_users(beamline='2-BM-A,B', date=None):
 
     return users
 
-def get_proposal_id(beamline='2-BM-A,B', date=None):
+def get_proposal_id(date=None):
     """Find the proposal number (GUP) for a given beamline and date
 
     Returns users."""
-    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     if not date:
         date = datetime.datetime.now()
     run_name = findRunName(date, date)
@@ -291,11 +294,11 @@ def get_proposal_id(beamline='2-BM-A,B', date=None):
 
     return proposal_id
 
-def get_proposal_title(beamline='2-BM-A,B', date=None):
+def get_proposal_title(date=None):
     """Find the proposal title for a given beamline and date
 
     Returns users."""
-    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     if not date:
         date = datetime.datetime.now()
     run_name = findRunName(date, date)
@@ -314,11 +317,11 @@ def get_proposal_title(beamline='2-BM-A,B', date=None):
 
     return proposal_title
 
-def get_experiment_start(beamline='2-BM-A,B', date=None):
+def get_experiment_start(date=None):
     """Find the experiment start date for a given beamline and date
 
     Returns experiment_start."""
-    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     if not date:
         date = datetime.datetime.now()
     run_name = findRunName(date, date)
@@ -337,11 +340,11 @@ def get_experiment_start(beamline='2-BM-A,B', date=None):
 
     return experiment_start
 
-def get_experiment_end(beamline='2-BM-A,B', date=None):
+def get_experiment_end(date=None):
     """Find the experiment end date for a given beamline and date
 
     Returns experiment_end."""
-    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     if not date:
         date = datetime.datetime.now()
     run_name = findRunName(date, date)
@@ -360,11 +363,11 @@ def get_experiment_end(beamline='2-BM-A,B', date=None):
 
     return experiment_end
 
-def get_beamtime_request(beamline='2-BM-A,B', date=None):
+def get_beamtime_request(date=None):
     """Find the proposal beamtime request id for a given beamline and date
 
     Returns users."""
-    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     if not date:
         date = datetime.datetime.now()
     run_name = findRunName(date, date)
@@ -384,37 +387,37 @@ def get_beamtime_request(beamline='2-BM-A,B', date=None):
 
     return beamtime_request
     
-def create_experiment_id(beamline='2-BM-A,B', date=None):
+def create_experiment_id(date=None):
     
     datetime_format = '%Y-%m-%dT%H:%M:%S%z'
    
     # scheduling system settings
     print "\nCrating a unique experiment ID... "
-    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
-    proposal_id = get_proposal_id(beamline, date.replace(tzinfo=None))
-    beamtime_request = get_beamtime_request(beamline, date.replace(tzinfo=None))
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    proposal_id = get_proposal_id(date.replace(tzinfo=None))
+    beamtime_request = get_beamtime_request(date.replace(tzinfo=None))
     
     experiment_id = 'g' + str(proposal_id) + 'r' + str(beamtime_request)
 
     return experiment_id
 
-def find_experiment_start(beamline='2-BM-A,B', date=None):
+def find_experiment_start(date=None):
 
     datetime_format = '%Y-%m-%dT%H:%M:%S%z'
 
     # scheduling system settings
     print "\nFinding experiment start date ... "
-    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
 
-    experiment_start = get_experiment_start(beamline, date.replace(tzinfo=None))
+    experiment_start = get_experiment_start(date.replace(tzinfo=None))
  
     return experiment_start
     
-def find_users(beamline='2-BM-A,B', date=None):
+def find_users(date=None):
     # scheduling system settings
     print "\nFinding users ... "
-    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
-    users = get_users(beamline, date.replace(tzinfo=None))
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    users = get_users(date.replace(tzinfo=None))
     
     return users
 
@@ -432,7 +435,7 @@ def print_users(users):
             print "", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], users[tag]['institution'], users[tag]['email']
     print "(*) Proposal PI"        
 
-def print_experiment_info(beamline='2-BM-A,B', date=None):
+def print_experiment_info(date=None):
     print "Inputs: "
     datetime_format = '%Y-%m-%dT%H:%M:%S%z'
     print "\tTime of Day: ", date.strftime(datetime_format)
@@ -440,13 +443,13 @@ def print_experiment_info(beamline='2-BM-A,B', date=None):
 
     # scheduling system settings
     print "\n\tAccessing the APS Scheduling System ... "
-    runScheduleServiceClient, beamlineScheduleServiceClient = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
 
     run_name = findRunName(now.replace(tzinfo=None), now.replace(tzinfo=None))
-    proposal_title = get_proposal_title(beamline, date.replace(tzinfo=None))
+    proposal_title = get_proposal_title(date.replace(tzinfo=None))
     users = get_users(beamline, date.replace(tzinfo=None))
-    experiment_start = get_experiment_start(beamline, date.replace(tzinfo=None))
-    experiment_end = get_experiment_end(beamline, date.replace(tzinfo=None))
+    experiment_start = get_experiment_start(date.replace(tzinfo=None))
+    experiment_end = get_experiment_end(date.replace(tzinfo=None))
 
     print "\tRun Name: ", run_name 
     print "\n\tProposal Title: ", proposal_title
