@@ -41,8 +41,8 @@ installed, then open a terminal or a command prompt window and run::
     conda install -c decarlof data_management
 
 
-Updating the installation
-=========================
+Updating the installation  (coming soon ...)
+============================================
 
 Data Management is an active project, so we suggest you update your installation 
 frequently. To update the installation run in your terminal::
