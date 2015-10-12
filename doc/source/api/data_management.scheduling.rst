@@ -11,3 +11,5 @@
    .. autosummary::
    
       get_users
+      setup_connection
+      get_experiment_start
