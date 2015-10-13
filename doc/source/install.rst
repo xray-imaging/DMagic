@@ -20,22 +20,14 @@ You must also create in your home directory configuration files for
 and `scheduling <https://github.com/decarlof/data-management/blob/master/config/credentials.ini>`__ 
 systems.
 
-Being a beta tester
-===================
+Installing from souce
+=====================
 
-Data Management has been installed at 2-BM and 32-ID as a beta version. If you would like 
-to be a beta tester please clone the `data-management repository <https://github.com/decarlof/data-management>`__ 
-from `GitHub <https://github.com>`_.
+Clone the `data-management repository <https://github.com/decarlof/data-management>`__ 
+from `GitHub <https://github.com>`_ then run
 
-The beta version includes the following funtionalities:
+    python setup.py install
 
-    For a given experiment date retrieves the uses' email addresses from the APS scheduling system.
-    Automatically send an e-mail to the users with a link (drop-box style) to retrieve the data.
-    Data can be shared directly from the beamline machine or, after a globus copy, from petrel.
-
-To contribute back to the project please follow the `development <http://img-data-management.readthedocs.org/en/latest/source/devguide.html>`_
-instructions.
- 
 Installing from Conda/Binstar
 =============================
 
