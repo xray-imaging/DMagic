@@ -95,10 +95,8 @@ def settings():
     cf = ConfigParser.ConfigParser()
     cf.read(globus)
     globus_address = cf.get('settings', 'cli_address')
-    print globus_address
     globus_user = cf.get('settings', 'cli_user')
     scp_options = cf.get('settings', 'scp_options')
-    print scp_options
     local_user = cf.get('globus connect personal', 'user') 
     local_host = cf.get('globus connect personal', 'host') 
     local_share1 = cf.get('globus connect personal', 'share1') 

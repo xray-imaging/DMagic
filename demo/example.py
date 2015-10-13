@@ -55,8 +55,8 @@ distribute data
 import pytz
 import datetime
 
-import data_management.scheduling as sch
-import data_management.globus as gb
+import scheduling as sch
+import globus as gb
 
 gb.settings()
 

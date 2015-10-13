@@ -57,7 +57,7 @@ import sys, getopt
 import ConfigParser
 from validate_email import validate_email
 
-import data_management.globus as gb
+import globus as gb
 
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
