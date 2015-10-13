@@ -1,0 +1,33 @@
+package:
+  name: data-management
+  version: '0.1'
+
+source:
+  path: data_management
+  
+build:
+  number: 0
+
+requirements:
+  build:
+    - python
+    - setuptools
+ 
+  run:
+    - python
+
+#test:
+  # Python imports
+#  imports:
+#    - globus
+#    - scheduling
+
+about:
+  home: http://dataexchange.readthedocs.org
+  license: BSD
+  summary: 'Reader/Writer for Data Exchange files.'
+
+# See
+# http://docs.continuum.io/conda/build.html for
+# more information about meta.yaml
+
