@@ -11,11 +11,15 @@ Pre-requisites
 ==============
 
 Before using the Data Management toolbox  you need to have setup an account 
-on `Globus <https://www.globus.org/>`__ and installed a 
+on `Globus <https://www.globus.org/>`__, installed a 
 `Globus Connect Personal endpoint <https://www.globus.org/globus-connect-personal/>`__
-on the APS computer you want to share data from. You also need valid 
-APS credentials to access the `APS scheduling system <https://schedule.aps.anl.gov/>`__.
-You must also create in your home directory configuration files for 
+on the APS computer you want to share data from and met the the Globus 
+Command Line Interface (CLI) `pre-requisites <http://dev.globus.org/cli/using-the-cli/#prerequisites>`__
+
+To access the `APS scheduling system <https://schedule.aps.anl.gov/>`__ you need 
+valid APS credentials.
+
+Finally you must also create in your home directory configuration files for 
 `globus <https://github.com/decarlof/data-management/blob/master/config/globus.ini>`__ 
 and `scheduling <https://github.com/decarlof/data-management/blob/master/config/credentials.ini>`__ 
 systems.
@@ -24,7 +28,7 @@ Installing from souce
 =====================
 
 Clone the `data-management repository <https://github.com/decarlof/data-management>`__ 
-from `GitHub <https://github.com>`_ then run
+from `GitHub <https://github.com>`_ then run::
 
     python setup.py install
 
