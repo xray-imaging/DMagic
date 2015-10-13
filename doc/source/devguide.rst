@@ -19,7 +19,7 @@ The project is maintained on GitHub, which is a version control and a
 collaboration platform for software developers. To start first register 
 on `GitHub <https://github.com>`_ and fork the data-management repository by 
 clicking the **Fork** button in the header of the 
-`data-management repository <https://github.com/decarlof/data-management>`__: 
+`data-management repository <https://github.com/decarlof/DMagic>`__: 
 
 .. image:: img/fork-repo.png
 

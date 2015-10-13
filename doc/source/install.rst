@@ -20,14 +20,14 @@ To access the `APS scheduling system <https://schedule.aps.anl.gov/>`__ you need
 valid APS credentials.
 
 Finally you must also create in your home directory configuration files for 
-`globus <https://github.com/decarlof/data-management/blob/master/config/globus.ini>`__ 
-and `scheduling <https://github.com/decarlof/data-management/blob/master/config/credentials.ini>`__ 
+`globus <https://github.com/decarlof/DMagic/blob/master/config/globus.ini>`__ 
+and `scheduling <https://github.com/decarlof/DMagic/blob/master/config/credentials.ini>`__ 
 systems.
 
 Installing from souce
 =====================
 
-Clone the `data-management repository <https://github.com/decarlof/data-management>`__ 
+Clone the `data-management repository <https://github.com/decarlof/DMagic>`__ 
 from `GitHub <https://github.com>`_ then run::
 
     python setup.py install
