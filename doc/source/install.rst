@@ -36,22 +36,22 @@ The beta version includes the following funtionalities:
 To contribute back to the project please follow the `development <http://img-data-management.readthedocs.org/en/latest/source/devguide.html>`_
 instructions.
  
-Installing from Conda/Binstar (coming soon ...)
-===============================================
+Installing from Conda/Binstar
+=============================
 
 First you must have `Conda <http://continuum.io/downloads>`_ 
 installed, then open a terminal or a command prompt window and run::
 
-    conda install -c decarlof data_management
+    conda install -c https://conda.anaconda.org/decarlof data-management
 
 
-Updating the installation  (coming soon ...)
-============================================
+Updating the installation
+=========================
 
 Data Management is an active project, so we suggest you update your installation 
 frequently. To update the installation run in your terminal::
 
-    conda update -c decarlof data_management
+    conda update -c https://conda.anaconda.org/decarlof data-management
 
 For some more information about using Conda, please refer to the 
 `docs <http://conda.pydata.org/docs>`__.
