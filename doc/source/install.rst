@@ -15,6 +15,7 @@ on `Globus <https://www.globus.org/>`__ and installed a
 `Globus Connect Personal endpoint <https://www.globus.org/globus-connect-personal/>`__
 on the APS computer you want to share data from. You also need valid 
 APS credentials to access the `APS scheduling system <https://schedule.aps.anl.gov/>`__.
+You must also create in your home directory configuration files for `globus <https://github.com/decarlof/data-management/blob/master/config/globus.ini>`__ and `scheduling <https://github.com/decarlof/data-management/blob/master/config/credentials.ini>`__ systems.
 
 Being a beta tester
 ===================
