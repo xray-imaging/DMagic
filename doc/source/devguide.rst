@@ -3,7 +3,10 @@ Development
 ===========
 
 This section explains the basics for developers who wish to contribute 
-to the data-management project.
+to the data-management project. Detailed instruction are on  
+`github <https://help.github.com/articles/using-pull-requests>`__
+
+
 
 .. contents:: Contents:
    :local:
