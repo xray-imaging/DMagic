@@ -49,26 +49,9 @@
 """
 Module containing routines to access the APS scheduling system.
 
-You must use the APS web password. You can check it by logging into
-the proposal system. Be careful because this system also accepts LDAP
-account info.
-
-The credentials are stored in a 'credentials.ini' file and read by python.
- - Create a file called 'credentials.ini' in your home directory
- - Put the following text in it:
-
-[credentials]
-username = YOUR BADGE NUMBER
-password = YOUR APS WEB PASSWORD
-
-[hosts]
-internal = https: ....
-external = https: .... 
-
-[settings]
-beamline = 32-ID-B,C
-
- that's it.
+You must create in your home directory a 
+`credentials.ini <https://github.com/decarlof/data-management/blob/master/config/credentials.ini>`__ 
+configuration file
 
 """
 
@@ -237,13 +220,15 @@ def setup_connection():
 
 def get_users(date=None):
     """
-    Get users running at beamline at a specific date 
+    Get users running at beamline at a specific date
+     
     Parameters
     ----------
     beamline : str
         APS beamline.
     date : date
         Experiment date
+    
     Returns
     -------
     users        

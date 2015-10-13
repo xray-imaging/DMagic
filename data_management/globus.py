@@ -49,30 +49,9 @@
 """
 Module containing basic routines to use globus CLI
 
-The globus configuration is stored in a 'globus.ini' file and read by python.
- - Create a file called 'globus.ini' in your home directory
- - Customize the following text to match your configuration:
- 
-[globus connect personal]
-user = decarlo
-host = nectar
-folder = /Users/decarlo/data/
-share1 = #data
-share2 = #img
-
-[globus remote server]
-user = petrel
-host = petrel
-folder = /gpfs/globus-fs0/projects/tomography/img/
-share = #tomography
-
-[settings]
-cli_address = @cli.globusonline.org
-cli_user = decarlo
-beamline = 32-ID-B,C
-scp_options = --preserve-mtime -s 1
-
-
+You must create in your home directory the 
+`globus.ini <https://github.com/decarlof/data-management/blob/master/config/globus.ini>`__ 
+configuration file
 
 """
 
@@ -84,6 +63,11 @@ from validate_email import validate_email
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
+__all__ = ['create_unique_directory',
+           'settings',
+           'share_local',
+           'share_remote',
+           'upload']
 
 def create_unique_directory(exp_start, exp_id):
 

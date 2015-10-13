@@ -8,6 +8,7 @@ This section contains the API reference and usage information for data-managemen
 .. toctree::
 
    api/data_management.scheduling
+   api/data_management.globus
 
 .. automodule:: data_management
    :members:
