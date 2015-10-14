@@ -7,7 +7,7 @@ setup(
     author = 'Francesco De Carlo, Argonne National Laboratory',
     description = 'IMG data manamgement toolbox',
     py_modules = ['scheduling', 'globus'],
-    name = 'data_management',
+    name = 'DMagic',
     requires = (
         'python',
         ),
