@@ -1,7 +1,7 @@
-:mod:`src.globus`
-=================
+:mod:`dmagic.globus`
+====================
 
-.. automodule:: src.globus
+.. automodule:: dmagic.globus
    :members:
    :show-inheritance:
    :undoc-members:

@@ -1,3 +1,1 @@
-Project Home Page: http://img-data-management.readthedocs.org/
-
-
+Project Home Page: http://dmagic.readthedocs.org/

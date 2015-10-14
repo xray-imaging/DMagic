@@ -6,8 +6,6 @@ This section explains the basics for developers who wish to contribute
 to the `DMagic <https://github.com/decarlof/DMagic>`_ project. Detailed instruction are on  
 `github <https://help.github.com/articles/using-pull-requests>`__.
 
-
-
 .. contents:: Contents:
    :local:
 
@@ -35,6 +33,7 @@ This will launch the GitHub desktop application
 `Win <http://windows.github.com>`_) 
 and ask you where you want to save it. Select a location in your 
 computer and feel comfortable with making modifications in the code.
+
 
 Coding conventions
 ==================
@@ -67,6 +66,7 @@ parameters::
         """
         return a+b
 
+
 Package versioning
 ==================
 
@@ -94,6 +94,7 @@ made and click the **Commit** button:
 
 You can continue to make changes, add modules, write your own functions, 
 and take more *Commit snapshots* of your code writing process.
+
 
 Contributing back
 =================

@@ -7,6 +7,7 @@ This section covers the basics of how to download and install `DMagic <https://g
 .. contents:: Contents:
    :local:
 
+
 Pre-requisites
 ==============
 
@@ -23,7 +24,6 @@ Finally you must also create in your home directory configuration files for
 `globus <https://github.com/decarlof/DMagic/blob/master/config/globus.ini>`__ 
 and `scheduling <https://github.com/decarlof/DMagic/blob/master/config/credentials.ini>`__ 
 systems.
-
 
 
 Installing from source

@@ -1,6 +1,6 @@
 package:
   name: dmagic
-  version: '0.12'
+  version: '0.0.2'
 
 source:
   path: src
@@ -12,22 +12,24 @@ requirements:
   build:
     - python
     - setuptools
+    - suds
+    - ipdb
+    - validate_email
  
   run:
     - python
 
-#test:
+test:
   # Python imports
-#  imports:
-#    - globus
-#    - scheduling
+  imports:
+    - globus
+    - scheduling
 
 about:
-  home: http://dataexchange.readthedocs.org
-  license: BSD
-  summary: 'Reader/Writer for Data Exchange files.'
+  home: http://dmagic.readthedocs.org
+  license: BSD-3
+  summary: 'Data Management Magic Tools.'
 
 # See
 # http://docs.continuum.io/conda/build.html for
 # more information about meta.yaml
-
