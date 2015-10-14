@@ -4,7 +4,7 @@
    :width: 320px
    :alt: IMG Data Management
 
-`Data management <https://github.com/decarlof/DMagic>`_ is an open-sourced Python
+`DMagic <https://github.com/decarlof/DMagic>`_ is an open-sourced Python
 toolbox to perform data management and data sharing for users of the Imaging Group of
 the `Advanced Photon Source <http://www.aps.anl.gov>`_.
 

@@ -2,7 +2,7 @@
 Install directions
 ==================
 
-This section covers the basics of how to download and install data-management.
+This section covers the basics of how to download and install `DMagic <https://github.com/decarlof/DMagic>`_.
 
 .. contents:: Contents:
    :local:
@@ -10,7 +10,7 @@ This section covers the basics of how to download and install data-management.
 Pre-requisites
 ==============
 
-Before using the Data Management toolbox  you need to have setup an account 
+Before using `DMagic <https://github.com/decarlof/DMagic>`_  you need to have setup an account 
 on `Globus <https://www.globus.org/>`__, installed a 
 `Globus Connect Personal endpoint <https://www.globus.org/globus-connect-personal/>`__
 on the APS computer you want to share data from and met the the Globus 
@@ -27,7 +27,7 @@ systems.
 Installing from souce
 =====================
 
-Clone the `data-management repository <https://github.com/decarlof/DMagic>`__ 
+Clone the `DMagic <https://github.com/decarlof/DMagic>`_  
 from `GitHub <https://github.com>`_ then run::
 
     python setup.py install
@@ -38,7 +38,7 @@ Installing from Conda/Binstar
 First you must have `Conda <http://continuum.io/downloads>`_ 
 installed, then open a terminal or a command prompt window and run::
 
-    conda install -c https://conda.anaconda.org/decarlof data-management
+    conda install -c https://conda.anaconda.org/decarlof DMagic
 
 
 Updating the installation
@@ -47,7 +47,7 @@ Updating the installation
 Data Management is an active project, so we suggest you update your installation 
 frequently. To update the installation run in your terminal::
 
-    conda update -c https://conda.anaconda.org/decarlof data-management
+    conda update -c https://conda.anaconda.org/decarlof DMagic
 
 For some more information about using Conda, please refer to the 
 `docs <http://conda.pydata.org/docs>`__.

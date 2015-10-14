@@ -3,7 +3,7 @@ Development
 ===========
 
 This section explains the basics for developers who wish to contribute 
-to the data-management project. Detailed instruction are on  
+to the `DMagic <https://github.com/decarlof/DMagic>`_ project. Detailed instruction are on  
 `github <https://help.github.com/articles/using-pull-requests>`__.
 
 
@@ -15,7 +15,7 @@ to the data-management project. Detailed instruction are on
 Cloning the repository
 ======================
 
-The project is maintained on GitHub, which is a version control and a 
+`DMagic <https://github.com/decarlof/DMagic>`_ is maintained on GitHub, which is a version control and a 
 collaboration platform for software developers. To start first register 
 on `GitHub <https://github.com>`_ and fork the data-management repository by 
 clicking the **Fork** button in the header of the 
