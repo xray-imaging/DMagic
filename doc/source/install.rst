@@ -24,13 +24,22 @@ Finally you must also create in your home directory configuration files for
 and `scheduling <https://github.com/decarlof/DMagic/blob/master/config/credentials.ini>`__ 
 systems.
 
-Installing from souce
-=====================
 
+
+Installing from source
+======================
+
+Install the following::
+
+    pip install suds
+    pip install ipdb
+    pip install validate-email
+    
 Clone the `DMagic <https://github.com/decarlof/DMagic>`_  
 from `GitHub <https://github.com>`_ then run::
 
     python setup.py install
+
 
 Installing from Conda/Binstar
 =============================

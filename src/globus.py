@@ -70,6 +70,21 @@ __all__ = ['create_unique_directory',
            'upload']
 
 def create_unique_directory(exp_start, exp_id):
+    """
+    Create a unique directory name based on experiment starting date and experiment id
+     
+    Parameters
+    ----------
+    exp_start : date
+        Experiment staring date
+    
+    exp_id : str
+        Unique experiment id
+
+    Returns
+    -------
+    Directory name        
+    """
 
     home = expanduser("~")
     globus = os.path.join(home, 'globus.ini')
@@ -89,7 +104,9 @@ def create_unique_directory(exp_start, exp_id):
     return unique_directory
 
 def settings():
-    
+    """
+    Print the current globus.ini settings
+    """
     home = expanduser("~")
     globus = os.path.join(home, 'globus.ini')
     cf = ConfigParser.ConfigParser()
@@ -131,6 +148,15 @@ def settings():
     print "\n\tEdit globus.ini to match your globus configuration"
 
 def upload(local_directory):
+    """
+    Upload a local shared directory to the remote Globus server
+     
+    Parameters
+    ----------
+    local_directory : str
+        Directory shared by the Globus Connect Personal Endpoint
+    
+    """
         
     home = expanduser("~")
     globus = os.path.join(home, 'globus.ini')
@@ -171,6 +197,22 @@ def upload(local_directory):
         print "Done data trasfer to: ", remote_user
        
 def share_local(directory, users):
+    """
+    Send a token email to users to share a Globus Connect Personal directory
+     
+    Parameters
+    ----------
+    directory : str
+        Directory shared by the Globus Connect Personal Endpoint
+    users : 
+    
+    exp_id : str
+        Unique experiment id
+
+    Returns
+    -------
+    Globlus Command Line string         
+    """
 
     home = expanduser("~")
     globus = os.path.join(home, 'globus.ini')
@@ -210,6 +252,23 @@ def share_local(directory, users):
     return cmd
       
 def share_remote(directory, users):
+    """
+    Send a token email to users to share a Globus server directory
+     
+    Parameters
+    ----------
+    directory : str
+        Directory shared by the Globus Connect Personal Endpoint
+    
+    users : 
+    
+    exp_id : str
+        Unique experiment id
+
+    Returns
+    -------
+    Globlus Command Line string         
+    """
 
     home = expanduser("~")
     globus = os.path.join(home, 'globus.ini')

@@ -75,9 +75,12 @@ __author__ = "Francesco De Carlo"
 __credits__ = "John Hammonds"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['get_users',
-           'setup_connection',
-           'get_experiment_start']
+__all__ = ['create_experiment_id',
+           'find_experiment_start',
+           'find_users',
+           'print_experiment_info',
+           'print_users'
+           ]
 
 debug = False
 
@@ -224,14 +227,12 @@ def get_users(date=None):
      
     Parameters
     ----------
-    beamline : str
-        APS beamline.
     date : date
         Experiment date
     
     Returns
     -------
-    users        
+    users : dictionary-like object containing user information      
     """
     
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
@@ -302,6 +303,7 @@ def get_proposal_title(date=None):
 
     return proposal_title
 
+
 def get_experiment_start(date=None):
     """Find the experiment start date for a given beamline and date
 
@@ -325,6 +327,7 @@ def get_experiment_start(date=None):
 
     return experiment_start
 
+
 def get_experiment_end(date=None):
     """Find the experiment end date for a given beamline and date
 
@@ -347,6 +350,7 @@ def get_experiment_end(date=None):
             raise
 
     return experiment_end
+
 
 def get_beamtime_request(date=None):
     """Find the proposal beamtime request id for a given beamline and date
@@ -372,7 +376,20 @@ def get_beamtime_request(date=None):
 
     return beamtime_request
     
+
 def create_experiment_id(date=None):
+    """
+    Generate a unique experiment id as g + GUP # + r + Beamtime Request
+     
+    Parameters
+    ----------
+    date : date
+        Experiment date
+    
+    Returns
+    -------
+    experiment id       
+    """
     
     datetime_format = '%Y-%m-%dT%H:%M:%S%z'
    
@@ -386,7 +403,20 @@ def create_experiment_id(date=None):
 
     return experiment_id
 
+
 def find_experiment_start(date=None):
+    """
+    Find the experiment starting date
+     
+    Parameters
+    ----------
+    date : date
+        Experiment date
+    
+    Returns
+    -------
+    Experiment Stating date : date        
+    """
 
     datetime_format = '%Y-%m-%dT%H:%M:%S%z'
 
@@ -398,16 +428,41 @@ def find_experiment_start(date=None):
  
     return experiment_start
     
+
 def find_users(date=None):
-    # scheduling system settings
+    """
+    Find users running at beamline at a specific date
+     
+    Parameters
+    ----------
+    date : date
+        Experiment date
+    
+    Returns
+    -------
+    users : dictionary-like object containing user information        
+    """
+
     print "\nFinding users ... "
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     users = get_users(date.replace(tzinfo=None))
     
     return users
 
+
 def print_users(users):
-    # find the Principal Investigator
+    """
+    Print the users running at beamline at a specific date
+     
+    Parameters
+    ----------
+    date : date
+        Experiment date
+    
+    Returns
+    -------
+    Print of user info        
+    """
     for tag in users:
         if users[tag].get('piFlag') != None:
             name = str(users[tag]['firstName'] + ' ' + users[tag]['lastName'])            
@@ -420,7 +475,20 @@ def print_users(users):
             print "", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], users[tag]['institution'], users[tag]['email']
     print "(*) Proposal PI"        
 
+
 def print_experiment_info(date=None):
+    """
+    Print the experiment info running at beamline at a specific date
+     
+    Parameters
+    ----------
+    date : date
+        Experiment date
+    
+    Returns
+    -------
+    Print experiment information        
+    """
     print "Inputs: "
     datetime_format = '%Y-%m-%dT%H:%M:%S%z'
     print "\tTime of Day: ", date.strftime(datetime_format)

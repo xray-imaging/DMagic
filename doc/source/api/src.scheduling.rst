@@ -10,6 +10,8 @@
 
    .. autosummary::
    
-      get_users
-      setup_connection
-      get_experiment_start
+      create_experiment_id
+      find_experiment_start
+      find_users
+      print_experiment_info
+      print_users
