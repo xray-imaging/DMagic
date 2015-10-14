@@ -7,11 +7,11 @@ This section contains the API reference and usage information for `DMagic <https
 
 .. toctree::
 
-   api/data_management.scheduling
-   api/data_management.globus
+   api/src.scheduling
+   api/src.globus
 
 
-.. automodule:: data_management
+.. automodule:: src
    :members:
    :undoc-members:
    :show-inheritance: 

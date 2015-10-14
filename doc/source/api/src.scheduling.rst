@@ -1,7 +1,7 @@
-:mod:`data_management.scheduling`
-=================================
+:mod:`src.scheduling`
+=====================
 
-.. automodule:: data_management.scheduling
+.. automodule:: src.scheduling
    :members:
    :show-inheritance:
    :undoc-members:
