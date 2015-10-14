@@ -1,6 +1,6 @@
-=====
-About
-=====
+============
+About DMagic 
+============
 
 Data collection at the Advanced Photon Source (APS) can generate massive 
 amount of data and often the beamline staff can be overwhelmed by 
