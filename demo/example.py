@@ -55,8 +55,8 @@ distribute data
 import pytz
 import datetime
 
-import scheduling as sch
-import globus as gb
+import dmagic.scheduling as sch
+import dmagic.globus as gb
 
 gb.settings()
 
