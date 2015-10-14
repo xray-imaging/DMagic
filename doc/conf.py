@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# TomoPy documentation build configuration file, created by
+# DMagic documentation build configuration file, created by
 # sphinx-quickstart on Fri Mar 13 16:29:32 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -20,8 +20,6 @@ import os
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('..'))
-sys.path.insert(0, os.path.abspath('../src'))
-#sys.path.insert(0, os.path.abspath(os.path.join('..', '..')))
 
 # -- General configuration ------------------------------------------------
 
@@ -67,7 +65,7 @@ master_doc = 'index'
 
 # General information about the project.
 Argonne = u'Argonne National Laboratory'
-project = u'data-management'
+project = u'DMagic'
 copyright = u'2013-2015, ' + Argonne
 
 # The version info for the project you're documenting, acts as replacement for

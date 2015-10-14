@@ -1,0 +1,4 @@
+setuptools
+suds
+ipdb
+validate_email

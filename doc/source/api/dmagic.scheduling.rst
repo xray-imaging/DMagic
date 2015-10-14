@@ -1,7 +1,7 @@
-:mod:`src.scheduling`
-=====================
+:mod:`dmagic.scheduling`
+========================
 
-.. automodule:: src.scheduling
+.. automodule:: dmagic.scheduling
    :members:
    :show-inheritance:
    :undoc-members:
