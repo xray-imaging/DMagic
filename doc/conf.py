@@ -65,7 +65,7 @@ master_doc = 'index'
 
 # General information about the project.
 Argonne = u'Argonne National Laboratory'
-project = u'data-management'
+project = u'DMagic'
 copyright = u'2013-2015, ' + Argonne
 
 # The version info for the project you're documenting, acts as replacement for
