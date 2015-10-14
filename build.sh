@@ -1,5 +1,5 @@
 #!/bin/bash
-cp -r $RECIPE_DIR/data_management data_management
-cd data_management
+cp -r $RECIPE_DIR/src src
+cd src
 
 $PYTHON setup.py install
