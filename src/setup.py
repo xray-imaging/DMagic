@@ -1,13 +1,16 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-from setuptools import setup, Extension, find_packages
+from __future__ import print_function
+
+from distutils.core import setup
+from distutils.extension import Extension
 
 setup(
-    name = 'DMagic',
-    packages=find_packages(),
     author = 'Francesco De Carlo, Argonne National Laboratory',
     description = 'IMG data manamgement toolbox',
-    version = '0.2',
-    license='BSD',
-    platforms='Any'
+    py_modules = ['scheduling', 'globus'],
+    name = 'data_management',
+    requires = (
+        'python',
+        ),
+    version = '0.1',
 )
+

@@ -448,3 +448,4 @@ def print_experiment_info(date=None):
             print "\t\t", email
         else:            
             print "\tMissing e-mail for:", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], users[tag]['institution']
+

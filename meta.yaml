@@ -1,6 +1,6 @@
 package:
   name: dmagic
-  version: '0.4'
+  version: '0.12'
 
 source:
   path: src

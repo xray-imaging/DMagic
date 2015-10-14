@@ -247,3 +247,4 @@ def share_remote(directory, users):
     print cmd
     #os.system(cmd)
     return cmd
+
