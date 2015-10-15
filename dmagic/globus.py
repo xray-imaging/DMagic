@@ -169,7 +169,8 @@ def upload(local_directory):
     
     local_user = cf.get('globus connect personal', 'user') 
     local_share1 = cf.get('globus connect personal', 'share1') 
-    
+    local_folder = cf.get('globus connect personal', 'folder')  
+   
     remote_user = cf.get('globus remote server', 'user') 
     remote_share = cf.get('globus remote server', 'share') 
     remote_folder = cf.get('globus remote server', 'folder')  
@@ -184,7 +185,7 @@ def upload(local_directory):
     remote_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1]
 
     globus_mkdir = 'mkdir ' +  remote_user + remote_share + ":" + os.sep + remote_data_share + local_date_folder + os.sep        
-    globus_scp = "scp -r " + local_user + local_share1 + ":" + os.sep + local_data_share + " " + remote_user + remote_share + ":" + os.sep + remote_data_share + local_date_folder + os.sep 
+    globus_scp = "scp -r " + local_user + local_share1 + ":" + local_folder + local_data_share + " " + remote_user + remote_share + ":" + os.sep + remote_data_share + local_date_folder + os.sep 
 
     if os.path.isdir(local_directory):
         cmd1 = globus_ssh + " " + globus_mkdir
@@ -237,8 +238,8 @@ def share_local(directory, users):
             globus_add = "acl-add " + local_user + local_share1 + os.sep + local_data_share  + " --perm r --email " + email
             if validate_email(email) and os.path.isdir(directory):
                 cmd = globus_ssh + " " + globus_add
-                print "\nEmail sent to: ", email
                 print cmd
+                print "\nEmail sent to: ", email
                 #os.system(cmd)
 
     # for demo
@@ -246,11 +247,60 @@ def share_local(directory, users):
     globus_add = "acl-add " + local_user + local_share1 + os.sep + local_data_share  + " --perm r --email " + email
     cmd = globus_ssh + " " + globus_add
     #print "ssh decarlo@cli.globusonline.org acl-add decarlo#data/2014-10/g40065r94918/ --perm r --email decarlof@gmail.com"
-    print "\nEmail sent to: ", email
     print cmd
+    print "\nEmail sent to: ", email
     #os.system(cmd)
     return cmd
       
+
+def share(directory, email, local=True):
+    """
+    Send a token email to share a Globus directory 
+     
+    Parameters
+    ----------
+    directory : str
+        Full directory path under the Globus Shared Endpoint
+    
+    local : bol
+        True = folder is on local share, False is on the remote share 
+    
+    email : 
+        Users email address
+        
+
+    Returns
+    -------
+    Globlus Command Line string         
+    """
+
+    home = expanduser("~")
+    globus = os.path.join(home, 'globus.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(globus)
+    globus_address = cf.get('settings', 'cli_address')
+    globus_user = cf.get('settings', 'cli_user')
+    globus_ssh = "ssh " + globus_user + globus_address
+
+    if local:
+        user = cf.get('globus connect personal', 'user') 
+        share = cf.get('globus connect personal', 'share1')
+    else: 
+        user = cf.get('globus remote server', 'user')
+        share = cf.get('globus remote server', 'share')
+    
+    path_list = directory.split(os.sep)
+    data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1] + os.sep
+
+    globus_add = "acl-add " + user + share + os.sep + data_share  + " --perm r --email " + email        
+    if validate_email(email) and os.path.isdir(directory):
+        cmd = globus_ssh + " " + globus_add
+        print cmd
+        print "\nEmail sent to: ", email
+        #os.system(cmd)
+    return cmd
+    
+
 def share_remote(directory, users):
     """
     Send a token email to users to share a Globus server directory
@@ -275,35 +325,39 @@ def share_remote(directory, users):
     cf = ConfigParser.ConfigParser()
     cf.read(globus)
     globus_address = cf.get('settings', 'cli_address')
-    print globus_address
+
     globus_user = cf.get('settings', 'cli_user')
     scp_options = cf.get('settings', 'scp_options')
-    print scp_options
+
     local_user = cf.get('globus connect personal', 'user') 
-    local_share2 = cf.get('globus connect personal', 'share2') 
+    local_share2 = cf.get('globus connect personal', 'share2')
+     
+    remote_user = cf.get('globus remote server', 'user')
+    remote_share = cf.get('globus remote server', 'share')
+    
     globus_ssh = "ssh " + globus_user + globus_address
 
     path_list = directory.split(os.sep)
-    local_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1] + os.sep
+    remote_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1] + os.sep
 
-    print "\n\tSend a token to share the globus server folder: ", local_data_share
+    print "\n\tSend a token to share the globus server folder: ", remote_data_share
     for tag in users:
         if users[tag].get('email') != None:
             email = str(users[tag]['email'])
-            globus_add = "acl-add " + local_user + local_share2 + os.sep + local_data_share  + " --perm r --email " + email
+            globus_add = "acl-add " + remote_user + remote_share + os.sep + remote_data_share  + " --perm r --email " + email
             if validate_email(email) and os.path.isdir(directory):
                 cmd = globus_ssh + " " + globus_add
-                print "\nEmail sent to: ", email
                 print cmd
+                print "\nEmail sent to: ", email
                 #os.system(cmd)
 
     # for demo
     email = 'decarlof@gmail.com'
-    globus_add = "acl-add " + local_user + local_share2 + os.sep + local_data_share  + " --perm r --email " + email
+    globus_add = "acl-add " + remote_user + remote_share + os.sep + remote_data_share  + " --perm r --email " + email
     cmd = globus_ssh + " " + globus_add
     #print "ssh decarlo@cli.globusonline.org acl-add decarlo#data/2014-10/g40065r94918/ --perm r --email decarlof@gmail.com"
-    print "\nEmail sent to: ", email
     print cmd
+    print "\nEmail sent to: ", email
     #os.system(cmd)
     return cmd
 

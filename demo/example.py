@@ -76,6 +76,6 @@ gb.upload(unique_directory)
 users = sch.find_users(now)
 
 #sch.print_users(users)
-gb.share_local(unique_directory, users)
+#gb.share_local(unique_directory, users)
 gb.share_remote(unique_directory, users)
 
