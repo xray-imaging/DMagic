@@ -259,7 +259,7 @@ def get_users(date=None):
 def get_proposal_id(date=None):
     """Find the proposal number (GUP) for a given beamline and date
 
-    Returns users."""
+    Returns proposal id."""
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     if not date:
         date = datetime.datetime.now()
@@ -283,7 +283,7 @@ def get_proposal_id(date=None):
 def get_proposal_title(date=None):
     """Find the proposal title for a given beamline and date
 
-    Returns users."""
+    Returns proposal title."""
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     if not date:
         date = datetime.datetime.now()
@@ -456,8 +456,8 @@ def print_users(users):
      
     Parameters
     ----------
-    date : date
-        Experiment date
+    users : dictionary-like object containing user information
+    
     
     Returns
     -------

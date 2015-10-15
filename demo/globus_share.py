@@ -47,35 +47,44 @@
 # #########################################################################
 
 """
-Module containing an example on how to use globus.py and scheduling.py to manage and 
-distribute data
-
+Module to share a Globus Personal shared folder with a user by sending an e-mail.
 """
 
-import pytz
-import datetime
+import sys, getopt
 
-import dmagic.scheduling as sch
 import dmagic.globus as gb
 
-gb.settings()
+__author__ = "Francesco De Carlo"
+__copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
+__docformat__ = 'restructuredtext en'
 
-now = datetime.datetime(2014, 10, 18, 10, 10, 30).replace(tzinfo=pytz.timezone('US/Central'))
-print "\n\nExperiment date: ", now
+def main(argv):
+    input_folder = ''
+    input_email = ''
+    input_mode = 'local'
 
-exp_start = sch.find_experiment_start(now)
-print "Experiment starting date/time: ", exp_start
-
-exp_id = sch.create_experiment_id(now)
-print "Unique experiment ID: ", exp_id
-                  
-unique_directory = gb.create_unique_directory(exp_start, exp_id)
-
-gb.upload(unique_directory)
-
-users = sch.find_users(now)
-
-#sch.print_users(users)
-#gb.share_local(unique_directory, users)
-gb.share_remote(unique_directory, users)
+    try:
+        opts, args = getopt.getopt(argv,"hf:e:m:",["ffolder=","eemail=","mmode="])
+    except getopt.GetoptError:
+        print 'test.py -f <folder> -e <email> -m <mode>'
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-h':
+            print 'globus_share.py -f <folder> -e <email>'
+            sys.exit()
+        elif opt in ("-f", "--ffolder"):
+            input_folder = arg
+        elif opt in ("-e", "--eemail"):
+            input_email = arg
+        elif opt in ("-m", "--mmode"):
+            input_mode = arg
+            
+    cmd = gb.share(input_folder, input_email, input_mode)
+    print cmd
+    if cmd != -1: 
+        #os.system(cmd)
+        print "Download link sent to: ", input_email
+    
+if __name__ == "__main__":
+    main(sys.argv[1:])
 

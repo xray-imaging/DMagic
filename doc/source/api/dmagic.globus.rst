@@ -10,8 +10,10 @@
 
    .. autosummary::
    
-      create_unique_directory
-      settings
-      share_local
-      share_remote
-      upload
+      dm_create_directory
+      dm_settings
+      dm_share
+      dm_share_local
+      dm_share_remote
+      dm_upload
+      share
