@@ -50,7 +50,7 @@
 Module containing routines to access the APS scheduling system.
 
 You must create in your home directory a 
-`credentials.ini <https://github.com/decarlof/data-management/blob/master/config/credentials.ini>`__ 
+`scheduling.ini <https://github.com/decarlof/data-management/blob/master/config/scheduling.ini>`__ 
 configuration file
 
 """
@@ -181,7 +181,7 @@ def findBeamtimeRequestsByBeamline(beamlineName, runName):
 def setup_connection():
     
     home = expanduser("~")
-    credentials = os.path.join(home, 'credentials.ini')
+    credentials = os.path.join(home, 'scheduling.ini')
     
     cf = ConfigParser.ConfigParser()
     cf.read(credentials)
@@ -461,7 +461,7 @@ def print_users(users):
     
     Returns
     -------
-    Print of user info        
+    Print user info        
     """
     for tag in users:
         if users[tag].get('piFlag') != None:

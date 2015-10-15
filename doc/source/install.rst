@@ -22,7 +22,7 @@ valid APS credentials.
 
 Finally you must also create in your home directory configuration files for 
 `globus <https://github.com/decarlof/DMagic/blob/master/config/globus.ini>`__ 
-and `scheduling <https://github.com/decarlof/DMagic/blob/master/config/credentials.ini>`__ 
+and `scheduling <https://github.com/decarlof/DMagic/blob/master/config/scheduling.ini>`__ 
 systems.
 
 

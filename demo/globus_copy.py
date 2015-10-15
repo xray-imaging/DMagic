@@ -64,7 +64,7 @@ __docformat__ = 'restructuredtext en'
 
 home = expanduser("~")
 globus = os.path.join(home, 'globus.ini')
-# see README.txt to set a globus personal shared folder
+
 cf = ConfigParser.ConfigParser()
 cf.read(globus)
 globus_address = cf.get('settings', 'cli_address')
@@ -90,27 +90,27 @@ def main(argv):
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'globus_copy.py -f <folder>'
+            print 'USAGE: globus_copy.py -f <folder>'
             print 'copy data from globus connect personal ', local_user + local_share + os.sep + '<folder> to ' + remote_user + remote_share + remote_folder
 
             sys.exit()
         elif opt in ("-f", "--ffolder"):
             input_folder = arg
-    
-    print "input_folder", input_folder
-    input_folder = os.path.normpath(input_folder) + os.sep # will add the trailing slash if it's not already there.
-    print "input_folder", input_folder
+            input_folder = os.path.normpath(input_folder) + os.sep # will add the trailing slash if it's not already there.
+            cmd = gb.upload(input_folder)
+            if cmd !=-1:
+                print cmd
+                #print "ssh decarlo@cli.globusonline.org scp -r decarlo#data:/test/ petrel#tomography:/img/"
+                #os.system(cmd)
+            else:
+                print "ERROR: " + local_folder + input_folder, "does not exists under the Globus Personal Share folder"
+                #gb.dm_settings()
+        else:
+            print "globus_copy.py -h for help" 
 
-    cmd = gb.upload(input_folder)
-    if cmd !=-1:
-        print cmd
-        #print "ssh decarlo@cli.globusonline.org scp -r decarlo#data:/test/ petrel#tomography:/img/"
-        #os.system(cmd)
-    else:
-        print "ERROR: "
-        print "EXAMPLE: python globus_copy.py -f test"
-        print local_folder + input_folder, "does not exists under the Globus Personal Share folder"
-        gb.dm_settings()
+    if (input_folder == ''):
+        print 'USAGE: globus_copy.py -h'
+        print 'USAGE: globus_copy.py -f <folder>'
 
     
 if __name__ == "__main__":

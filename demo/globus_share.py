@@ -90,13 +90,10 @@ def main(argv):
     input_folder = os.path.normpath(input_folder) + os.sep # will add the trailing slash if it's not already there.
             
     cmd = gb.share(input_folder, input_email, input_mode)
-    print cmd
 
     if cmd == -1: 
         print "ERROR: email is not valid ..."
         print "EXAMPLE: python globus_share.py -f test -e decarlof@gmail.com -m remote"
-        print input_folder, "does not exists under the Globus Personal Share folder"
-        gb.dm_settings()    
         
     elif cmd == -2: 
         print "ERROR: " + input_folder + " does not exists under the Globus Personal Share folder"
@@ -104,6 +101,7 @@ def main(argv):
         gb.dm_settings()    
     else:
         #os.system(cmd)
+        print cmd
         print "Download link sent to: ", input_email
 
 if __name__ == "__main__":
