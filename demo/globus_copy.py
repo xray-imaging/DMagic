@@ -55,7 +55,6 @@ import os
 from os.path import expanduser
 import sys, getopt
 import ConfigParser
-from validate_email import validate_email
 
 import dmagic.globus as gb
 
@@ -72,8 +71,7 @@ globus_address = cf.get('settings', 'cli_address')
 globus_user = cf.get('settings', 'cli_user')
 
 local_user = cf.get('globus connect personal', 'user') 
-local_share1 = cf.get('globus connect personal', 'share1') 
-local_share2 = cf.get('globus connect personal', 'share2') 
+local_share = cf.get('globus connect personal', 'share') 
 local_folder = cf.get('globus connect personal', 'folder')  
 
 remote_user = cf.get('globus remote server', 'user') 
@@ -84,53 +82,35 @@ globus_ssh = "ssh " + globus_user + globus_address
 
 def main(argv):
     input_folder = ''
-    input_email = ''
 
     try:
-        opts, args = getopt.getopt(argv,"hf:e:",["ffolder=","eemail="])
+        opts, args = getopt.getopt(argv,"hf:",["ffolder="])
     except getopt.GetoptError:
-        print 'test.py -f <folder> -e <email>'
+        print 'globus_copy.py -f <folder>'
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'globus_copy_share.py -f <folder> -e <email>'
-            print 'copy data from globus connect personal ', local_user + local_share + os.sep + '<folder> to ' + remote_user + remote_share + os.sep + remote_folder
-            print 'share data from', remote_user + remote_share + os.sep + remote_folder + "<folder>", ' with ' + "<email>"
+            print 'globus_copy.py -f <folder>'
+            print 'copy data from globus connect personal ', local_user + local_share + os.sep + '<folder> to ' + remote_user + remote_share + remote_folder
 
             sys.exit()
         elif opt in ("-f", "--ffolder"):
             input_folder = arg
-        elif opt in ("-e", "--eemail"):
-            input_email = arg
     
+    print "input_folder", input_folder
     input_folder = os.path.normpath(input_folder) + os.sep # will add the trailing slash if it's not already there.
+    print "input_folder", input_folder
 
-    path_list = remote_folder.split(os.sep)
-    remote_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1]
-
-
-    globus_scp = "scp -r " + local_user + local_share1 + ":" + os.sep + input_folder + " " + remote_user + remote_share + ":" + os.sep + remote_data_share
-    globus_add = "acl-add " + local_user + local_share2  + os.sep + input_folder + " --perm r --email " + input_email
-    if validate_email(input_email) and os.path.isdir(local_folder + input_folder):
-        cmd_1 = globus_ssh + " " + globus_scp
-        cmd_2 = globus_ssh + " " + globus_add
-        print cmd_1
-        print "ssh decarlo@cli.globusonline.org scp -r decarlo#data:/test/ petrel#tomography:/img/"
-        #os.system(cmd1)
-        print "Done data trasfer to: ", remote_user
-        #os.system(cmd2)
-        print cmd_2
-        print "ssh decarlo@cli.globusonline.org acl-add decarlo#img/test/ --perm r --email decarlof@gmail.com"
-        print "Download link sent to: ", input_email
+    cmd = gb.upload(input_folder)
+    if cmd !=-1:
+        print cmd
+        #print "ssh decarlo@cli.globusonline.org scp -r decarlo#data:/test/ petrel#tomography:/img/"
+        #os.system(cmd)
     else:
         print "ERROR: "
-        print "EXAMPLE: python globus_copy_remote_share.py -f test -e decarlof@gmail.com"
-
-        if not validate_email(input_email):
-            print "email is not valid ..."
-        else:
-            print local_folder + input_folder, "does not exists under the Globus Personal Share folder"
-        gb.settings()
+        print "EXAMPLE: python globus_copy.py -f test"
+        print local_folder + input_folder, "does not exists under the Globus Personal Share folder"
+        gb.dm_settings()
 
     
 if __name__ == "__main__":

@@ -50,6 +50,7 @@
 Module to share a Globus Personal shared folder with a user by sending an e-mail.
 """
 
+import os
 import sys, getopt
 
 import dmagic.globus as gb
@@ -66,11 +67,18 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv,"hf:e:m:",["ffolder=","eemail=","mmode="])
     except getopt.GetoptError:
-        print 'test.py -f <folder> -e <email> -m <mode>'
+        print 'globus_share.py -f <folder> -e <email> -m <mode>'
+        print '<folder>: folder path under the globus share'
+        print '<email>: e-mail address to send a web link to the shared folder ' 
+        print '<mode>: local (default) or remote'
         sys.exit(2)
     for opt, arg in opts:
         if opt == '-h':
-            print 'globus_share.py -f <folder> -e <email>'
+            print 'python globus_share.py -f <folder> -e <email> -m <mode>'
+            print "python globus_share.py -f test -e decarlof@gmail.com -m remote"
+            print '\t<folder>:folder path under the globus share'
+            print '\t<email>:e-mail address to send a link to the shared folder ' 
+            print '\t<mode>:local (default) or remote\n'
             sys.exit()
         elif opt in ("-f", "--ffolder"):
             input_folder = arg
@@ -78,13 +86,26 @@ def main(argv):
             input_email = arg
         elif opt in ("-m", "--mmode"):
             input_mode = arg
+
+    input_folder = os.path.normpath(input_folder) + os.sep # will add the trailing slash if it's not already there.
             
     cmd = gb.share(input_folder, input_email, input_mode)
     print cmd
-    if cmd != -1: 
+
+    if cmd == -1: 
+        print "ERROR: email is not valid ..."
+        print "EXAMPLE: python globus_share.py -f test -e decarlof@gmail.com -m remote"
+        print input_folder, "does not exists under the Globus Personal Share folder"
+        gb.dm_settings()    
+        
+    elif cmd == -2: 
+        print "ERROR: " + input_folder + " does not exists under the Globus Personal Share folder"
+        print "EXAMPLE: python globus_share.py -f test -e decarlof@gmail.com -m remote"
+        gb.dm_settings()    
+    else:
         #os.system(cmd)
         print "Download link sent to: ", input_email
-    
+
 if __name__ == "__main__":
     main(sys.argv[1:])
 

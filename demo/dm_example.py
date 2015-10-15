@@ -76,9 +76,9 @@ gb.dm_upload(directory)
 users = sch.find_users(now)
 
 #sch.print_users(users)
-gb.dm_share_local(directory, users)
+#gb.dm_share_local(directory, users)
 gb.dm_share(directory, users, 'local')
 
-gb.dm_share_remote(directory, users)
+#gb.dm_share_remote(directory, users)
 gb.dm_share(directory, users, 'remote')
 

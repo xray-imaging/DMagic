@@ -66,10 +66,9 @@ __docformat__ = 'restructuredtext en'
 __all__ = ['dm_create_directory',
            'dm_settings',
            'dm_share',
-           'dm_share_local',
-           'dm_share_remote',
            'dm_upload',
-           'share']
+           'share',
+           'upload']
 
 def dm_create_directory(exp_start, exp_id):
     """
@@ -105,6 +104,7 @@ def dm_create_directory(exp_start, exp_id):
     
     return unique_directory
 
+
 def dm_settings():
     """
     Print the current globus.ini settings
@@ -117,26 +117,26 @@ def dm_settings():
     globus_user = cf.get('settings', 'cli_user')
 
     local_user = cf.get('globus connect personal', 'user') 
-    local_host = cf.get('globus connect personal', 'host') 
+    local_host = '#' + cf.get('globus connect personal', 'host') 
     local_share = cf.get('globus connect personal', 'share') 
     local_folder = cf.get('globus connect personal', 'folder')  
     
     remote_user = cf.get('globus remote server', 'user') 
-    remote_host = cf.get('globus remote server', 'host') 
+    remote_host = '#' + cf.get('globus remote server', 'host') 
     remote_share = cf.get('globus remote server', 'share') 
     remote_folder = cf.get('globus remote server', 'folder')  
     
     globus_ssh = "ssh " + globus_user + globus_address
-    print globus_ssh
     print "\n\nCurrent Globus Settings:"
 
     print "\tCLI user: ", globus_user
     print "\tCLI address: ", globus_address
+    print "\tCLI ssh: ", globus_ssh
 
     print "Globus Connect Personal Configuration: "
     print "\tGlobus User: ", local_user
     print "\tLocal Host: ", local_host
-    print "\tLocal share: " + local_user + local_share
+    print "\tLocal share: ", local_share
     print "\tLocal folder under data management: " + local_folder 
 
     print "Globus Server Configuration: "
@@ -144,7 +144,7 @@ def dm_settings():
 
     print "\tRemote Share: " + remote_user + remote_share
     print "\tRemote folder under data management: " + remote_folder 
-    print "\n\tEdit globus.ini to match your globus configuration"
+    print "\nEdit globus.ini to match your globus configuration"
 
 def dm_upload(directory):
     """
@@ -169,7 +169,7 @@ def dm_upload(directory):
     scp_options = cf.get('settings', 'scp_options')
     
     local_user = cf.get('globus connect personal', 'user') 
-    local_share = cf.get('globus connect personal', 'share') 
+    local_host = cf.get('globus connect personal', 'host') 
     local_folder = cf.get('globus connect personal', 'folder')  
    
     remote_user = cf.get('globus remote server', 'user') 
@@ -186,7 +186,7 @@ def dm_upload(directory):
     remote_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1]
 
     globus_mkdir = 'mkdir ' +  remote_user + remote_share + ":" + os.sep + remote_data_share + local_date_folder + os.sep        
-    globus_scp = "scp -r " + local_user + local_share + ":" + local_folder + local_data_share + " " + remote_user + remote_share + ":" + os.sep + remote_data_share + local_date_folder + os.sep 
+    globus_scp = "scp -r " + local_user + local_host + ":" + local_folder + local_data_share + " " + remote_user + remote_share + ":" + os.sep + remote_data_share + local_date_folder + os.sep 
 
     if os.path.isdir(directory):
         cmd1 = globus_ssh + " " + globus_mkdir
@@ -198,118 +198,7 @@ def dm_upload(directory):
         #os.system(cmd1)
         print "Done data trasfer to: ", remote_user
        
-def dm_share_local(directory, users):
-    """
-    Send a token email to users to share a Globus Connect Personal directory
-     
-    Parameters
-    ----------
-    directory : str
-        Directory shared by the Globus Connect Personal Endpoint
-
-    users : dictionary-like object containing user information      
-    
-    exp_id : str
-        Unique experiment id
-
-    Returns
-    -------
-    Globlus Command Line string         
-    """
-
-    home = expanduser("~")
-    globus = os.path.join(home, 'globus.ini')
-    cf = ConfigParser.ConfigParser()
-    cf.read(globus)
-    globus_address = cf.get('settings', 'cli_address')
-    globus_user = cf.get('settings', 'cli_user')
-    
-    local_user = cf.get('globus connect personal', 'user') 
-    local_share = cf.get('globus connect personal', 'share') 
-    
-    globus_ssh = "ssh " + globus_user + globus_address
-
-    path_list = directory.split(os.sep)
-    local_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1] + os.sep
-
-    print "\n\tSend a token to share the globus connect personal folder: ", local_data_share
-    for tag in users:
-        if users[tag].get('email') != None:
-            email = str(users[tag]['email'])
-            globus_add = "acl-add " + local_user + local_share + os.sep + local_data_share  + " --perm r --email " + email
-            if validate_email(email) and os.path.isdir(directory):
-                cmd = globus_ssh + " " + globus_add
-                print cmd
-                print "\nEmail sent to: ", email
-                #os.system(cmd)
-
-    # for demo
-    email = 'decarlof@gmail.com'
-    globus_add = "acl-add " + local_user + local_share + os.sep + local_data_share  + " --perm r --email " + email
-    cmd = globus_ssh + " " + globus_add
-    #print "ssh decarlo@cli.globusonline.org acl-add decarlo#data/2014-10/g40065r94918/ --perm r --email decarlof@gmail.com"
-    print cmd
-    print "\nEmail sent to: ", email
-    #os.system(cmd)
-    return cmd
       
-      
-def dm_share_remote(directory, users):
-    """
-    Send a token email to users to share a Globus server directory
-     
-    Parameters
-    ----------
-    directory : str
-        Directory shared by the Globus Connect Personal Endpoint
-    
-    users : dictionary-like object containing user information      
-    
-    exp_id : str
-        Unique experiment id
-
-    Returns
-    -------
-    Globlus Command Line string         
-    """
-
-    home = expanduser("~")
-    globus = os.path.join(home, 'globus.ini')
-    cf = ConfigParser.ConfigParser()
-    cf.read(globus)
-    globus_address = cf.get('settings', 'cli_address')
-
-    globus_user = cf.get('settings', 'cli_user')
-     
-    remote_user = cf.get('globus remote server', 'user')
-    remote_share = cf.get('globus remote server', 'share')
-    
-    globus_ssh = "ssh " + globus_user + globus_address
-
-    path_list = directory.split(os.sep)
-    remote_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1] + os.sep
-
-    print "\n\tSend a token to share the globus server folder: ", remote_data_share
-    for tag in users:
-        if users[tag].get('email') != None:
-            email = str(users[tag]['email'])
-            globus_add = "acl-add " + remote_user + remote_share + os.sep + remote_data_share  + " --perm r --email " + email
-            if validate_email(email) and os.path.isdir(directory):
-                cmd = globus_ssh + " " + globus_add
-                print cmd
-                print "\nEmail sent to: ", email
-                #os.system(cmd)
-
-    # for demo
-    email = 'decarlof@gmail.com'
-    globus_add = "acl-add " + remote_user + remote_share + os.sep + remote_data_share  + " --perm r --email " + email
-    cmd = globus_ssh + " " + globus_add
-    #print "ssh decarlo@cli.globusonline.org acl-add decarlo#data/2014-10/g40065r94918/ --perm r --email decarlof@gmail.com"
-    print cmd
-    print "\nEmail sent to: ", email
-    #os.system(cmd)
-    return cmd
-
 def dm_share(directory, users, mode):
     """
     Send a token email to users to share the unique local directory 
@@ -363,7 +252,7 @@ def dm_share(directory, users, mode):
         cmd = globus_ssh + " " + globus_add
         #print "ssh decarlo@cli.globusonline.org acl-add decarlo#data/2014-10/g40065r94918/ --perm r --email decarlof@gmail.com"
         print cmd
-        print "\n##########Email sent to: ", email
+        print "\nEmail sent to: ", email
         #os.system(cmd)
     
     elif mode == 'remote': 
@@ -380,7 +269,7 @@ def dm_share(directory, users, mode):
                 if validate_email(email):
                     cmd = globus_ssh + " " + globus_add
                     print cmd
-                    print "\n######## Email sent to: ", email
+                    print "\nEmail sent to: ", email
                     #os.system(cmd)
 
         # for demo
@@ -428,27 +317,64 @@ def share(directory, email, mode):
         folder = cf.get('globus connect personal', 'folder')
 
         if os.path.isdir(folder + directory) and validate_email(email):
-            globus_add = "acl-add " + user + share + folder + directory  + " --perm r --email " + email        
+            globus_add = "acl-add " + user + share + os.sep + directory  + " --perm r --email " + email        
             cmd = globus_ssh + " " + globus_add
             return cmd
         else:
-            print "ERROR: "
             if not validate_email(email):
-                print "email is not valid."
+                return -1
             else:
-                print directory +  " does not exists under the Globus Personal Share folder " + folder
-            return -1
-
+                return -2
+            
     elif mode == 'remote': 
         user = cf.get('globus remote server', 'user')
         share = cf.get('globus remote server', 'share')
         folder = cf.get('globus remote server', 'folder')
     
         if validate_email(email):
-            globus_add = "acl-add " + user + share + folder + directory  + " --perm r --email " + email        
+            globus_add = "acl-add " + user + share + os.sep + directory  + " --perm r --email " + email        
             cmd = globus_ssh + " " + globus_add
             return cmd
         else:
-            print "ERROR: "
-            print "email is not valid."
+            return -1
             
+
+def upload(directory):
+    """
+    Upload a local directory under the Globus Connect Endpoint 
+    to the remote Globus Server
+     
+    Parameters
+    ----------
+    local_directory : str
+        Directory under the shared by the Globus Connect Personal Endpoint
+    
+    """
+        
+    home = expanduser("~")
+    globus = os.path.join(home, 'globus.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(globus)
+
+    globus_address = cf.get('settings', 'cli_address')
+    globus_user = cf.get('settings', 'cli_user')
+    scp_options = cf.get('settings', 'scp_options')
+    
+    local_user = cf.get('globus connect personal', 'user') 
+    local_host = cf.get('globus connect personal', 'host') 
+    local_folder = cf.get('globus connect personal', 'folder')  
+   
+    remote_user = cf.get('globus remote server', 'user') 
+    remote_share = cf.get('globus remote server', 'share') 
+    remote_folder = cf.get('globus remote server', 'folder')  
+    
+    globus_ssh = "ssh " + globus_user + globus_address
+
+    globus_scp = "scp -r " + local_user + local_host + ":" + local_folder + directory + " " + remote_user + remote_share + ":" + remote_folder 
+
+    if os.path.isdir(local_folder + directory):
+        cmd = globus_ssh + " " + globus_scp + " " + scp_options
+        return cmd
+    else:
+        return -1
+
