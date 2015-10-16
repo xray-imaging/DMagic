@@ -317,7 +317,7 @@ def share(directory, email, mode):
         share = cf.get('globus connect personal', 'share')
         folder = cf.get('globus connect personal', 'folder')
 
-        if os.path.isdir(folder + directory) and validate_email(email):
+        if (os.path.isdir(folder + directory) or os.path.isfile(folder + directory)) and validate_email(email):
             globus_add = "acl-add " + user + share + os.sep + directory  + " --perm r --email " + email        
             cmd = globus_ssh + " " + globus_add
             return cmd
