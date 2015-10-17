@@ -1,7 +1,7 @@
 Data Management 
 ===============
 
-This section contains examples of data management scripts.
+This section contains examples on how to implement various data management tasks.
 
 .. rubric:: **Data Management Examples:**
 

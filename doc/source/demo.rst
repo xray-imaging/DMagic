@@ -1,12 +1,12 @@
 Examples
 ========
 
-This section contains code example for various DMagic tasks.
+This section contains code examples for various DMagic tasks.
 
 .. toctree::
 
-   demo/doc.demo.dm_example
    demo/doc.demo.globus
+   demo/doc.demo.dm
 
 .. automodule:: doc.demo
    :members:

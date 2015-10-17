@@ -1,14 +1,14 @@
 Globus 
 ======
 
-This section contains example scripts to use Globus.
+This section contains Globus data sharing examples.
 
 .. rubric:: **Globus Examples:**
 
 .. toctree::
 
-   doc.demo.globus_copy
    doc.demo.globus_share
+   doc.demo.globus_copy
 
 .. automodule:: doc.demo
    :members:
