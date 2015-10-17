@@ -36,8 +36,13 @@ Install the following::
     pip install validate-email
     
 Clone the `DMagic <https://github.com/decarlof/DMagic>`_  
-from `GitHub <https://github.com>`_ then run::
+from `GitHub <https://github.com>`_ repository::
 
+    git clone https://github.com/decarlof/DMagic.git DMagic
+
+then::
+
+    cd DMagic
     python setup.py install
 
 

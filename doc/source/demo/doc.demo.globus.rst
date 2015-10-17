@@ -1,7 +1,7 @@
 Globus 
 ======
 
-This section contains Globus data sharing examples.
+This section contains DMagic, command line style, examples to use Globus. 
 
 .. rubric:: **Globus Examples:**
 
