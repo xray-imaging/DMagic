@@ -55,6 +55,7 @@ managed data saving and automatic data distribution to users.
 import pytz
 import datetime
 
+# set ~/globus.ini and ~/scheduling.ini to match your configuration
 import dmagic.scheduling as sch
 import dmagic.globus as gb
 
@@ -76,9 +77,7 @@ exp_id = sch.create_experiment_id(now)
 print "Unique experiment ID: ", exp_id
  
 # create a directory to store the raw data as: 
-#
-#           \local_folder\YYYY-MM\gGUP#rBR#\  
-#
+# \local_folder\YYYY-MM\gGUP#rBR#\  
 # local_folder is defined in globus.ini under [globus connect personal] folder
               
 directory = gb.dm_create_directory(exp_start, exp_id)
@@ -94,7 +93,9 @@ sch.print_users(users)
 # Users will receive an e-mail with a drop-box style link to access the data
 gb.dm_share(directory, users, 'local')
 
-# Copy the raw data to the remote Globus server set in globus.ini (i.e. petrel)
+# Upload the raw data to the remote Globus server set in globus.ini (i.e. petrel)
+# Upload creates a folder YYYY-MM then copy the raw data from the Globus Personal
+# endpoint to the remote Globus server
 cmd1, cmd2 = gb.dm_upload(directory)
 print cmd1
 print cmd2
