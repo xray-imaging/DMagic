@@ -117,12 +117,12 @@ def dm_settings():
     globus_user = cf.get('settings', 'cli_user')
 
     local_user = cf.get('globus connect personal', 'user') 
-    local_host = '#' + cf.get('globus connect personal', 'host') 
+    local_host = cf.get('globus connect personal', 'host') 
     local_share = cf.get('globus connect personal', 'share') 
     local_folder = cf.get('globus connect personal', 'folder')  
     
     remote_user = cf.get('globus remote server', 'user') 
-    remote_host = '#' + cf.get('globus remote server', 'host') 
+    remote_host = cf.get('globus remote server', 'host') 
     remote_share = cf.get('globus remote server', 'share') 
     remote_folder = cf.get('globus remote server', 'folder')  
     

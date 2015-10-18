@@ -92,7 +92,9 @@ sch.print_users(users)
 
 # share the raw data directory with the users. 
 # Users will receive an e-mail with a drop-box style link to access the data
-gb.dm_share(directory, users, 'local')
+cmd = gb.dm_share(directory, users, 'local')
+print cmd
+#os.system(cmd)
 
 # Upload the raw data to the remote Globus server set in globus.ini (i.e. petrel)
 # Upload creates a folder YYYY-MM then copy the raw data from the Globus Personal
