@@ -72,7 +72,8 @@ print "\n\nToday's date: ", now
 exp_start = sch.find_experiment_start(now)
 print "Experiment starting date/time: ", exp_start
 
-# create a unique experiment ID using GUP and beamtime request (BR) numbers as: g + GUP# + r + BR#
+# create a unique experiment ID using GUP and beamtime request (BR) numbers as: 
+# g + GUP# + r + BR#
 exp_id = sch.create_experiment_id(now)
 print "Unique experiment ID: ", exp_id
  
