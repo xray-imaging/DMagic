@@ -91,13 +91,14 @@ users = sch.find_users(now)
 sch.print_users(users)
 
 # share the raw data directory with the users. 
-# Users will receive an e-mail with a drop-box style link to access the data
+# users will receive an e-mail with a drop-box style link to access the data
 cmd = gb.dm_share(directory, users, 'local')
-print cmd
-#os.system(cmd)
+for share in cmd: 
+    print share
+    #os.system(share)
 
-# Upload the raw data to the remote Globus server set in globus.ini (i.e. petrel)
-# Upload creates a folder YYYY-MM then copy the raw data from the Globus Personal
+# upload the raw data to the remote Globus server set in globus.ini (i.e. petrel)
+# upload creates a folder YYYY-MM then copy the raw data from the Globus Personal
 # endpoint to the remote Globus server
 cmd1, cmd2 = gb.dm_upload(directory)
 print cmd1
@@ -106,7 +107,9 @@ print cmd2
 #os.system(cmd2)
 
 # share the raw data directory on the Globus server with the users. 
-# Users will receive an e-mail with a drop-box style link to access the data
+# users will receive an e-mail with a drop-box style link to access the data
 cmd = gb.dm_share(directory, users, 'remote')
-print cmd
-#os.system(cmd)
+for share in cmd: 
+    print share
+    #os.system(share)
+
