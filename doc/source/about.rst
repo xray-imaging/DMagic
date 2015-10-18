@@ -17,7 +17,7 @@ at any APS beamline.
 and makes extent use of `Globus <https://www.globus.org/>`__
 
 Basic functionality include the ability, for a given experiment date, to retrieve the uses' 
-email addresses from the APS scheduling system, automatically send an e-mail to the users 
+email addresses from the APS scheduling system and automatically send an e-mail to the users 
 containing link (drop-box style) to retrieve the data. 
 
 Data can be shared directly from the beamline machine or from a Globus server.
