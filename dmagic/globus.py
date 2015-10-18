@@ -164,7 +164,9 @@ def dm_upload(directory):
     cf = ConfigParser.ConfigParser()
     cf.read(globus)
     globus_address = cf.get('settings', 'cli_address')
-
+    cmd1 = -1
+    cmd2 = -1
+    
     globus_user = cf.get('settings', 'cli_user')
     scp_options = cf.get('settings', 'scp_options')
     
@@ -192,7 +194,8 @@ def dm_upload(directory):
     if os.path.isdir(directory):
         cmd1 = globus_ssh + " " + globus_mkdir
         cmd2 = globus_ssh + " " + globus_scp + " " + scp_options
-        return cmd1, cmd2
+
+    return cmd1, cmd2
        
       
 def dm_share(directory, users, mode):
@@ -223,7 +226,8 @@ def dm_share(directory, users, mode):
     globus_address = cf.get('settings', 'cli_address')
     globus_user = cf.get('settings', 'cli_user')
     globus_ssh = "ssh " + globus_user + globus_address
-     
+    
+    cmd = -1 
     if mode == 'local':
         user = cf.get('globus connect personal', 'user') 
         share = cf.get('globus connect personal', 'share')
@@ -237,7 +241,6 @@ def dm_share(directory, users, mode):
                 globus_add = "acl-add " + end_point_share + " --perm r --email " + email
                 if validate_email(email) and os.path.isdir(directory):
                     cmd = globus_ssh + " " + globus_add
-                    return cmd
                         
     elif mode == 'remote': 
         user = cf.get('globus remote server', 'user')
@@ -252,8 +255,9 @@ def dm_share(directory, users, mode):
                 globus_add = "acl-add " + end_point_share + " --perm r --email " + email
                 if validate_email(email):
                     cmd = globus_ssh + " " + globus_add
-                    return cmd
 
+    return cmd
+    
 def share(directory, email, mode):
     """
     Send a token email to share a directory under the local or remote Globus Endpoint
