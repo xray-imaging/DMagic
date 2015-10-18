@@ -46,8 +46,8 @@ then::
     python setup.py install
 
 
-Installing from Conda/Binstar
-=============================
+Installing from Conda/Binstar (coming soon)
+===========================================
 
 First you must have `Conda <http://continuum.io/downloads>`_ 
 installed, then open a terminal or a command prompt window and run::
@@ -55,8 +55,8 @@ installed, then open a terminal or a command prompt window and run::
     conda install -c https://conda.anaconda.org/decarlof dmagic
 
 
-Updating the installation
-=========================
+Updating the installation (coming soon)
+=======================================
 
 Data Management is an active project, so we suggest you update your installation 
 frequently. To update the installation run in your terminal::
