@@ -47,11 +47,15 @@
 # #########################################################################
 
 """
-Module containing basic routines to use globus CLI
+Module containing basic functions to use the 
+`Globus CLI <http://dev.globus.org/cli/>`__
 
 You must create in your home directory the 
 `globus.ini <https://github.com/decarlof/data-management/blob/master/config/globus.ini>`__ 
 configuration file
+
+Functions with the dm_ prefix are specific to Data Management tasks and are designed to be
+integrated with the beamline data collection software
 
 """
 
@@ -279,7 +283,7 @@ def share(directory, email, mode):
     -------
     cmd : str 
         Globus Command Line string. If executed with os.system() 
-        will send notification e-mail to user         
+        will send notification e-mail to users         
     """
 
     home = expanduser("~")
