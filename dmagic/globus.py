@@ -169,10 +169,11 @@ def dm_upload(directory):
     scp_options = cf.get('settings', 'scp_options')
     
     local_user = cf.get('globus connect personal', 'user') 
-    local_host = cf.get('globus connect personal', 'host') 
+    local_host = '#' + cf.get('globus connect personal', 'host') 
     local_folder = cf.get('globus connect personal', 'folder')  
    
     remote_user = cf.get('globus remote server', 'user') 
+    remote_host = '#' + cf.get('globus remote server', 'host') 
     remote_share = cf.get('globus remote server', 'share') 
     remote_folder = cf.get('globus remote server', 'folder')  
     
@@ -185,20 +186,13 @@ def dm_upload(directory):
     path_list = remote_folder.split(os.sep)
     remote_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1]
 
-    globus_mkdir = 'mkdir ' +  remote_user + remote_share + ":" + os.sep + remote_data_share + local_date_folder + os.sep        
+    globus_mkdir = 'mkdir ' +  remote_user + remote_share + ":" + remote_folder + local_date_folder + os.sep        
     globus_scp = "scp -r " + local_user + local_host + ":" + local_folder + local_data_share + " " + remote_user + remote_share + ":" + os.sep + remote_data_share + local_date_folder + os.sep 
 
     if os.path.isdir(directory):
         cmd1 = globus_ssh + " " + globus_mkdir
-        #os.system(cmd1)
-
         cmd2 = globus_ssh + " " + globus_scp + " " + scp_options
-        #os.system(cmd2)
-
-        print cmd1
-        print cmd2
-        print "Done data trasfer to: ", remote_user
-        #print "ssh decarlo@cli.globusonline.org scp -r decarlo#data:/txm/ petrel#tomography:dm/"
+        return cmd1, cmd2
        
       
 def dm_share(directory, users, mode):
@@ -243,20 +237,8 @@ def dm_share(directory, users, mode):
                 globus_add = "acl-add " + end_point_share + " --perm r --email " + email
                 if validate_email(email) and os.path.isdir(directory):
                     cmd = globus_ssh + " " + globus_add
-                    #os.system(cmd)
-                    print "\n", cmd
-                    print "Email sent to: ", email
-
-        # for demo
-        email = 'decarlof@gmail.com'
-        globus_add = "acl-add " + end_point_share + " --perm r --email " + email
-           
-        cmd = globus_ssh + " " + globus_add
-        #os.system(cmd)
-        print "\n", cmd
-        print "Email sent to: ", email
-        #print "ssh decarlo@cli.globusonline.org acl-add decarlo#data/2014-10/g40065r94918/ --perm r --email decarlof@gmail.com"
-    
+                    return cmd
+                        
     elif mode == 'remote': 
         user = cf.get('globus remote server', 'user')
         share = cf.get('globus remote server', 'share')
@@ -270,19 +252,7 @@ def dm_share(directory, users, mode):
                 globus_add = "acl-add " + end_point_share + " --perm r --email " + email
                 if validate_email(email):
                     cmd = globus_ssh + " " + globus_add
-                    #os.system(cmd)
-                    print "\n", cmd
-                    print "Email sent to: ", email
-
-        # for demo
-        email = 'decarlof@gmail.com'
-        globus_add = "acl-add " + end_point_share + " --perm r --email " + email
-           
-        cmd = globus_ssh + " " + globus_add
-        #os.system(cmd)
-        print "\n", cmd
-        print "Email sent to: ", email
-        #print "ssh decarlo@cli.globusonline.org acl-add decarlo#data/2014-10/g40065r94918/ --perm r --email decarlof@gmail.com"
+                    return cmd
 
 def share(directory, email, mode):
     """

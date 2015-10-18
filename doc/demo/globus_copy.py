@@ -100,7 +100,6 @@ def main(argv):
             cmd = gb.upload(input_folder)
             if cmd !=-1:
                 print cmd
-                #print "ssh decarlo@cli.globusonline.org scp -r decarlo#data:/test/ petrel#tomography:/img/"
                 #os.system(cmd)
             else:
                 print "ERROR: " + local_folder + input_folder, "does not exists under the Globus Personal Share folder"
