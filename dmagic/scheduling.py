@@ -70,13 +70,15 @@ from xml.sax import SAXParseException
 import ipdb
 from collections import defaultdict
 import ConfigParser
-
+import unicodedata
+import string
 __author__ = "Francesco De Carlo"
 __credits__ = "John Hammonds"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 __all__ = ['create_experiment_id',
            'find_experiment_start',
+           'find_pi_last_name',
            'find_users',
            'print_experiment_info',
            'print_users'
@@ -450,6 +452,36 @@ def find_users(date=None):
     return users
 
 
+def find_pi_last_name(date=None):
+    """
+    Find the Principal Investigator (PI) running at beamline at a specific date
+     
+    Parameters
+    ----------
+    date : date
+        Experiment date
+    
+    Returns
+    -------
+    last_name : str
+        PI last name as a valid folder name       
+    """
+    print "\nFinding PI last name ... "
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    users = get_users(date.replace(tzinfo=None))
+
+    for tag in users:
+        if users[tag].get('piFlag') != None:
+            first_name = str(users[tag]['firstName']) 
+            last_name = str(users[tag]['lastName'])            
+            role = "*"
+            institution = str(users[tag]['institution'])
+            badge = str(users[tag]['badge'])
+            email = str(users[tag]['email'])
+
+    return remove_disallowed_filename_chars(last_name)     
+
+
 def print_users(users):
     """
     Print the users running at beamline at a specific date
@@ -516,4 +548,21 @@ def print_experiment_info(date=None):
             print "\t\t", email
         else:            
             print "\tMissing e-mail for:", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], users[tag]['institution']
+
+def remove_disallowed_filename_chars(last_name):
+    """
+    Remove from user last name characters that are not compatible folder names.
+     
+    Parameters
+    ----------
+    last_name : str
+        user last name    
+    Returns
+    -------
+    last_name : str
+        user last name compatible with directory name   
+    """
+
+    valid_folder_name_chars = "-_%s%s" % (string.ascii_letters, string.digits)    cleaned_folder_name = unicodedata.normalize('NFKD', last_name.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')    
+    return ''.join(c for c in cleaned_folder_name if c in valid_folder_name_chars)
 

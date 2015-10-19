@@ -74,15 +74,17 @@ print "Experiment starting date/time: ", exp_start
 
 # create a unique experiment ID using GUP and beamtime request (BR) numbers as: 
 # g + GUP# + r + BR#
-exp_id = sch.create_experiment_id(now)
-print "Unique experiment ID: ", exp_id
- 
+#exp_id = sch.create_experiment_id(now)
+             
+# create an experiment ID using the PI last name: 
+exp_id = sch.find_pi_last_name(now)
+
+print "Experiment ID: ", exp_id
+
 # create a directory to store the raw data as: 
-# \local_folder\YYYY-MM\gGUP#rBR#\  
-# local_folder is defined in globus.ini under [globus connect personal] folder
-              
+# \local_folder\YYYY-MM\gGUP#rBR#\  or
+# \local_folder\YYYY-MM\PI_last_name\  
 directory = gb.dm_create_directory(exp_start, exp_id)
-print "Raw data directory: ", directory
 
 # find the user running now
 users = sch.find_users(now)
