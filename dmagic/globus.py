@@ -54,15 +54,17 @@ You must create in your home directory the
 `globus.ini <https://github.com/decarlof/data-management/blob/master/config/globus.ini>`__ 
 configuration file
 
-Functions with the dm_ prefix are specific to Data Management tasks and are designed to be
+Functions with the dm prefix are specific to Data Management tasks and are designed to be
 integrated with the beamline data collection software
 
 """
 
 import os
+import sys
 from os.path import expanduser
 import ConfigParser
 from validate_email import validate_email
+import dmagic.react as react
 
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
@@ -74,7 +76,7 @@ __all__ = ['dm_create_directory',
            'share',
            'upload']
 
-def dm_create_directory(exp_start, exp_id):
+def dm_create_directory(exp_start, exp_id, mode = 'local'):
     """
     Create a unique directory based on experiment starting date and activity number
      
@@ -85,27 +87,55 @@ def dm_create_directory(exp_start, exp_id):
     
     exp_id : str
         Unique experiment id
+        
+    globus : str
+        None, remote, personal
 
     Returns
     -------
     Full directory path under the shared Endpoint        
     """
-
     home = expanduser("~")
     globus = os.path.join(home, 'globus.ini')
     cf = ConfigParser.ConfigParser()
     cf.read(globus)
-    local_folder = cf.get('globus connect personal', 'folder')  
-    
-    datetime_format = '%Y-%m'
-    unique_directory = local_folder + str(exp_start.strftime(datetime_format)) + os.sep + exp_id
 
-    if os.path.exists(unique_directory) == False: 
-        os.makedirs(unique_directory)    
-        print "\nCreating unique data directory: ", unique_directory
-    else:
-        print "\nDirectory already exists: ", unique_directory
+    globus_user = cf.get('settings', 'cli_user')
+    globus_address = cf.get('settings', 'cli_address')   
+    globus_ssh = "ssh " + globus_user + globus_address
+
+    datetime_format = '%Y-%m'
     
+    if (mode == 'local'):   
+        local_folder = cf.get('local host', 'folder')  
+        unique_directory = local_folder + str(exp_start.strftime(datetime_format)) + os.sep + exp_id
+        if os.path.exists(unique_directory) == False: 
+            os.makedirs(unique_directory)    
+            print "\nCreating unique data directory: ", unique_directory
+        else:
+            print "\nDirectory already exists: ", unique_directory
+    else:
+        unique_directory ='' 
+        if (mode == 'personal'):
+            user = cf.get('globus connect personal', 'user') 
+            host = '#' + cf.get('globus connect personal', 'host') 
+            share = cf.get('globus connect personal', 'share') 
+            folder = cf.get('globus connect personal', 'folder')  
+            globus_mkdir1 = 'mkdir ' +  user + share + ":" + os.sep + '~' + os.sep + str(exp_start.strftime(datetime_format)) + os.sep        
+            globus_mkdir2 = 'mkdir ' +  user + share + ":" + os.sep + '~' + os.sep + str(exp_start.strftime(datetime_format)) + os.sep + exp_id + os.sep       
+        elif (mode == 'remote'):
+            user = cf.get('globus remote server', 'user') 
+            host = '#' + cf.get('globus remote server', 'host') 
+            share = cf.get('globus remote server', 'share') 
+            folder = cf.get('globus remote server', 'folder')  
+            globus_mkdir1 = 'mkdir ' +  user + share + ":" + folder + str(exp_start.strftime(datetime_format)) + os.sep        
+            globus_mkdir2 = 'mkdir ' +  user + share + ":" + folder + str(exp_start.strftime(datetime_format)) + os.sep + exp_id + os.sep       
+
+        cmd1 = globus_ssh + " " + globus_mkdir1
+        cmd2 = globus_ssh + " " + globus_mkdir2
+        print cmd1
+        print cmd2
+        
     return unique_directory
 
 
@@ -120,10 +150,10 @@ def dm_settings():
     globus_address = cf.get('settings', 'cli_address')
     globus_user = cf.get('settings', 'cli_user')
 
-    local_user = cf.get('globus connect personal', 'user') 
-    local_host = cf.get('globus connect personal', 'host') 
-    local_share = cf.get('globus connect personal', 'share') 
-    local_folder = cf.get('globus connect personal', 'folder')  
+    personal_user = cf.get('globus connect personal', 'user') 
+    personal_host = cf.get('globus connect personal', 'host') 
+    personal_share = cf.get('globus connect personal', 'share') 
+    personal_folder = cf.get('globus connect personal', 'folder')  
     
     remote_user = cf.get('globus remote server', 'user') 
     remote_host = cf.get('globus remote server', 'host') 
@@ -138,10 +168,10 @@ def dm_settings():
     print "\tCLI ssh: ", globus_ssh
 
     print "Globus Connect Personal Configuration: "
-    print "\tGlobus User: ", local_user
-    print "\tLocal Host: ", local_host
-    print "\tLocal share: ", local_share
-    print "\tLocal folder under data management: " + local_folder 
+    print "\tGlobus User: ", personal_user
+    print "\tPersonal Host: ", personal_host
+    print "\tPersonal share: ", personal_share
+    print "\tPersonal folder under data management: " + personal_folder 
 
     print "Globus Server Configuration: "
     print "\tRemote Host: ", remote_host
@@ -150,9 +180,44 @@ def dm_settings():
     print "\tRemote folder under data management: " + remote_folder 
     print "\nEdit globus.ini to match your globus configuration"
 
+def dm_monitor(directory, protocol='scp'):
+    """
+    Monitor a directory on the data collection machine and automatically copy 
+    the raw data to the data analysis machine where the Globus Connect Personal 
+    Endpoint is running. 
+         
+    Parameters
+    ----------
+    directory : str
+        Unique directory shared by the Globus Connect Personal Endpoint
+    
+    protocol : str
+        copy protocol. scp (default), ... 
+    """
+    home = expanduser("~")
+    globus = os.path.join(home, 'globus.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(globus)
+
+    local_user = cf.get('local host', 'user') 
+    local_host = cf.get('local host', 'host') 
+    local_folder = cf.get('local host', 'folder')  
+
+    personal_user = cf.get('globus connect personal', 'user') 
+    personal_host = cf.get('globus connect personal', 'host') 
+    personal_folder = cf.get('globus connect personal', 'folder')  
+
+    cmd = 'scp ' + '$f ' + personal_host + ':' + directory 
+    # start directory monitoring
+    sys.argv  = ['react', directory, '-p', '*.txt', cmd]
+    print "Start raw data director monitoring", directory
+    print "New files will be copied to: " + personal_host + ':' + directory 
+    print "Contro-C to exit"
+    react.main(sys.argv)
+
 def dm_upload(directory):
     """
-    Upload the unique local directory under the Globus Connect Endpoint 
+    Upload the unique directory under the Globus Connect Personal Endpoint 
     that is autoamatically generated by the scheduling system
     to the remote Globus Server
      
@@ -167,33 +232,33 @@ def dm_upload(directory):
     globus = os.path.join(home, 'globus.ini')
     cf = ConfigParser.ConfigParser()
     cf.read(globus)
-    globus_address = cf.get('settings', 'cli_address')
+    globus_user = cf.get('settings', 'cli_user')
+    globus_address = cf.get('settings', 'cli_address')   
+    globus_ssh = "ssh " + globus_user + globus_address
+
+    scp_options = cf.get('settings', 'scp_options')
+
     cmd1 = -1
     cmd2 = -1
     
-    globus_user = cf.get('settings', 'cli_user')
-    scp_options = cf.get('settings', 'scp_options')
-    
-    local_user = cf.get('globus connect personal', 'user') 
-    local_host = '#' + cf.get('globus connect personal', 'host') 
-    local_folder = cf.get('globus connect personal', 'folder')  
+    personal_user = cf.get('globus connect personal', 'user') 
+    personal_host = '#' + cf.get('globus connect personal', 'host') 
+    personal_folder = cf.get('globus connect personal', 'folder')  
    
     remote_user = cf.get('globus remote server', 'user') 
     remote_host = '#' + cf.get('globus remote server', 'host') 
     remote_share = cf.get('globus remote server', 'share') 
     remote_folder = cf.get('globus remote server', 'folder')  
     
-    globus_ssh = "ssh " + globus_user + globus_address
-
     path_list = directory.split(os.sep)
-    local_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1] + os.sep 
-    local_date_folder = path_list[len(path_list)-2]
+    personal_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1] + os.sep 
+    personal_date_folder = path_list[len(path_list)-2]
 
     path_list = remote_folder.split(os.sep)
     remote_data_share = path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1]
 
-    globus_mkdir = 'mkdir ' +  remote_user + remote_share + ":" + remote_folder + local_date_folder + os.sep        
-    globus_scp = "scp -r " + local_user + local_host + ":" + local_folder + local_data_share + " " + remote_user + remote_share + ":" + os.sep + remote_data_share + local_date_folder + os.sep 
+    globus_mkdir = 'mkdir ' +  remote_user + remote_share + ":" + remote_folder + personal_date_folder + os.sep        
+    globus_scp = "scp -r " + personal_user + personal_host + ":" + personal_folder + personal_data_share + " " + remote_user + remote_share + ":" + os.sep + remote_data_share + personal_date_folder + os.sep 
 
     if os.path.isdir(directory):
         cmd1 = globus_ssh + " " + globus_mkdir
@@ -205,7 +270,7 @@ def dm_upload(directory):
 def dm_share(directory, users, mode):
     """
     Send an e-mail to users with a link to access the unique experiment 
-    directory under the Globus local/remote Endpoint that is autoamatically 
+    directory under the Globus personal/remote Endpoint that is autoamatically 
     generated by the scheduling system
      
     Parameters
@@ -216,7 +281,7 @@ def dm_share(directory, users, mode):
     users : dictionary-like object containing user information      
     
     mode : str
-        local/remote Endpoint hosting the share 
+        personal/remote Endpoint hosting the share 
 
     Returns
     -------
@@ -234,7 +299,7 @@ def dm_share(directory, users, mode):
     globus_ssh = "ssh " + globus_user + globus_address
 
     cmd = []    
-    if mode == 'local':
+    if mode == 'personal':
         user = cf.get('globus connect personal', 'user') 
         share = cf.get('globus connect personal', 'share')
         folder = cf.get('globus connect personal', 'folder')
@@ -266,7 +331,7 @@ def dm_share(directory, users, mode):
     
 def share(directory, email, mode):
     """
-    Send a token e-mail to share a directory under the local or remote Globus Endpoint
+    Send a token e-mail to share a directory under the personal or remote Globus Endpoint
      
     Parameters
     ----------
@@ -277,7 +342,7 @@ def share(directory, email, mode):
         User e-mail address
 
     mode : str
-        local, remote. Shared folder is on local/remote Endpoint 
+        personal, remote. Shared folder is on personal/remote Endpoint 
     
     Returns
     -------
@@ -294,7 +359,7 @@ def share(directory, email, mode):
     globus_user = cf.get('settings', 'cli_user')
     globus_ssh = "ssh " + globus_user + globus_address
 
-    if mode == 'local':
+    if mode == 'personal':
         user = cf.get('globus connect personal', 'user') 
         share = cf.get('globus connect personal', 'share')
         folder = cf.get('globus connect personal', 'folder')
@@ -324,7 +389,7 @@ def share(directory, email, mode):
 
 def upload(directory):
     """
-    Upload a local directory under the Globus Connect Endpoint 
+    Upload a directory under the Globus Connect Personal Endpoint 
     to the remote Globus Server
      
     Parameters
@@ -343,9 +408,9 @@ def upload(directory):
     globus_user = cf.get('settings', 'cli_user')
     scp_options = cf.get('settings', 'scp_options')
     
-    local_user = cf.get('globus connect personal', 'user') 
-    local_host = '#' + cf.get('globus connect personal', 'host') 
-    local_folder = cf.get('globus connect personal', 'folder')  
+    personal_user = cf.get('globus connect personal', 'user') 
+    personal_host = '#' + cf.get('globus connect personal', 'host') 
+    personal_folder = cf.get('globus connect personal', 'folder')  
    
     remote_user = cf.get('globus remote server', 'user') 
     remote_share = cf.get('globus remote server', 'share') 
@@ -353,9 +418,9 @@ def upload(directory):
     
     globus_ssh = "ssh " + globus_user + globus_address
 
-    globus_scp = "scp -r " + local_user + local_host + ":" + local_folder + directory + " " + remote_user + remote_share + ":" + remote_folder 
+    globus_scp = "scp -r " + personal_user + personal_host + ":" + personal_folder + directory + " " + remote_user + remote_share + ":" + remote_folder 
 
-    if os.path.isdir(local_folder + directory):
+    if os.path.isdir(personal_folder + directory):
         cmd = globus_ssh + " " + globus_scp + " " + scp_options
         return cmd
     else:

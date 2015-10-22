@@ -48,7 +48,7 @@
 
 """
 Module containing an example on how to use DMagic to setup and experiment for 
-managed data saving and automatic data distribution to users.
+managed data saving by monitoring the raw data collection folder and automatic copy to the data processing machine and distribution to users via Globus.
 
 """
 
@@ -59,7 +59,6 @@ import sys
 # set ~/globus.ini and ~/scheduling.ini to match your configuration
 import dmagic.scheduling as sch
 import dmagic.globus as gb
-import dmagic.react as react
 
 # pring the current Globus settings
 gb.dm_settings()
@@ -94,9 +93,9 @@ users = sch.find_users(now)
 # print user information
 sch.print_users(users)
 
-# share the raw data directory with the users. 
+# share the data directory in the personal end point with the users. 
 # users will receive an e-mail with a drop-box style link to access the data
-cmd = gb.dm_share(directory, users, 'local')
+cmd = gb.dm_share(directory, users, 'personal')
 for share in cmd: 
     print share
     #os.system(share)
@@ -117,9 +116,9 @@ for share in cmd:
     print share
     #os.system(share)
 
-# testing directory monitoring
-sys.argv  = ['react', '/local/dataraid/databank/', '-p', '*.txt', 'mv $f /local/dataraid/databank/CHESS/txt/']
 
-print sys.argv
-react.main(sys.argv)
+gb.dm_create_directory(exp_start, exp_id, 'personal')
+
+
+gb.dm_monitor(directory)
 

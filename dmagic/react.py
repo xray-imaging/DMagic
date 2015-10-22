@@ -71,7 +71,7 @@ def main(args):
 
     args = parser.parse_args(namespace=options)
 
-    print sys.argv
+    #print sys.argv
     while True:
         wm = WatchManager()
         process = Process(options)
