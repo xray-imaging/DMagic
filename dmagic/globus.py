@@ -207,12 +207,20 @@ def dm_monitor(directory, protocol='scp'):
     personal_host = cf.get('globus connect personal', 'host') 
     personal_folder = cf.get('globus connect personal', 'folder')  
 
-    cmd = 'scp ' + '$f ' + personal_host + ':' + directory 
+    path_list = directory.split(os.sep)
+    personal_path = personal_folder + path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1]
+
+    cmd = 'scp ' + '$f ' + personal_host + ':' + personal_path 
     # start directory monitoring
     sys.argv  = ['react', directory, '-p', '*.txt', cmd]
-    print "Start raw data director monitoring", directory
-    print "New files will be copied to: " + personal_host + ':' + directory 
-    print "Contro-C to exit"
+    print "\nStart raw data monitoring:" 
+    print "\tserver: ", local_host
+    print "\tdirectory: ", directory
+    print "\nNew files will be copied to: " 
+    print "\tserver: ", personal_host
+    print "\tdirectory: ", personal_path
+
+    print "\nControl-C to exit"
     react.main(sys.argv)
 
 def dm_upload(directory):
