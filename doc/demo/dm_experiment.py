@@ -54,10 +54,12 @@ managed data saving and automatic data distribution to users.
 
 import pytz
 import datetime
+import sys
 
 # set ~/globus.ini and ~/scheduling.ini to match your configuration
 import dmagic.scheduling as sch
 import dmagic.globus as gb
+import dmagic.react as react
 
 # pring the current Globus settings
 gb.dm_settings()
@@ -114,4 +116,10 @@ cmd = gb.dm_share(directory, users, 'remote')
 for share in cmd: 
     print share
     #os.system(share)
+
+# testing directory monitoring
+sys.argv  = ['react', '/local/dataraid/databank/', '-p', '*.txt', 'mv $f /local/dataraid/databank/CHESS/txt/']
+
+print sys.argv
+react.main(sys.argv)
 
