@@ -1,4 +1,14 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+Module to monitor a folder for new files. 
+
+If there is a new file a unix command is executed.
+DMagic uses react to move a raw data set to the data analysis machine 
+as soon as the file is closed. 
+
+"""
 
 import os
 import os.path
@@ -9,14 +19,10 @@ import re
 import argparse
 import fnmatch
 
-"""
-Module to monitor a folder for new files. 
-
-If there is a new file a unix command is executed.
-DMagic uses react to move a raw data set to the data analysis machine 
-as soon as the file is closed. 
-
-"""
+__author__ = "Alexander Bernauer (alex@copton.net)"
+__copyright__ = "[GPL 2.0](http://www.gnu.org/licenses/gpl-2.0.html)"
+__docformat__ = 'restructuredtext en'
+__all__ = ['main']
 
 class PatternAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -67,7 +73,6 @@ def main(args):
 
     print sys.argv
     while True:
-        #print sys.argv
         wm = WatchManager()
         process = Process(options)
 
