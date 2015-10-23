@@ -10,10 +10,10 @@ Experiment Monitor relies on the following configuration:
 
 - local: this is the computer where the detector is connected. The raw data directory is located on a local disk of this computer. Experiment Monitor runs on local.
 
-- personal: this is a computer, generally different from local, where the data analysis will be completed. On personal you need to run a Globus connect personal endpoint and configure a Globus shared folder by setting the GMagic `Globus configuration <https://github.com/decarlof/DMagic/blob/master/config/globus.ini>`__.
+- personal: this is a computer, generally different from local, where the data analysis will be completed. On personal you need to run a `Globus Connect Personal endpoint <https://www.globus.org/globus-connect-personal/>`__ and configure a Globus shared folder by setting the GMagic `Globus configuration <https://github.com/decarlof/DMagic/blob/master/config/globus.ini>`__ file.
 
 
-- access to the APS scheduling system by setting the GMagic `Scheduling configuration <https://github.com/decarlof/DMagic/blob/master/config/scheduling.ini>`__.
+- access to the `APS scheduling system <https://schedule.aps.anl.gov/>`__ by setting the GMagic `Scheduling configuration <https://github.com/decarlof/DMagic/blob/master/config/scheduling.ini>`__ file.
 
 - ssh public key sharing: local and personal are configured to ssh into each other with no password required.
 
