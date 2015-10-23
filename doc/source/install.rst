@@ -34,6 +34,7 @@ Install the following::
     pip install suds
     pip install ipdb
     pip install validate-email
+    pip install pyinotify
     
 Clone the `DMagic <https://github.com/decarlof/DMagic>`_  
 from `GitHub <https://github.com>`_ repository::
