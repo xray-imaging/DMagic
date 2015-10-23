@@ -70,6 +70,7 @@ __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 __all__ = ['dm_create_directory',
+           'dm_monitor',
            'dm_settings',
            'dm_share',
            'dm_upload',

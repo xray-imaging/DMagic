@@ -11,6 +11,7 @@
    .. autosummary::
    
       dm_create_directory
+      dm_monitor
       dm_settings
       dm_share
       dm_upload
