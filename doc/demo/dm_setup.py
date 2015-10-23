@@ -47,8 +47,9 @@
 # #########################################################################
 
 """
-Module containing an example on how to use DMagic to setup and experiment for 
-automatic data distribution to users via Globus.
+Module containing an example on how to use DMagic to setup an experiment for 
+automatic data distribution to users via Globus sharing the personal and the
+remote endpoints.
 
 """
 

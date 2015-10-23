@@ -47,8 +47,9 @@
 # #########################################################################
 
 """
-Module containing an example on how to use DMagic to setup and experiment for 
-managed data saving by monitoring the raw data collection folder and automatic copy to the data processing machine and distribution to users via Globus.
+Module containing an example on how to use DMagic to setup an experiment for 
+managed data saving by monitoring the raw data collection folder and 
+automatically copy to the data processing machine and share to users via Globus.
 
 """
 
@@ -82,10 +83,13 @@ exp_id = sch.find_pi_last_name(now)
 
 print "Experiment ID: ", exp_id
 
-# create a directory to store the raw data as: 
+# create a local directory to store the raw data as: 
 # \local_folder\YYYY-MM\gGUP#rBR#\  or
 # \local_folder\YYYY-MM\PI_last_name\  
 directory = gb.dm_create_directory(exp_start, exp_id)
+
+# create the same directory on the globus personal endpoint
+gb.dm_create_directory(exp_start, exp_id, 'personal')
 
 # find the user running now
 users = sch.find_users(now)
@@ -93,32 +97,14 @@ users = sch.find_users(now)
 # print user information
 sch.print_users(users)
 
-# share the data directory in the personal end point with the users. 
+# share the personal endpoint directory with the users. 
 # users will receive an e-mail with a drop-box style link to access the data
 cmd = gb.dm_share(directory, users, 'personal')
 for share in cmd: 
     print share
     #os.system(share)
 
-# upload the raw data to the remote Globus server set in globus.ini (i.e. petrel)
-# upload creates a folder YYYY-MM then copy the raw data from the Globus Personal
-# endpoint to the remote Globus server
-cmd1, cmd2 = gb.dm_upload(directory)
-print cmd1
-print cmd2
-#os.system(cmd1)
-#os.system(cmd2)
-
-# share the raw data directory on the Globus server with the users. 
-# users will receive an e-mail with a drop-box style link to access the data
-cmd = gb.dm_share(directory, users, 'remote')
-for share in cmd: 
-    print share
-    #os.system(share)
-
-
-gb.dm_create_directory(exp_start, exp_id, 'personal')
-
-
+# monitor the local directory and automatically copy any new file
+# to the shared directory on the globus personal endpoint
 gb.dm_monitor(directory)
 
