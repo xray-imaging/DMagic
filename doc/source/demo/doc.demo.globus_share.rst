@@ -1,9 +1,27 @@
 Globus Share
 ============
 
+Module to share a folder with a user by sending an e-mail.
+
 For help and to run::
 
     python globus_share.py -h
+
+Pre-requisites
+++++++++++++++
+
+Globus Share relies on the following configuration:
+
+- personal: this is a computer where the data to share are located. On personal you need to run a Globus connect personal endpoint and configure a Globus shared folder by setting the GMagic `Globus configuration <https://github.com/decarlof/DMagic/blob/master/config/globus.ini>`__.
+
+
+Tasks
++++++
+
+- Data Sharing
+
+    Globus Share sends an invitation e-mail (drop-dox style) to the user. Since what is shared is a link to the folder, users will have access to the current and any future content. 
+
 
 Download file: :download:`globus_share.py<../../../doc/demo/globus_share.py>`
 
