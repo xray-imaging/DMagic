@@ -47,4 +47,4 @@
 # #########################################################################
 
 from scheduling import *
-from globus import *
+#from globus import *
