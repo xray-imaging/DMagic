@@ -20,4 +20,6 @@ Basic functionality include the ability, for a given experiment date, to retriev
 email addresses from the APS scheduling system and automatically send an e-mail to the users 
 containing a link (drop-box style) to retrieve the data. 
 
+Monitor a directory and copy any new files to a globus connect personal or remote server endpoints.
+
 Data can be shared directly from the beamline machine or from a Globus server.
