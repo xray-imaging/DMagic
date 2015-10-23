@@ -74,7 +74,7 @@ def main(args):
                         files only trigger the reaction if their name matches
                         this shell pattern
      
-s    """
+    """
 
     parser = argparse.ArgumentParser(description='Launch a script if specified files change.')
     parser.add_argument('directory', help='the directory which is recursively monitored')
