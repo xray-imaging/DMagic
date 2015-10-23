@@ -2,11 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Module to monitor a folder for new files. 
-
-If there is a new file a unix command is executed.
-DMagic uses react to move a raw data set to the data analysis machine 
-as soon as the file is closed. 
+Launch a script if specified files change.
 
 """
 
@@ -19,7 +15,7 @@ import re
 import argparse
 import fnmatch
 
-__author__ = "Alexander Bernauer (alex@copton.net)"
+__author__ = "Alexander Bernauer (alex@copton.net) https://github.com/copton/react"
 __copyright__ = "[GPL 2.0](http://www.gnu.org/licenses/gpl-2.0.html)"
 __docformat__ = 'restructuredtext en'
 __all__ = ['main']
@@ -59,6 +55,27 @@ class Process(ProcessEvent):
             sys.stdout.write("------------------------\n")
 
 def main(args):
+    """
+    args : [-h] [-r REGEX | -p REGEX] directory script
+
+    example :
+        react.py /tmp -p '*.txt' 'echo $f'
+        
+    positional arguments :
+        - directory:             the directory which is recursively monitored
+        - script:                the script that is executed upon reaction
+
+    optional arguments :
+        -h, --help            show this help message and exit
+        -r REGEX, --regex REGEX
+                        files only trigger the reaction if their name matches
+                        this regular expression
+        -p REGEX, --pattern REGEX
+                        files only trigger the reaction if their name matches
+                        this shell pattern
+     
+s    """
+
     parser = argparse.ArgumentParser(description='Launch a script if specified files change.')
     parser.add_argument('directory', help='the directory which is recursively monitored')
 
@@ -71,7 +88,7 @@ def main(args):
 
     args = parser.parse_args(namespace=options)
 
-    #print sys.argv
+    print sys.argv
     while True:
         wm = WatchManager()
         process = Process(options)
