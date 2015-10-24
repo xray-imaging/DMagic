@@ -86,7 +86,7 @@ print "Experiment ID: ", exp_id
 # create a local directory to store the raw data as: 
 # \local_folder\YYYY-MM\gGUP#rBR#\  or
 # \local_folder\YYYY-MM\PI_last_name\  
-directory = gb.dm_create_directory(exp_start, exp_id)
+directory = gb.dm_create_directory(exp_start, exp_id, 'local')
 
 # create the same directory on the globus personal endpoint
 gb.dm_create_directory(exp_start, exp_id, 'personal')

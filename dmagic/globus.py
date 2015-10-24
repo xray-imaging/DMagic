@@ -112,9 +112,9 @@ def dm_create_directory(exp_start, exp_id, mode = 'local'):
         unique_directory = local_folder + str(exp_start.strftime(datetime_format)) + os.sep + exp_id
         if os.path.exists(unique_directory) == False: 
             os.makedirs(unique_directory)    
-            print "\nCreating unique data directory: ", unique_directory
+            print "\nCreating unique local data directory: ", unique_directory
         else:
-            print "\nDirectory already exists: ", unique_directory
+            print "\nLocal data directory already exists: ", unique_directory
     else:
         unique_directory ='' 
         if (mode == 'personal'):
@@ -134,6 +134,8 @@ def dm_create_directory(exp_start, exp_id, mode = 'local'):
 
         cmd1 = globus_ssh + " " + globus_mkdir1
         cmd2 = globus_ssh + " " + globus_mkdir2
+        os.system(cmd1)
+        os.system(cmd2)
         print cmd1
         print cmd2
         
@@ -213,7 +215,7 @@ def dm_monitor(directory, protocol='scp'):
 
     cmd = 'scp ' + '$f ' + personal_host + ':' + personal_path 
     # start directory monitoring
-    sys.argv  = ['react', directory, '-p', '*.txt', cmd]
+    sys.argv  = ['react', directory, '-p', '*.hdf', cmd]
     print "\nStart raw data monitoring:" 
     print "\tserver: ", local_host
     print "\tdirectory: ", directory

@@ -59,7 +59,7 @@ def main(args):
     args : [-h] [-r REGEX | -p REGEX] directory script
 
     example :
-        react.py /tmp -p '*.txt' 'echo $f'
+        react.py /local/data -p '*.hdf' 'echo $f'
         
     positional arguments :
         - directory:             the directory which is recursively monitored
@@ -88,7 +88,7 @@ def main(args):
 
     args = parser.parse_args(namespace=options)
 
-    print sys.argv
+    #print sys.argv
     while True:
         wm = WatchManager()
         process = Process(options)
