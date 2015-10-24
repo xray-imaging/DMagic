@@ -38,6 +38,6 @@ Tasks
     
 - Data Sharing
 
-    An invitation e-mail is sent to the users to access the Globus personal shared folder on **personal**. The user e-mails are retrieved using the current date and accessing the APS scheduling system. Since what is shared is a link to the folder, users will have access to the raw data as they are collected and to any data analysis results generated in the same folder at a later time.
+    Experiment Monitor sends an e-mail to the users with a link to access the data on **personal**. The user e-mails are retrieved using the current date and accessing the APS scheduling system. Since what is shared is a link to the folder, users will have remote access to the raw data as they are collected and to any data analysis results generated in the same folder at a later time.
 
 
