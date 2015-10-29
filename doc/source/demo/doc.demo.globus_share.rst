@@ -10,11 +10,18 @@ For help and to run::
 Pre-requisites
 ++++++++++++++
 
-globus_share relies on the following configuration:
+Before using **globus_share**  you need to have setup an account on `Globus <https://www.globus.org/>`__, 
+installed a  `Globus Connect Personal endpoint <https://www.globus.org/globus-connect-personal/>`__
+on the computer you want to share data from and met the the Globus Command Line Interface (CLI) 
+`pre-requisites <http://dev.globus.org/cli/using-the-cli/#prerequisites>`__
 
-- **personal**: this is a computer where the data you want to share are located. On personal you need to run a Globus connect personal endpoint and configure a Globus shared folder by setting the GMagic `Globus configuration <https://github.com/decarlof/DMagic/blob/master/config/globus.ini>`__.
+Edit the GMagic `Globus configuration file <https://github.com/decarlof/DMagic/blob/master/config/globus.ini>`__ :
 
-- Globus_share runs on personal. 
+- **settings**: Set the cli_user/cli_address.
+
+- **globus connect personal**: set the globus connect personal endpoint **user**, host, folder and **share**.  
+
+Login as **user** on `Globus <https://www.globus.org/>`__ and add the **share**. 
 
 
 Tasks

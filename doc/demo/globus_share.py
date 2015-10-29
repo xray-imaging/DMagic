@@ -138,7 +138,7 @@ def main(argv):
     personal_folder = cf.get('globus connect personal', 'folder')  
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("folder", help="folder path under " + personal_folder)
+    parser.add_argument("folder", help="new or existing folder under " + personal_folder)
     parser.add_argument("email", help="user e-mail address")
     args = parser.parse_args()
 

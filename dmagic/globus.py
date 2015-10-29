@@ -74,7 +74,6 @@ __all__ = ['dm_create_directory',
            'dm_settings',
            'dm_share',
            'dm_upload',
-           'share',
            'upload']
 
 def dm_create_directory(exp_start, exp_id, mode = 'local'):
