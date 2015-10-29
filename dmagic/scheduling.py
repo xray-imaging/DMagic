@@ -479,7 +479,7 @@ def find_pi_last_name(date=None):
             badge = str(users[tag]['badge'])
             email = str(users[tag]['email'])
 
-    return remove_disallowed_filename_chars(last_name)     
+    return clean_folder_name(last_name)     
 
 
 def print_users(users):
@@ -549,7 +549,7 @@ def print_experiment_info(date=None):
         else:            
             print "\tMissing e-mail for:", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], users[tag]['institution']
 
-def remove_disallowed_filename_chars(last_name):
+def clean_folder_name(last_name):
     """
     Remove from user last name characters that are not compatible folder names.
      

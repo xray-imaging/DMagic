@@ -340,63 +340,6 @@ def dm_share(directory, users, mode):
 
     return cmd
     
-def share(directory, email, mode):
-    """
-    Send a token e-mail to share a directory under the personal or remote Globus Endpoint
-     
-    Parameters
-    ----------
-    directory : str
-        Full directory path under the Globus Shared Endpoint
-        
-    email : email
-        User e-mail address
-
-    mode : str
-        personal, remote. Shared folder is on personal/remote Endpoint 
-    
-    Returns
-    -------
-    cmd : str 
-        Globus Command Line string. If executed with os.system() 
-        will send notification e-mail to users         
-    """
-
-    home = expanduser("~")
-    globus = os.path.join(home, 'globus.ini')
-    cf = ConfigParser.ConfigParser()
-    cf.read(globus)
-    globus_address = cf.get('settings', 'cli_address')
-    globus_user = cf.get('settings', 'cli_user')
-    globus_ssh = "ssh " + globus_user + globus_address
-
-    if mode == 'personal':
-        user = cf.get('globus connect personal', 'user') 
-        share = cf.get('globus connect personal', 'share')
-        folder = cf.get('globus connect personal', 'folder')
-
-        if os.path.isdir(folder + directory) and validate_email(email):
-            globus_add = "acl-add " + user + share + os.sep + directory  + " --perm r --email " + email        
-            cmd = globus_ssh + " " + globus_add
-            return cmd
-        else:
-            if not validate_email(email):
-                return -1
-            else:
-                return -2
-            
-    elif mode == 'remote': 
-        user = cf.get('globus remote server', 'user')
-        share = cf.get('globus remote server', 'share')
-        folder = cf.get('globus remote server', 'folder')
-    
-        if validate_email(email):
-            globus_add = "acl-add " + user + share + os.sep + directory  + " --perm r --email " + email        
-            cmd = globus_ssh + " " + globus_add
-            return cmd
-        else:
-            return -1
-            
 
 def upload(directory):
     """

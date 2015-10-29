@@ -51,59 +51,106 @@ Module to share a Globus Personal shared folder with a user by sending an e-mail
 """
 
 import os
-import sys, getopt
+import sys
+import string
+import argparse
+import platform
+import unicodedata
+import ConfigParser
 
-import dmagic.globus as gb
+from os.path import expanduser
+from distutils.dir_util import mkpath
+from validate_email import validate_email
 
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 
-def main(argv):
-    input_folder = ''
-    input_email = ''
-    input_mode = 'local'
+def clean_folder_name(directory):
+
+    valid_folder_name_chars = "-_"+ os.sep + "%s%s" % (string.ascii_letters, string.digits)    cleaned_folder_name = unicodedata.normalize('NFKD', directory.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')    
+    return ''.join(c for c in cleaned_folder_name if c in valid_folder_name_chars)
+
+
+def try_email(email):
+
+    try: 
+        if validate_email(email):
+            return True
+    except: 
+        pass # or raise
+    else: 
+        print "e-mail address in not valid"
+        return False
+
+def try_folder(directory):
 
     try:
-        opts, args = getopt.getopt(argv,"hf:e:m:",["ffolder=","eemail=","mmode="])
-    except getopt.GetoptError:
-        print 'globus_share.py -f <folder> -e <email> -m <mode>'
-        print '<folder>: folder path under the globus share'
-        print '<email>: e-mail address to send a web link to the shared folder ' 
-        print '<mode>: local (default) or remote'
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print 'python globus_share.py -f <folder> -e <email> -m <mode>'
-            print "python globus_share.py -f test -e decarlof@gmail.com -m remote"
-            print '\t<folder>:folder path under the globus share'
-            print '\t<email>:e-mail address to send a link to the shared folder ' 
-            print '\t<mode>:local (default) or remote\n'
-            sys.exit()
-        elif opt in ("-f", "--ffolder"):
-            input_folder = arg
-        elif opt in ("-e", "--eemail"):
-            input_email = arg
-        elif opt in ("-m", "--mmode"):
-            input_mode = arg
+        home = expanduser("~")
+        globus = os.path.join(home, 'globus.ini')
+        cf = ConfigParser.ConfigParser()
+        cf.read(globus)
+        personal_folder = cf.get('globus connect personal', 'folder')  
+        if os.path.isdir(personal_folder + directory):
+            print directory + " exists"
+            return True
+        else:
+            print directory + " does not exist under " + personal_folder
+            a = raw_input('Would you like to create ' + directory + ' ? ').lower()
+            if a.startswith('y'): 
+                mkpath(personal_folder + directory)                print("Great!")
+                return True            else:                print ("Sorry for asking...")
+                return False
+    except: 
+        pass # or raise
+    else: 
+        return False
 
-    input_folder = os.path.normpath(input_folder) + os.sep # will add the trailing slash if it's not already there.
-            
-    cmd = gb.share(input_folder, input_email, input_mode)
+def try_platform():
+    home = expanduser("~")
+    globus = os.path.join(home, 'globus.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(globus)
+    personal_host = cf.get('globus connect personal', 'host') 
 
-    if cmd == -1: 
-        print "ERROR: email is not valid ..."
-        print "EXAMPLE: python globus_share.py -f test -e decarlof@gmail.com -m remote"
-        
-    elif cmd == -2: 
-        print "ERROR: " + input_folder + " does not exists under the Globus Personal Share folder"
-        print "EXAMPLE: python globus_share.py -f test -e decarlof@gmail.com -m remote"
-        gb.dm_settings()    
-    else:
-        #os.system(cmd)
-        print cmd
-        print "Download link sent to: ", input_email
+    try: 
+        if (platform.node().split('.')[0] == personal_host):
+            return True
+    except: 
+        pass # or raise
+    else: 
+        print "This command only runs on :", personal_host
+        return False
+
+def main(argv):
+    home = expanduser("~")
+    globus = os.path.join(home, 'globus.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(globus)
+
+    globus_address = cf.get('settings', 'cli_address')
+    globus_user = cf.get('settings', 'cli_user')
+    globus_ssh = "ssh " + globus_user + globus_address
+
+    user = cf.get('globus connect personal', 'user') 
+    share = cf.get('globus connect personal', 'share')
+
+    personal_folder = cf.get('globus connect personal', 'folder')  
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("folder", help="folder path under " + personal_folder)
+    parser.add_argument("email", help="user e-mail address")
+    args = parser.parse_args()
+
+    try: 
+        folder = os.path.normpath(clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
+        if (try_platform() and try_email(args.email) and try_folder(folder)):
+            globus_add = "acl-add " + user + share + os.sep + folder  + " --perm r --email " + args.email        
+            cmd = globus_ssh + " " + globus_add
+            os.system(cmd)
+
+    except: pass
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
-
+   main(sys.argv[1:])
+   
