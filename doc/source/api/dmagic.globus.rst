@@ -15,4 +15,3 @@
       dm_settings
       dm_share
       dm_upload
-      upload

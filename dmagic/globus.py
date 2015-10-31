@@ -73,8 +73,7 @@ __all__ = ['dm_create_directory',
            'dm_monitor',
            'dm_settings',
            'dm_share',
-           'dm_upload',
-           'upload']
+           'dm_upload']
 
 def dm_create_directory(exp_start, exp_id, mode = 'local'):
     """
@@ -338,44 +337,4 @@ def dm_share(directory, users, mode):
                     cmd.append(globus_ssh + " " + globus_add)
 
     return cmd
-    
-
-def upload(directory):
-    """
-    Upload a directory under the Globus Connect Personal Endpoint 
-    to the remote Globus Server
-     
-    Parameters
-    ----------
-    directory : str
-        Directory under the Globus Connect Personal Endpoint share
-    
-    """
-        
-    home = expanduser("~")
-    globus = os.path.join(home, 'globus.ini')
-    cf = ConfigParser.ConfigParser()
-    cf.read(globus)
-
-    globus_address = cf.get('settings', 'cli_address')
-    globus_user = cf.get('settings', 'cli_user')
-    scp_options = cf.get('settings', 'scp_options')
-    
-    personal_user = cf.get('globus connect personal', 'user') 
-    personal_host = '#' + cf.get('globus connect personal', 'host') 
-    personal_folder = cf.get('globus connect personal', 'folder')  
-   
-    remote_user = cf.get('globus remote server', 'user') 
-    remote_share = cf.get('globus remote server', 'share') 
-    remote_folder = cf.get('globus remote server', 'folder')  
-    
-    globus_ssh = "ssh " + globus_user + globus_address
-
-    globus_scp = "scp -r " + personal_user + personal_host + ":" + personal_folder + directory + " " + remote_user + remote_share + ":" + remote_folder 
-
-    if os.path.isdir(personal_folder + directory):
-        cmd = globus_ssh + " " + globus_scp + " " + scp_options
-        return cmd
-    else:
-        return -1
 

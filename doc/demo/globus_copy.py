@@ -47,53 +47,120 @@
 # #########################################################################
 
 """
-Module to copy data from a Globus Personal shared folder to petrel and share that
+Module to copy data from a Globus Personal shared folder to a remote Globus server share and optionally share the remote
 folder with a user by sending an e-mail.
 """
 
+
 import os
-from os.path import expanduser
-import sys, getopt
+import sys
+import string
+import argparse
+import platform
+import unicodedata
 import ConfigParser
 
-import dmagic.globus as gb
+from os.path import expanduser
+from distutils.dir_util import mkpath
+from validate_email import validate_email
 
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 
-def main(argv):
-    input_folder = ''
+def clean_folder_name(directory):
+
+    valid_folder_name_chars = "-_"+ os.sep + "%s%s" % (string.ascii_letters, string.digits)    cleaned_folder_name = unicodedata.normalize('NFKD', directory.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')    
+    return ''.join(c for c in cleaned_folder_name if c in valid_folder_name_chars)
+
+
+def try_email(email):
+
+    try: 
+        if validate_email(email):
+            return True
+    except: 
+        pass # or raise
+    else: 
+        print "e-mail address in not valid"
+        return False
+
+
+def try_folder(directory):
 
     try:
-        opts, args = getopt.getopt(argv,"hf:",["ffolder="])
-    except getopt.GetoptError:
-        print 'globus_copy.py -f <folder>'
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print 'USAGE: globus_copy.py -f <folder>'
-            print 'copy data from globus connect personal ', local_user + local_share + os.sep + '<folder> to ' + remote_user + remote_share + remote_folder
-
-            sys.exit()
-        elif opt in ("-f", "--ffolder"):
-            input_folder = arg
-            input_folder = os.path.normpath(input_folder) + os.sep # will add the trailing slash if it's not already there.
-            cmd = gb.upload(input_folder)
-            if cmd !=-1:
-                print cmd
-                #os.system(cmd)
-            else:
-                print "ERROR: " + local_folder + input_folder, "does not exists under the Globus Personal Share folder"
-                #gb.dm_settings()
+        home = expanduser("~")
+        globus = os.path.join(home, 'globus.ini')
+        cf = ConfigParser.ConfigParser()
+        cf.read(globus)
+        personal_folder = cf.get('globus connect personal', 'folder')  
+        if os.path.isdir(personal_folder + directory):
+            return True
         else:
-            print "globus_copy.py -h for help" 
+            print directory + " does not exist under " + personal_folder
+            return False
+    except: 
+        pass # or raise
+    else: 
+        return False
 
-    if (input_folder == ''):
-        print 'USAGE: globus_copy.py -h'
-        print 'USAGE: globus_copy.py -f <folder>'
+def try_platform():
 
+    home = expanduser("~")
+    globus = os.path.join(home, 'globus.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(globus)
+    personal_host = cf.get('globus connect personal', 'host') 
+
+    try: 
+        if (platform.node().split('.')[0] == personal_host):
+            return True
+    except: 
+        pass # or raise
+    else: 
+        print "This command only runs on :", personal_host
+        return False
+
+def main(argv):
+
+    home = expanduser("~")
+    globus = os.path.join(home, 'globus.ini')
+    cf = ConfigParser.ConfigParser()
+    cf.read(globus)
+
+    globus_address = cf.get('settings', 'cli_address')
+    globus_user = cf.get('settings', 'cli_user')
+    scp_options = cf.get('settings', 'scp_options')
     
-if __name__ == "__main__":
-    main(sys.argv[1:])
+    personal_user = cf.get('globus connect personal', 'user') 
+    personal_host = '#' + cf.get('globus connect personal', 'host') 
+    personal_folder = cf.get('globus connect personal', 'folder')  
+   
+    remote_user = cf.get('globus remote server', 'user') 
+    remote_share = cf.get('globus remote server', 'share') 
+    remote_folder = cf.get('globus remote server', 'folder')  
+    
+    globus_ssh = "ssh " + globus_user + globus_address
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("folder", help="existing folder under " + personal_folder + " to be copied to " + remote_user + remote_share)
+    parser.add_argument("-e", "--email", help="user e-mail address")
+    args = parser.parse_args()
+    print try_email(args.email)
+
+    try: 
+        folder = os.path.normpath(clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
+        if (try_platform() and try_folder(folder)):
+            globus_scp = "scp -r " + personal_user + personal_host + ":" + personal_folder + folder + " " + remote_user + remote_share + ":" + remote_folder 
+            cmd = globus_ssh + " " + globus_scp + " " + scp_options
+            os.system(cmd)
+            if try_email(args.email):
+                globus_add = "acl-add " + remote_user + remote_share + os.sep + folder  + " --perm r --email " + args.email        
+                cmd = globus_ssh + " " + globus_add
+                os.system(cmd)
+
+    except: pass
+
+if __name__ == "__main__":
+   main(sys.argv[1:])
+   
