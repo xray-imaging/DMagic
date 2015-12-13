@@ -3,7 +3,7 @@ Development
 ===========
 
 This section explains the basics for developers who wish to contribute 
-to the `DMagic <https://github.com/decarlof/DMagic>`_ project. Detailed instruction are on  
+to the `DMagic <https://github.com/decarlof/DMagic>`_ project, detailed instruction are on  
 `github <https://help.github.com/articles/using-pull-requests>`__.
 
 .. contents:: Contents:

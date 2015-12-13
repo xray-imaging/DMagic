@@ -15,7 +15,7 @@ Before using `DMagic <https://github.com/decarlof/DMagic>`_  you need to have se
 on `Globus <https://www.globus.org/>`__, installed a 
 `Globus Connect Personal endpoint <https://www.globus.org/globus-connect-personal/>`__
 on the APS computer you want to share data from and met the the Globus 
-Command Line Interface (CLI) `pre-requisites <http://dev.globus.org/cli/using-the-cli/#prerequisites>`__
+Command Line Interface (CLI) `pre-requisites <http://dev.globus.org/cli/using-the-cli/#prerequisites>`__.
 
 To access the `APS scheduling system <https://schedule.aps.anl.gov/>`__ you need 
 valid APS credentials.

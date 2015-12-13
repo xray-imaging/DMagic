@@ -1,9 +1,9 @@
-Globus 
-======
+Data Sharing 
+============
 
-This section contains DMagic, command line style, examples to use Globus. 
+This section contains DMagic, command line style, examples to share data. DMagic Data Sharing makes extent use of `Globus <https://www.globus.org/>`__. 
 
-.. rubric:: **Globus Examples:**
+.. rubric:: **Data Sharing Examples:**
 
 .. toctree::
 
