@@ -92,7 +92,7 @@ def try_folder(directory):
         cf.read(globus)
         personal_folder = cf.get('globus connect personal', 'folder')  
         if os.path.isdir(personal_folder + directory):
-            print directory + " exists"
+            print personal_folder + directory + " exists"
             return True
         else:
             print directory + " does not exist under " + personal_folder
@@ -143,9 +143,11 @@ def main(argv):
     args = parser.parse_args()
 
     try: 
+        args.folder = args.folder[0].strip(os.sep) + args.folder[1:] # will remove the front slash if it is there.
         folder = os.path.normpath(clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
         if (try_platform() and try_email(args.email) and try_folder(folder)):
-            globus_add = "acl-add " + user + share + os.sep + folder  + " --perm r --email " + args.email        
+            globus_add = "acl-add " + user + share + os.sep + folder  + " --perm r --email " + args.email
+            print globus_add        
             cmd = globus_ssh + " " + globus_add
             os.system(cmd)
 
