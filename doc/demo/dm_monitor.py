@@ -61,12 +61,11 @@ import sys
 import dmagic.scheduling as sch
 import dmagic.globus as gb
 
-# pring the current Globus settings
+# print the current Globus settings
 gb.dm_settings()
 
 # set the experiment date 
 # now = datetime.date.today()
-
 now = datetime.datetime(2014, 10, 18, 10, 10, 30).replace(tzinfo=pytz.timezone('US/Central'))
 print "\n\nToday's date: ", now
 
@@ -74,18 +73,15 @@ print "\n\nToday's date: ", now
 exp_start = sch.find_experiment_start(now)
 print "Experiment starting date/time: ", exp_start
 
-# create a unique experiment ID using GUP and beamtime request (BR) numbers as: 
-# g + GUP# + r + BR#
+# create a unique experiment ID using GUP and beamtime request (BR) numbers:  g + GUP# + r + BR#
 #exp_id = sch.create_experiment_id(now)
              
-# create an experiment ID using the PI last name: 
+# create an experiment ID using the PI last name 
 exp_id = sch.find_pi_last_name(now)
-
 print "Experiment ID: ", exp_id
 
 # create a local directory to store the raw data as: 
-# \local_folder\YYYY-MM\gGUP#rBR#\  or
-# \local_folder\YYYY-MM\PI_last_name\  
+# \local_folder\YYYY-MM\gGUP#rBR#\  or \local_folder\YYYY-MM\PI_last_name\  
 directory = gb.dm_create_directory(exp_start, exp_id, 'local')
 
 # create the same directory on the globus personal endpoint
