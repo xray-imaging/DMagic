@@ -1,7 +1,7 @@
 Experiment Monitor
 ==================
 
-DMagic active directory monitoring example (Download file: :download:`dm_monitor.py<../../../doc/demo/dm_monitor.py>`)
+DMagic active directory monitoring example. (Download file: :download:`dm_monitor.py<../../../doc/demo/dm_monitor.py>`)
 
 Pre-requisites
 ++++++++++++++
@@ -26,7 +26,7 @@ Tasks
 
 - Unique data directory creation
 
-    Using the current date and accessing the APS scheduling system, Experiment Monitor creates a unique folder *YYYY-MM/pi_last_name* on **local** and on **personal** 
+    Using the current date and accessing the APS scheduling system, Experiment Monitor creates a unique folder *YYYY-MM/pi_last_name* on **local** and on **personal** .
 
 - Data Collection
     
