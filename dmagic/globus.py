@@ -120,8 +120,8 @@ def dm_create_directory(exp_start, exp_id, mode = 'local'):
             host = '#' + cf.get('globus connect personal', 'host') 
             share = cf.get('globus connect personal', 'share') 
             folder = cf.get('globus connect personal', 'folder')  
-            globus_mkdir1 = 'mkdir ' +  user + share + ":" + os.sep + '~' + os.sep + str(exp_start.strftime(datetime_format)) + os.sep        
-            globus_mkdir2 = 'mkdir ' +  user + share + ":" + os.sep + '~' + os.sep + str(exp_start.strftime(datetime_format)) + os.sep + exp_id + os.sep       
+            globus_mkdir1 = 'mkdir ' +  user + share + os.sep  + str(exp_start.strftime(datetime_format)) + os.sep        
+            globus_mkdir2 = 'mkdir ' +  user + share + os.sep  + str(exp_start.strftime(datetime_format)) + os.sep + exp_id + os.sep       
         elif (mode == 'remote'):
             user = cf.get('globus remote server', 'user') 
             host = '#' + cf.get('globus remote server', 'host') 
@@ -213,7 +213,7 @@ def dm_monitor(directory, protocol='scp'):
 
     cmd = 'scp ' + '$f ' + personal_host + ':' + personal_path 
     # start directory monitoring
-    sys.argv  = ['react', directory, '-p', '*.hdf', cmd]
+    sys.argv  = ['react', directory, '-p', '*.h5', cmd]
     print "\nStart raw data monitoring:" 
     print "\tserver: ", local_host
     print "\tdirectory: ", directory
