@@ -155,6 +155,8 @@ def main(argv):
             cmd = globus_ssh + " " + globus_scp + " " + scp_options
             os.system(cmd)
             if try_email(args.email):
+                # ready for new CLI release
+                #globus_add = "acl-add " + remote_user + remote_share + os.sep + folder  + " --perm r --identityusername " + args.email + " --notify-email=" + args.email + " --notify-message=" + '"Here are your data from the TXM"' 
                 globus_add = "acl-add " + remote_user + remote_share + os.sep + folder  + " --perm r --email " + args.email        
                 cmd = globus_ssh + " " + globus_add
                 os.system(cmd)

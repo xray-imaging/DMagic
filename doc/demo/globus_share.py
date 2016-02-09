@@ -151,9 +151,12 @@ def main(argv):
         args.folder = args.folder[0].strip(os.sep) + args.folder[1:] # will remove the front slash if it is there.
         folder = os.path.normpath(clean_folder_name(args.folder)) + os.sep # will add the trailing slash if it's not already there.
         if (try_platform() and try_email(args.email) and try_folder(folder)):
+            # ready for new CLI release
+            #globus_add = "acl-add " + user + share + os.sep + folder  + " --perm r --identityusername " + args.email + " --notify-email=" + args.email + " --notify-message=" + '"Here are your data from the TXM"' 
             globus_add = "acl-add " + user + share + os.sep + folder  + " --perm r --email " + args.email
-            print globus_add        
+            #print globus_add        
             cmd = globus_ssh + " " + globus_add
+            print cmd
             #os.system(cmd)
 
     except: pass
