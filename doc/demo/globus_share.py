@@ -68,7 +68,9 @@ __docformat__ = 'restructuredtext en'
 
 def clean_folder_name(directory):
 
-    valid_folder_name_chars = "-_"+ os.sep + "%s%s" % (string.ascii_letters, string.digits)    cleaned_folder_name = unicodedata.normalize('NFKD', directory.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')    
+    valid_folder_name_chars = "-_"+ os.sep + "%s%s" % (string.ascii_letters, string.digits)
+    cleaned_folder_name = unicodedata.normalize('NFKD', directory.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')
+    
     return ''.join(c for c in cleaned_folder_name if c in valid_folder_name_chars)
 
 
@@ -98,8 +100,11 @@ def try_folder(directory):
             print directory + " does not exist under " + personal_folder
             a = raw_input('Would you like to create ' + directory + ' ? ').lower()
             if a.startswith('y'): 
-                mkpath(personal_folder + directory)                print("Great!")
-                return True            else:                print ("Sorry for asking...")
+                mkpath(personal_folder + directory)
+                print("Great!")
+                return True
+            else:
+                print ("Sorry for asking...")
                 return False
     except: 
         pass # or raise
@@ -119,7 +124,7 @@ def try_platform():
     except: 
         pass # or raise
     else: 
-        print "This command only runs on :", personal_host
+        print "WARNING: This command only runs on", personal_host
         return False
 
 def main(argv):
@@ -149,7 +154,7 @@ def main(argv):
             globus_add = "acl-add " + user + share + os.sep + folder  + " --perm r --email " + args.email
             print globus_add        
             cmd = globus_ssh + " " + globus_add
-            os.system(cmd)
+            #os.system(cmd)
 
     except: pass
 
