@@ -196,6 +196,7 @@ def dm_monitor(directory, protocol='scp'):
         copy protocol. scp (default), ... 
     """
     home = expanduser("~")
+    monitor = '*.h5'
     globus = os.path.join(home, 'globus.ini')
     cf = ConfigParser.ConfigParser()
     cf.read(globus)
@@ -213,10 +214,11 @@ def dm_monitor(directory, protocol='scp'):
 
     cmd = 'scp ' + '$f ' + personal_host + ':' + personal_path 
     # start directory monitoring
-    sys.argv  = ['react', directory, '-p', '*.h5', cmd]
+    sys.argv  = ['react', directory, '-p', monitor, cmd]
     print "\nStart raw data monitoring:" 
     print "\tserver: ", local_host
     print "\tdirectory: ", directory
+    print "\tfiles: ", monitor
     print "\nNew files will be copied to: " 
     print "\tserver: ", personal_host
     print "\tdirectory: ", personal_path
