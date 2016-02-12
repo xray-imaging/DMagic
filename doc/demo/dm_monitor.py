@@ -60,17 +60,13 @@ import sys
 # set ~/globus.ini and ~/scheduling.ini to match your configuration
 import dmagic.scheduling as sch
 import dmagic.globus as gb
-import dmagic.epics_pv_32ID as pv
 
 # print the current Globus settings
 gb.dm_settings()
 
 # set the experiment date 
-#now = datetime.date.today()
-#now = datetime.datetime(now.year, now.month, now.day)
-#print "Today's date: ", now
-
-now = datetime.datetime(2014, 10, 18, 10, 10, 30)
+now = datetime.datetime.today()
+#now = datetime.datetime(2014, 10, 18, 10, 10, 30)
 print "Today's date: ", now
 
 # find the experiment starting date
@@ -96,18 +92,6 @@ users = sch.find_users(now)
 
 # print user information
 sch.print_users(users)
-
-# get PI information
-pi_name, pi_institution, pi_badge, pi_email = sch.find_pi_info(now)
-pv.pi_name.put(pi_name)
-pv.pi_institution.put(pi_institution)
-pv.pi_badge.put(pi_badge)
-pv.pi_email.put(pi_email)
-
-# get experiment information
-proposal_id, proposal_title = sch.find_experiment_info(now)
-pv.proposal_id.put(proposal_id)
-pv.proposal_title.put(proposal_title)
 
 # share the personal endpoint directory with the users. 
 # users will receive an e-mail with a drop-box style link to access the data
