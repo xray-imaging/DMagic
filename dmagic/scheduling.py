@@ -423,7 +423,6 @@ def find_experiment_info(date=None):
     datetime_format = '%Y-%m-%dT%H:%M:%S%z'
    
     # scheduling system settings
-    print "\nFind experiment info ... "
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     proposal_id = get_proposal_id(date.replace(tzinfo=None))
     proposal_title = get_proposal_title(date.replace(tzinfo=None))
@@ -546,7 +545,6 @@ def find_pi_info(date=None):
     last_name : str
         PI last name as a valid folder name       
     """
-    print "\nFinding PI last name ... "
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     users = get_users(date.replace(tzinfo=None))
 
