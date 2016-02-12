@@ -80,6 +80,7 @@ __all__ = ['create_experiment_id',
            'find_experiment_start',
            'find_pi_last_name',
            'find_users',
+           'find_pi_info',
            'print_experiment_info',
            'print_users'
            ]
@@ -405,6 +406,29 @@ def create_experiment_id(date=None):
 
     return experiment_id
 
+def find_experiment_info(date=None):
+    """
+    Generate a unique experiment id as g + GUP # + r + Beamtime Request
+     
+    Parameters
+    ----------
+    date : date
+        Experiment date
+    
+    Returns
+    -------
+    experiment id       
+    """
+    
+    datetime_format = '%Y-%m-%dT%H:%M:%S%z'
+   
+    # scheduling system settings
+    print "\nFind experiment info ... "
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    proposal_id = get_proposal_id(date.replace(tzinfo=None))
+    proposal_title = get_proposal_title(date.replace(tzinfo=None))
+
+    return str(proposal_id), proposal_title[:30]
 
 def find_experiment_start(date=None):
     """
@@ -508,6 +532,35 @@ def print_users(users):
     print "(*) Proposal PI"        
 
 
+def find_pi_info(date=None):
+    """
+    Find info the Principal Investigator (PI) running at beamline at a specific date
+     
+    Parameters
+    ----------
+    date : date
+        Experiment date
+    
+    Returns
+    -------
+    last_name : str
+        PI last name as a valid folder name       
+    """
+    print "\nFinding PI last name ... "
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    users = get_users(date.replace(tzinfo=None))
+
+    for tag in users:
+        if users[tag].get('piFlag') != None:
+            pi_name = str(users[tag]['firstName'] + ' ' + users[tag]['lastName'])            
+            pi_role = "*"
+            pi_institution = str(users[tag]['institution'])
+            pi_badge = str(users[tag]['badge'])
+            pi_email = str(users[tag]['email'])
+
+    return pi_name, pi_institution, pi_badge, pi_email      
+
+
 def print_experiment_info(date=None):
     """
     Print the experiment info running at beamline at a specific date
@@ -563,6 +616,9 @@ def clean_folder_name(last_name):
         user last name compatible with directory name   
     """
 
-    valid_folder_name_chars = "-_%s%s" % (string.ascii_letters, string.digits)    cleaned_folder_name = unicodedata.normalize('NFKD', last_name.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')    
+    valid_folder_name_chars = "-_%s%s" % (string.ascii_letters, string.digits)
+
+    cleaned_folder_name = unicodedata.normalize('NFKD', last_name.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')
+    
     return ''.join(c for c in cleaned_folder_name if c in valid_folder_name_chars)
 
