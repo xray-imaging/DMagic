@@ -56,6 +56,7 @@ automatically copy to the data processing machine and share to users via Globus.
 import pytz
 import datetime
 import sys
+import os
 
 # set ~/globus.ini and ~/scheduling.ini to match your configuration
 import dmagic.scheduling as sch

@@ -320,7 +320,6 @@ def dm_share(directory, users, mode):
         for tag in users:
             if users[tag].get('email') != None:
                 email = str(users[tag]['email'])
-                email = 'decarlof@gmail.com'
                 # globus_add = "acl-add " + end_point_share + " --perm r --email " + email
                 globus_add = "acl-add " + end_point_share + " --perm r --identityusername " + email + " --notify-email=" + email + " --notify-message=txm_data"
                 if validate_email(email) and os.path.isdir(directory):
