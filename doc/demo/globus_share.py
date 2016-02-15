@@ -157,8 +157,9 @@ def main(argv):
             #globus_add = "acl-add " + user + share + os.sep + folder  + " --perm r --email " + args.email
             #print globus_add        
             cmd = globus_ssh + " " + globus_add
-            print cmd
-            #os.system(cmd)
+            print "Issued: ", cmd
+            os.system(cmd)
+            print "Done sharing: " + user + share + os.sep + folder + " with " + args.email
 
     except: pass
 
