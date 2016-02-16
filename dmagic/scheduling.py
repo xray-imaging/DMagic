@@ -263,6 +263,8 @@ def get_proposal_id(date=None):
     """Find the proposal number (GUP) for a given beamline and date
 
     Returns proposal id."""
+
+    proposal_id = "not set"
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     if not date:
         date = datetime.datetime.now()
@@ -287,6 +289,8 @@ def get_proposal_title(date=None):
     """Find the proposal title for a given beamline and date
 
     Returns proposal title."""
+
+    proposal_title = "not set"
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     if not date:
         date = datetime.datetime.now()
@@ -419,7 +423,7 @@ def find_experiment_info(date=None):
     -------
     experiment id       
     """
-    
+       
     datetime_format = '%Y-%m-%dT%H:%M:%S%z'
    
     # scheduling system settings
@@ -547,6 +551,11 @@ def find_pi_info(date=None):
     """
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     users = get_users(date.replace(tzinfo=None))
+
+    pi_name = "not set"
+    pi_institution = "not set"
+    pi_badge = "not set" 
+    pi_email = "not set"
 
     for tag in users:
         if users[tag].get('piFlag') != None:
