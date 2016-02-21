@@ -430,7 +430,7 @@ def find_experiment_info(date=None):
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     proposal_id = get_proposal_id(date.replace(tzinfo=None))
     proposal_title = get_proposal_title(date.replace(tzinfo=None))
-    print proposal_id, proposal_title
+    #print proposal_id, proposal_title
     
     return str(proposal_id), proposal_title[:30]
 
