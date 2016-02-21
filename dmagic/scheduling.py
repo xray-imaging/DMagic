@@ -430,7 +430,8 @@ def find_experiment_info(date=None):
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     proposal_id = get_proposal_id(date.replace(tzinfo=None))
     proposal_title = get_proposal_title(date.replace(tzinfo=None))
-
+    print proposal_id, proposal_title
+    
     return str(proposal_id), proposal_title[:30]
 
 def find_experiment_start(date=None):
@@ -564,8 +565,9 @@ def find_pi_info(date=None):
             pi_institution = str(users[tag]['institution'])
             pi_badge = str(users[tag]['badge'])
             pi_email = str(users[tag]['email'])
-
-    return pi_name, pi_institution, pi_badge, pi_email      
+    #print pi_name, pi_institution, pi_badge, pi_email
+    
+    return pi_name, pi_institution[:30], pi_badge, pi_email      
 
 
 def print_experiment_info(date=None):
