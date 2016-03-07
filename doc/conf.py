@@ -308,12 +308,11 @@ class Mock(object):
 
     @classmethod
     def __getattr__(cls, name):        return Mock()    def __mul__(self, other):        return Mock()    def __rmul__(self, other):        return Mock()    def __pow__(self, other):        return Mock()    def __div__(self, other):        return Mock()    def __add__(self, other):        return Mock()    def __radd__(self, other):        return Mock()            
-
+#  'ConfigParser', 
 MOCK_MODULES = [
-    'numpy', 'scipy', 'scipy.misc', 'scipy.optimize', 'h5py', 'ctypes',
-    'matplotlib', 'matplotlib.pylab', 'tifffile', 'EdfFile', 'netCDF4',  
-    'spefile', 'scipy.ndimage', 'pywt', 'scikit-image', 'skimage',
-    'skimage.io', 'skimage.filter', 'skimage.morphology', 'DM3lib']
+    'pyinotify', 'validate_email', 'subprocess', 'argparse',
+    'fnmatch', 'suds', 'logging', 'traceback', 'urllib2',
+    'httplib', 'xml', 'ipdb', 'collections', 'unicodedata', 'string']
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
