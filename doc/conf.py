@@ -308,6 +308,10 @@ class Mock(object):
 
     @classmethod
     def __getattr__(cls, name):        return Mock()    def __mul__(self, other):        return Mock()    def __rmul__(self, other):        return Mock()    def __pow__(self, other):        return Mock()    def __div__(self, other):        return Mock()    def __add__(self, other):        return Mock()    def __radd__(self, other):        return Mock()            
+#MOCK_MODULES = [
+#    'pyinotify', 'validate_email', 'subprocess', 'argparse',
+#    'fnmatch', 'suds', 'logging', 'traceback', 'urllib2',
+#    'httplib', 'xml', 'ipdb', 'collections', 'unicodedata', 'string']
 
 MOCK_MODULES = [
     'numpy', 'scipy', 'scipy.misc', 'scipy.optimize', 'h5py', 'ctypes',
