@@ -81,6 +81,7 @@ __all__ = ['create_experiment_id',
            'find_pi_last_name',
            'find_users',
            'find_pi_info',
+           'find_experiment_info',
            'print_experiment_info',
            'print_users'
            ]
@@ -432,7 +433,7 @@ def find_experiment_info(date=None):
     proposal_title = get_proposal_title(date.replace(tzinfo=None))
     #print proposal_id, proposal_title
     
-    return str(proposal_id), proposal_title[:30]
+    return str(proposal_id), proposal_title[:256]
 
 def find_experiment_start(date=None):
     """
@@ -567,7 +568,7 @@ def find_pi_info(date=None):
             pi_email = str(users[tag]['email'])
     #print pi_name, pi_institution, pi_badge, pi_email
     
-    return pi_name, pi_institution[:30], pi_badge, pi_email      
+    return pi_name, pi_institution[:256], pi_badge, pi_email      
 
 
 def print_experiment_info(date=None):

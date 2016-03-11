@@ -67,7 +67,10 @@ gb.dm_settings()
 
 # set the experiment date 
 now = datetime.datetime.today()
-#now = datetime.datetime(2014, 10, 18, 10, 10, 30)
+#now = datetime.datetime(2016, 02, 19, 10, 10, 30)
+#now = datetime.datetime(2016, 02, 21, 10, 10, 30)
+#now = datetime.datetime(2016, 02, 24, 10, 10, 30)
+#now = datetime.datetime(2016, 02, 26, 10, 10, 30)
 print "Today's date: ", now
 
 # find the experiment starting date
