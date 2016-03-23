@@ -212,7 +212,7 @@ def dm_monitor(directory, protocol='scp'):
     path_list = directory.split(os.sep)
     personal_path = personal_folder + path_list[len(path_list)-2] + os.sep + path_list[len(path_list)-1]
 
-    cmd = 'scp ' + '$f ' + personal_host + ':' + personal_path 
+    cmd = 'scp -p ' + '$f ' + personal_host + ':' + personal_path 
     # start directory monitoring
     sys.argv  = ['react', directory, '-p', monitor, cmd]
     print "\nStart raw data monitoring:" 
