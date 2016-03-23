@@ -563,12 +563,16 @@ def find_pi_info(date=None):
         if users[tag].get('piFlag') != None:
             pi_name = str(users[tag]['firstName'] + ' ' + users[tag]['lastName'])            
             pi_role = "*"
-            pi_institution = str(users[tag]['institution'])
+            #print "@@@@@@@@@@@@@@@@@@@@"
+            #print "1:", users[tag]['institution']
+            #print "2:", strip_accents(users[tag]['institution'])
+            pi_institution = str(strip_accents(users[tag]['institution']))
+            #print "2a:", pi_institution
             pi_badge = str(users[tag]['badge'])
             pi_email = str(users[tag]['email'])
     #print pi_name, pi_institution, pi_badge, pi_email
     
-    return clean_entry(pi_name), clean_entry(pi_institution[:256]), pi_badge, pi_email      
+    return pi_name, pi_institution[:256], pi_badge, pi_email      
 
 
 def print_experiment_info(date=None):
@@ -612,6 +616,9 @@ def print_experiment_info(date=None):
         else:            
             print "\tMissing e-mail for:", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], users[tag]['institution']
 
+
+def strip_accents(s):   return ''.join(c for c in unicodedata.normalize('NFD', s)                  if unicodedata.category(c) != 'Mn')
+                  
 def clean_entry(entry):
     """
     Remove from user last name characters that are not compatible folder names.
@@ -626,9 +633,12 @@ def clean_entry(entry):
         user last name compatible with directory name   
     """
 
+    entry = strip_accents(entry)
+    
     valid_folder_entry_chars = "-_%s%s" % (string.ascii_letters, string.digits)
 
+    print "3:", entry
     cleaned_folder_name = unicodedata.normalize('NFKD', entry.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')
-    
+    print "4:", cleaned_folder_name
     return ''.join(c for c in cleaned_folder_name if c in valid_folder_entry_chars)
 
