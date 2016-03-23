@@ -504,8 +504,8 @@ def find_pi_last_name(date=None):
             first_name = str(users[tag]['firstName']) 
             last_name = str(users[tag]['lastName'])            
             role = "*"
-            institution = str(users[tag]['institution'])
-            badge = str(users[tag]['badge'])
+            #institution = str(users[tag]['institution'])
+            #badge = str(users[tag]['badge'])
             email = str(users[tag]['email'])
 
     return clean_entry(last_name)     
@@ -617,7 +617,9 @@ def print_experiment_info(date=None):
             print "\tMissing e-mail for:", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], users[tag]['institution']
 
 
-def strip_accents(s):   return ''.join(c for c in unicodedata.normalize('NFD', s)                  if unicodedata.category(c) != 'Mn')
+def strip_accents(s):
+   return ''.join(c for c in unicodedata.normalize('NFD', s)
+                  if unicodedata.category(c) != 'Mn')
                   
 def clean_entry(entry):
     """
@@ -633,12 +635,12 @@ def clean_entry(entry):
         user last name compatible with directory name   
     """
 
-    entry = strip_accents(entry)
+    #entry = strip_accents(entry)
     
     valid_folder_entry_chars = "-_%s%s" % (string.ascii_letters, string.digits)
 
-    print "3:", entry
+    #print "3:", entry
     cleaned_folder_name = unicodedata.normalize('NFKD', entry.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')
-    print "4:", cleaned_folder_name
+    #print "4:", cleaned_folder_name
     return ''.join(c for c in cleaned_folder_name if c in valid_folder_entry_chars)
 

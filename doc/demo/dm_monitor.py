@@ -95,7 +95,7 @@ gb.dm_create_directory(exp_start, exp_id, 'personal')
 users = sch.find_users(now)
 
 # print user information
-sch.print_users(users)
+#sch.print_users(users)
 
 # share the personal endpoint directory with the users. 
 # users will receive an e-mail with a drop-box style link to access the data
