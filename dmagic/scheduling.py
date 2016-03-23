@@ -508,7 +508,7 @@ def find_pi_last_name(date=None):
             badge = str(users[tag]['badge'])
             email = str(users[tag]['email'])
 
-    return clean_entry(strip_accents(last_name))     
+    return clean_entry(last_name)     
 
 
 def print_users(users):
