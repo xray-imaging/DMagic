@@ -49,6 +49,9 @@ Thumbs.db
 build
 dist
 docs/build
+docs/_build
+doc/build
+doc/_build
 *egg-info
 *.egg
 .settings

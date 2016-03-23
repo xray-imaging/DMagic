@@ -433,7 +433,7 @@ def find_experiment_info(date=None):
     proposal_title = get_proposal_title(date.replace(tzinfo=None))
     #print proposal_id, proposal_title
     
-    return str(proposal_id), proposal_title[:256]
+    return str(proposal_id), clean_entry(proposal_title[:256])
 
 def find_experiment_start(date=None):
     """
@@ -508,7 +508,7 @@ def find_pi_last_name(date=None):
             badge = str(users[tag]['badge'])
             email = str(users[tag]['email'])
 
-    return clean_folder_name(last_name)     
+    return clean_entry(last_name)     
 
 
 def print_users(users):
@@ -568,7 +568,7 @@ def find_pi_info(date=None):
             pi_email = str(users[tag]['email'])
     #print pi_name, pi_institution, pi_badge, pi_email
     
-    return pi_name, pi_institution[:256], pi_badge, pi_email      
+    return clean_entry(pi_name), clean_entry(pi_institution[:256]), pi_badge, pi_email      
 
 
 def print_experiment_info(date=None):
@@ -612,23 +612,23 @@ def print_experiment_info(date=None):
         else:            
             print "\tMissing e-mail for:", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], users[tag]['institution']
 
-def clean_folder_name(last_name):
+def clean_entry(entry):
     """
     Remove from user last name characters that are not compatible folder names.
      
     Parameters
     ----------
-    last_name : str
+    entry : str
         user last name    
     Returns
     -------
-    last_name : str
+    entry : str
         user last name compatible with directory name   
     """
 
-    valid_folder_name_chars = "-_%s%s" % (string.ascii_letters, string.digits)
+    valid_folder_entry_chars = "-_%s%s" % (string.ascii_letters, string.digits)
 
-    cleaned_folder_name = unicodedata.normalize('NFKD', last_name.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')
+    cleaned_folder_name = unicodedata.normalize('NFKD', entry.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')
     
-    return ''.join(c for c in cleaned_folder_name if c in valid_folder_name_chars)
+    return ''.join(c for c in cleaned_folder_name if c in valid_folder_entry_chars)
 
