@@ -433,7 +433,7 @@ def find_experiment_info(date=None):
     proposal_title = get_proposal_title(date.replace(tzinfo=None))
     #print proposal_id, proposal_title
     
-    return str(proposal_id), clean_entry(proposal_title[:256])
+    return str(proposal_id), strip_accents(proposal_title[:256])
 
 def find_experiment_start(date=None):
     """
@@ -504,11 +504,11 @@ def find_pi_last_name(date=None):
             first_name = str(users[tag]['firstName']) 
             last_name = str(users[tag]['lastName'])            
             role = "*"
-            #institution = str(users[tag]['institution'])
-            #badge = str(users[tag]['badge'])
+            institution = str(strip_accents(users[tag]['institution']))
+            badge = str(users[tag]['badge'])
             email = str(users[tag]['email'])
 
-    return clean_entry(last_name)     
+    return clean_entry(strip_accents(last_name))     
 
 
 def print_users(users):
@@ -528,12 +528,12 @@ def print_users(users):
         if users[tag].get('piFlag') != None:
             name = str(users[tag]['firstName'] + ' ' + users[tag]['lastName'])            
             role = "*"
-            institution = str(users[tag]['institution'])
+            institution = str(strip_accents(users[tag]['institution']))
             badge = str(users[tag]['badge'])
             email = str(users[tag]['email'])
             print "", role, badge, name, institution, email
         else:            
-            print "", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], users[tag]['institution'], users[tag]['email']
+            print "", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], strip_accents(users[tag]['institution']), users[tag]['email']
     print "(*) Proposal PI"        
 
 
@@ -614,7 +614,7 @@ def print_experiment_info(date=None):
             email = str(users[tag]['email'])
             print "\t\t", email
         else:            
-            print "\tMissing e-mail for:", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], users[tag]['institution']
+            print "\tMissing e-mail for:", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], strip_accents(users[tag]['institution'])
 
 
 def strip_accents(s):
@@ -635,12 +635,9 @@ def clean_entry(entry):
         user last name compatible with directory name   
     """
 
-    #entry = strip_accents(entry)
     
     valid_folder_entry_chars = "-_%s%s" % (string.ascii_letters, string.digits)
 
-    #print "3:", entry
     cleaned_folder_name = unicodedata.normalize('NFKD', entry.decode('utf-8', 'ignore')).encode('ASCII', 'ignore')
-    #print "4:", cleaned_folder_name
     return ''.join(c for c in cleaned_folder_name if c in valid_folder_entry_chars)
 
