@@ -190,7 +190,7 @@ def dm_monitor(directory, protocol='scp'):
     Parameters
     ----------
     directory : str
-        Unique directory shared by the Globus Connect Personal Endpoint
+        Directory on the data collection machine to be monitored
     
     protocol : str
         copy protocol. scp (default), ... 
