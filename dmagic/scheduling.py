@@ -433,7 +433,7 @@ def find_experiment_info(date=None):
     proposal_title = get_proposal_title(date.replace(tzinfo=None))
     #print proposal_id, proposal_title
     
-    return str(proposal_id), strip_accents(proposal_title[:256])
+    return str(proposal_id), proposal_title[:256]
 
 def find_experiment_start(date=None):
     """
@@ -561,16 +561,11 @@ def find_pi_info(date=None):
 
     for tag in users:
         if users[tag].get('piFlag') != None:
-            pi_name = str(users[tag]['firstName'] + ' ' + users[tag]['lastName'])            
+            pi_name = str(strip_accents(users[tag]['firstName']) + ' ' + strip_accents(users[tag]['lastName']))            
             pi_role = "*"
-            #print "@@@@@@@@@@@@@@@@@@@@"
-            #print "1:", users[tag]['institution']
-            #print "2:", strip_accents(users[tag]['institution'])
             pi_institution = str(strip_accents(users[tag]['institution']))
-            #print "2a:", pi_institution
             pi_badge = str(users[tag]['badge'])
             pi_email = str(users[tag]['email'])
-    #print pi_name, pi_institution, pi_badge, pi_email
     
     return pi_name, pi_institution[:256], pi_badge, pi_email      
 
