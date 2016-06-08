@@ -102,7 +102,7 @@ users = sch.find_users(now)
 cmd = gb.dm_share(directory, users, 'personal')
 for share in cmd: 
     print share
-    #os.system(share)
+    os.system(share)
 
 # monitor the local directory and automatically copy any new file
 # to the shared directory on the globus personal endpoint
