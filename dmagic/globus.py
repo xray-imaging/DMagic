@@ -196,7 +196,7 @@ def dm_monitor(directory, protocol='scp'):
         copy protocol. scp (default), ... 
     """
     home = expanduser("~")
-    monitor = '*.h5'
+    monitor = '*.*'
     globus = os.path.join(home, 'globus.ini')
     cf = ConfigParser.ConfigParser()
     cf.read(globus)
