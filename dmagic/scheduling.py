@@ -265,7 +265,7 @@ def get_proposal_id(date=None):
 
     Returns proposal id."""
 
-    proposal_id = "not set"
+    proposal_id = "empty_proposal_id"
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     if not date:
         date = datetime.datetime.now()
@@ -291,7 +291,7 @@ def get_proposal_title(date=None):
 
     Returns proposal title."""
 
-    proposal_title = "not set"
+    proposal_title = "empty_proposal_title"
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     if not date:
         date = datetime.datetime.now()
@@ -554,10 +554,10 @@ def find_pi_info(date=None):
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     users = get_users(date.replace(tzinfo=None))
 
-    pi_name = "not set"
-    pi_institution = "not set"
-    pi_badge = "not set" 
-    pi_email = "not set"
+    pi_name = "empty_pi_name"
+    pi_institution = "empty_pi_institution"
+    pi_badge = "empty_pi_badge" 
+    pi_email = "empty_pi_email"
 
     for tag in users:
         if users[tag].get('piFlag') != None:
