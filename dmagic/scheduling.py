@@ -554,10 +554,10 @@ def find_pi_info(date=None):
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     users = get_users(date.replace(tzinfo=None))
 
-    pi_name = "empty_pi_name"
-    pi_institution = "empty_pi_institution"
-    pi_badge = "empty_pi_badge" 
-    pi_email = "empty_pi_email"
+    pi_name = "empty pi_last_name"
+    pi_institution = "empty pi_institution"
+    pi_badge = "empty pi_badge" 
+    pi_email = "empty pi_email"
 
     for tag in users:
         if users[tag].get('piFlag') != None:
