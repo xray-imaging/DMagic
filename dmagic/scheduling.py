@@ -425,15 +425,16 @@ def find_experiment_info(date=None):
     experiment id       
     """
        
-    datetime_format = '%Y-%m-%dT%H:%M:%S%z'
+    datetime_format = '%Y-%m'
    
     # scheduling system settings
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     proposal_id = get_proposal_id(date.replace(tzinfo=None))
     proposal_title = get_proposal_title(date.replace(tzinfo=None))
+    experiment_start = get_experiment_start(date.replace(tzinfo=None))
     #print proposal_id, proposal_title
     
-    return str(proposal_id), str(proposal_title[:256])
+    return str(proposal_id), str(proposal_title[:256]), str(experiment_start.strftime(datetime_format))
 
 def find_experiment_start(date=None):
     """
@@ -458,7 +459,7 @@ def find_experiment_start(date=None):
     experiment_start = get_experiment_start(date.replace(tzinfo=None))
  
     return experiment_start
-    
+
 
 def find_users(date=None):
     """
@@ -554,20 +555,22 @@ def find_pi_info(date=None):
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     users = get_users(date.replace(tzinfo=None))
 
-    pi_name = "empty pi_last_name"
+    pi_name = "empty pi_full_name"
+    pi_last_name = "empty pi_last_name"
     pi_institution = "empty pi_institution"
     pi_badge = "empty pi_badge" 
     pi_email = "empty pi_email"
 
     for tag in users:
         if users[tag].get('piFlag') != None:
-            pi_name = str(strip_accents(users[tag]['firstName']) + ' ' + strip_accents(users[tag]['lastName']))            
+            pi_name = str(strip_accents(users[tag]['firstName']) + ' ' + strip_accents(users[tag]['lastName']))
+            pi_last_name = strip_accents(users[tag]['lastName'])      
             pi_role = "*"
             pi_institution = str(strip_accents(users[tag]['institution']))
             pi_badge = str(users[tag]['badge'])
             pi_email = str(users[tag]['email'])
     
-    return pi_name, pi_institution[:256], pi_badge, pi_email      
+    return pi_name, pi_last_name, pi_institution[:256], pi_badge, pi_email      
 
 
 def print_experiment_info(date=None):
