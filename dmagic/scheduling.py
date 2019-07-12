@@ -34,7 +34,7 @@
 #                                                                         #
 # THIS SOFTWARE IS PROVIDED BY UChicago Argonne, LLC AND CONTRIBUTORS     #
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT       #
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS       #
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS       #f
 # FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL UChicago     #
 # Argonne, LLC OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,        #
 # INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,    #
@@ -321,6 +321,7 @@ def get_experiment_start(date=None):
         date = datetime.datetime.now()
     run_name = findRunName(date, date)
     schedule = findBeamlineSchedule(beamline, run_name)
+    experiment_start = date
 
     events = schedule.activities.activity
     users = defaultdict(dict)
