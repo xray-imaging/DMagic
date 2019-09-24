@@ -46,5 +46,5 @@
 # POSSIBILITY OF SUCH DAMAGE.                                             #
 # #########################################################################
 
-from scheduling import *
+from dmagic.scheduling import *
 #from globus import *

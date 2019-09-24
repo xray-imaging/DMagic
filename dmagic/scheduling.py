@@ -64,12 +64,12 @@ from suds.transport.https import HttpAuthenticated
 import logging
 import sys
 import traceback
-import urllib2
-import httplib
+import urllib.request
+import http.client
 from xml.sax import SAXParseException
 import ipdb
 from collections import defaultdict
-import ConfigParser
+import configparser
 import unicodedata
 import string
 __author__ = "Francesco De Carlo"
@@ -88,9 +88,9 @@ __all__ = ['create_experiment_id',
 
 debug = False
 
-class HTTPSConnectionV3(httplib.HTTPSConnection):
+class HTTPSConnectionV3(http.client.HTTPSConnection):
     def __init__(self, *args, **kwargs):
-        httplib.HTTPSConnection.__init__(self, *args, **kwargs)
+        http.client.HTTPSConnection.__init__(self, *args, **kwargs)
 
     def connect(self):
         sock = socket.create_connection((self.host, self.port), self.timeout)
@@ -106,7 +106,7 @@ class HTTPSConnectionV3(httplib.HTTPSConnection):
             self.sock = ssl.wrap_socket(sock, self.key_file, self.cert_file, \
                                         ssl_version=ssl.PROTOCOL_SSLv23)
 
-class HTTPSHandlerV3(urllib2.HTTPSHandler):
+class HTTPSHandlerV3(urllib.request.HTTPSHandler):
     def https_open(self, req):
         print("using this opener")
         return self.do_open(HTTPSConnectionV3, req)
@@ -143,7 +143,9 @@ def findRunName(startDate, endDate):
     for run in runArray:
 
         try:
-            if startDate >= run.startTime and endDate <= run.endTime:
+            start_time = run.startTime.replace(tzinfo=None)
+            end_time = run.endTime.replace(tzinfo=None)
+            if startDate >= start_time and endDate <= end_time:
                 runName = run.runName
                 break
         except Exception as ex:
@@ -187,7 +189,7 @@ def setup_connection():
     home = expanduser("~")
     credentials = os.path.join(home, 'scheduling.ini')
     
-    cf = ConfigParser.ConfigParser()
+    cf = configparser.ConfigParser()
     cf.read(credentials)
     username = cf.get('credentials', 'username')
     password = cf.get('credentials', 'password')
@@ -197,7 +199,7 @@ def setup_connection():
     #base = cf.get('hosts', 'internal')
     base = cf.get('hosts', 'external')
 
-    result = urllib2.install_opener(urllib2.build_opener(HTTPSHandlerV3()))
+    result = urllib.request.install_opener(urllib.request.build_opener(HTTPSHandlerV3()))
     logging.raiseExceptions = 0
 
     beamlineScheduleServiceURL = base + \
@@ -249,8 +251,10 @@ def get_users(date=None):
     users = defaultdict(dict)
     for event in events:
         try:
+            start_time = event.startTime.replace(tzinfo=None)
+            ed = event.endTime.replace(tzinfo=None)
             if event.activityType.activityTypeName in ['GUP', 'PUP', 'rapid-access', 'sector staff']:
-                if date >= event.startTime and date <= event.endTime:
+                if date >= start_time and date <= ed:
                         for experimenter in event.beamtimeRequest.proposal.experimenters.experimenter:
                             for key in experimenter.__keylist__:
                                 users[experimenter.lastName][key] = getattr(experimenter, key)
@@ -277,8 +281,11 @@ def get_proposal_id(date=None):
     users = defaultdict(dict)
     for event in events:
         try:
+            start_time = event.startTime.replace(tzinfo=None)
+            ed = event.endTime.replace(tzinfo=None)
+
             if event.activityType.activityTypeName in ['GUP', 'PUP', 'rapid-access', 'sector staff']:
-                if date >= event.startTime and date <= event.endTime:
+                if date >= start_time and date <= ed:
                         proposal_id = event.beamtimeRequest.proposal.id
         except:
             ipdb.set_trace()
@@ -302,8 +309,10 @@ def get_proposal_title(date=None):
     users = defaultdict(dict)
     for event in events:
         try:
+            start_time = event.startTime.replace(tzinfo=None)
+            ed = event.endTime.replace(tzinfo=None)
             if event.activityType.activityTypeName in ['GUP', 'PUP', 'rapid-access', 'sector staff']:
-                if date >= event.startTime and date <= event.endTime:
+                if date >= start_time and date <= ed:
                         proposal_title = event.beamtimeRequest.proposal.proposalTitle
         except:
             ipdb.set_trace()
@@ -327,8 +336,11 @@ def get_experiment_start(date=None):
     users = defaultdict(dict)
     for event in events:
         try:
+            start_time = event.startTime.replace(tzinfo=None)
+            ed = event.endTime.replace(tzinfo=None)
+
             if event.activityType.activityTypeName in ['GUP', 'PUP', 'rapid-access', 'sector staff']:
-                if date >= event.startTime and date <= event.endTime:
+                if date >= start_time and date <= ed:
                         experiment_start = event.startTime
         except:
             ipdb.set_trace()
@@ -351,8 +363,11 @@ def get_experiment_end(date=None):
     users = defaultdict(dict)
     for event in events:
         try:
+            start_time = event.startTime.replace(tzinfo=None)
+            ed = event.endTime.replace(tzinfo=None)
+
             if event.activityType.activityTypeName in ['GUP', 'PUP', 'rapid-access', 'sector staff']:
-                if date >= event.startTime and date <= event.endTime:
+                if date >= start_time and date <= ed:
                         experiment_end = event.endTime
         except:
             ipdb.set_trace()
@@ -376,9 +391,12 @@ def get_beamtime_request(date=None):
     users = defaultdict(dict)
     for event in events:
         try:
+            start_time = event.startTime.replace(tzinfo=None)
+            ed = event.endTime.replace(tzinfo=None)
+
             if event.activityType.activityTypeName in ['GUP', 'PUP', 'rapid-access', 'sector staff']:
-                if date >= event.startTime and date <= event.endTime:
-                        beamtime_request = event.beamtimeRequest.id
+                if date >= start_time and date <= ed:
+                        beamtime_requestart_time = event.beamtimeRequest.id
         except:
             ipdb.set_trace()
             raise
@@ -406,7 +424,7 @@ def create_experiment_id(date=None):
     print("\nCrating a unique experiment ID... ")
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     proposal_id = get_proposal_id(date.replace(tzinfo=None))
-    beamtime_request = get_beamtime_request(date.replace(tzinfo=None))
+    beamtime_requestart_time = get_beamtime_request(date.replace(tzinfo=None))
     
     experiment_id = 'g' + str(proposal_id) + 'r' + str(beamtime_request)
 
@@ -554,7 +572,10 @@ def find_pi_info(date=None):
         PI last name as a valid folder name       
     """
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
-    users = get_users(date.replace(tzinfo=None))
+    # a = date
+    # local_dt = datetime.datetime.strptime(a, '%Y-%m-%dT%H:%M:%S.000000Z').replace(tzinfo=None)
+
+    users = get_users(date)
 
     pi_name = "empty pi_full_name"
     pi_last_name = "empty pi_last_name"
@@ -635,9 +656,9 @@ def clean_entry(entry):
     """
 
     valid_folder_entry_chars = "-_%s%s" % (string.ascii_letters, string.digits)
-    utf_8_str = unicode(entry) 
+    utf_8_str = str(entry) 
     norml_str = unicodedata.normalize('NFKD', utf_8_str)
     cleaned_folder_name = norml_str.encode('ASCII', 'ignore')
         
-    return ''.join(c for c in cleaned_folder_name if c in valid_folder_entry_chars)
+    return ''.join(c for c in list(cleaned_folder_name) if c in list(valid_folder_entry_chars))
 
