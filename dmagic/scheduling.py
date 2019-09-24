@@ -101,14 +101,14 @@ class HTTPSConnectionV3(httplib.HTTPSConnection):
             print ("using connection")
             self.sock = ssl.wrap_socket(sock, self.key_file, self.cert_file, \
                                         ssl_version=ssl.PROTOCOL_SSLv3)
-        except ssl.SSLError, e:
+        except ssl.SSLError as e:
             print("Trying SSLv3.")
             self.sock = ssl.wrap_socket(sock, self.key_file, self.cert_file, \
                                         ssl_version=ssl.PROTOCOL_SSLv23)
 
 class HTTPSHandlerV3(urllib2.HTTPSHandler):
     def https_open(self, req):
-        print "using this opener"
+        print("using this opener")
         return self.do_open(HTTPSConnectionV3, req)
 
 def setSoapHeader(client, username, password):
@@ -117,7 +117,7 @@ def setSoapHeader(client, username, password):
     token.setcreated()
     security.tokens.append(token)
     if debug:
-        print security
+        print(security)
     client.set_options(wsse=security)
 
 def findRunName(startDate, endDate):
@@ -129,14 +129,14 @@ def findRunName(startDate, endDate):
     try:
         result = runScheduleServiceClient.service.findAllRuns()
     except Exception:
-        print "Exception ERROR in findRunName"
-        print "Unable to contact data servicesl"
-        print "Request timed out."
-        print "The request timeout for the sent message was reached without receiving a response from the server."
+        print("Exception ERROR in findRunName")
+        print("Unable to contact data servicesl")
+        print("Request timed out.")
+        print("The request timeout for the sent message was reached without receiving a response from the server.")
         sys.exit(2)
     except soapFault:
-        print "Soap fault ERROR in findRunName"
-        print soapFault
+        print("Soap fault ERROR in findRunName")
+        print(soapFault)
         sys.exit(2)
     runArray = result.run
     runName = None
@@ -147,11 +147,11 @@ def findRunName(startDate, endDate):
                 runName = run.runName
                 break
         except Exception as ex:
-            print "ERROR caught in findRunName:" + str(ex)
-            print startDate
-            print run.startTime
-            print endDate
-            print run.endTime
+            print("ERROR caught in findRunName:" + str(ex))
+            print(startDate)
+            print(run.startTime)
+            print(endDate)
+            print(run.endTime)
             raise ex
     return runName
 
@@ -162,7 +162,7 @@ def findBeamlineSchedule(beamlineName, runName):
     try:
         result  = beamlineScheduleServiceClient.service.findBeamlineSchedule(beamlineName, runName)
     except SAXParseException as ex:
-        print "ERROR in findBeamlineSchedule\n"
+        print("ERROR in findBeamlineSchedule\n")
         traceback.print_exc()
         sys.exit(2)
 
@@ -175,9 +175,9 @@ def findBeamtimeRequestsByBeamline(beamlineName, runName):
     try:
         result  = beamlineScheduleServiceClient.service.findBeamtimeRequestsByBeamline(beamlineName, runName)
     except SAXParseException:
-        print "ERROR in findBeamtimeRequestsByBeamline"
+        print("ERROR in findBeamtimeRequestsByBeamline")
     except Exception:
-        print "ERROR in findBeamtimeRequestByBeamline\n"
+        print("ERROR in findBeamtimeRequestByBeamline\n")
         traceback.print_exc()
         sys.exit(2)
     return result
@@ -210,16 +210,16 @@ def setup_connection():
         credentials = dict(username=username, password=password)
         t = HttpAuthenticated(**credentials)
         if debug:
-            print t.u2handlers()
-            print t.credentials()
+            print(t.u2handlers())
+            print(t.credentials())
         runScheduleServiceClient = Client(runScheduleServiceURL)
         runScheduleServiceClient.options.cache.setduration(seconds=10)
         result = setSoapHeader(runScheduleServiceClient, username, password)
         beamlineScheduleServiceClient = Client(beamlineScheduleServiceURL)
         beamlineScheduleServiceClient.options.cache.setduration(seconds=10)
         result = setSoapHeader(beamlineScheduleServiceClient, username, password)
-    except Exception, ex:
-        print "CANNOT OPEN SERVICES:" + str(ex)
+    except Exception as ex:
+        print("CANNOT OPEN SERVICES:" + str(ex))
         raise
         exit(-1)
 
@@ -403,7 +403,7 @@ def create_experiment_id(date=None):
     datetime_format = '%Y-%m-%dT%H:%M:%S%z'
    
     # scheduling system settings
-    print "\nCrating a unique experiment ID... "
+    print("\nCrating a unique experiment ID... ")
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     proposal_id = get_proposal_id(date.replace(tzinfo=None))
     beamtime_request = get_beamtime_request(date.replace(tzinfo=None))
@@ -454,7 +454,7 @@ def find_experiment_start(date=None):
     datetime_format = '%Y-%m-%dT%H:%M:%S%z'
 
     # scheduling system settings
-    print "\nFinding experiment start date ... "
+    print("\nFinding experiment start date ... ")
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
 
     experiment_start = get_experiment_start(date.replace(tzinfo=None))
@@ -476,7 +476,7 @@ def find_users(date=None):
     users : dictionary-like object containing user information        
     """
 
-    print "\nFinding users ... "
+    print("\nFinding users ... ")
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     users = get_users(date.replace(tzinfo=None))
     
@@ -497,7 +497,7 @@ def find_pi_last_name(date=None):
     last_name : str
         PI last name as a valid folder name       
     """
-    print "\nFinding PI last name ... "
+    print("\nFinding PI last name ... ")
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
     users = get_users(date.replace(tzinfo=None))
 
@@ -533,10 +533,10 @@ def print_users(users):
             institution = str(strip_accents(users[tag]['institution']))
             badge = str(users[tag]['badge'])
             email = str(users[tag]['email'])
-            print "", role, badge, name, institution, email
+            print("", role, badge, name, institution, email)
         else:            
-            print "", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], strip_accents(users[tag]['institution']), users[tag]['email']
-    print "(*) Proposal PI"        
+            print("", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], strip_accents(users[tag]['institution']), users[tag]['email'])
+    print("(*) Proposal PI"        )
 
 
 def find_pi_info(date=None):
@@ -587,13 +587,13 @@ def print_experiment_info(date=None):
     -------
     Print experiment information        
     """
-    print "Inputs: "
+    print("Inputs: ")
     datetime_format = '%Y-%m-%dT%H:%M:%S%z'
-    print "\tTime of Day: ", date.strftime(datetime_format)
-    print "\tBeamline: ", beamline
+    print("\tTime of Day: ", date.strftime(datetime_format))
+    print("\tBeamline: ", beamline)
 
     # scheduling system settings
-    print "\n\tAccessing the APS Scheduling System ... "
+    print("\n\tAccessing the APS Scheduling System ... ")
     runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
 
     run_name = findRunName(now.replace(tzinfo=None), now.replace(tzinfo=None))
@@ -602,18 +602,18 @@ def print_experiment_info(date=None):
     experiment_start = get_experiment_start(date.replace(tzinfo=None))
     experiment_end = get_experiment_end(date.replace(tzinfo=None))
 
-    print "\tRun Name: ", run_name 
-    print "\n\tProposal Title: ", proposal_title
-    print "\tExperiment Start: ", experiment_start
-    print "\tExperiment End: ", experiment_end
+    print("\tRun Name: ", run_name) 
+    print("\n\tProposal Title: ", proposal_title)
+    print("\tExperiment Start: ", experiment_start)
+    print("\tExperiment End: ", experiment_end)
     # print user emails
-    print "\n\tUser email address: "
+    print("\n\tUser email address: ")
     for tag in users:
         if users[tag].get('email') != None:
             email = str(users[tag]['email'])
-            print "\t\t", email
+            print("\t\t", email)
         else:            
-            print "\tMissing e-mail for:", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], strip_accents(users[tag]['institution'])
+            print("\tMissing e-mail for:", users[tag]['badge'], users[tag]['firstName'], users[tag]['lastName'], strip_accents(users[tag]['institution']))
 
 
 def strip_accents(s):

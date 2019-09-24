@@ -110,9 +110,9 @@ def dm_create_directory(exp_start, exp_id, mode = 'local'):
         unique_directory = local_folder + str(exp_start.strftime(datetime_format)) + os.sep + exp_id
         if os.path.exists(unique_directory) == False: 
             os.makedirs(unique_directory)    
-            print "\nCreating unique local data directory: ", unique_directory
+            print("\nCreating unique local data directory: ", unique_directory)
         else:
-            print "\nLocal data directory already exists: ", unique_directory
+            print("\nLocal data directory already exists: ", unique_directory)
     else:
         unique_directory ='' 
         if (mode == 'personal'):
@@ -134,8 +134,8 @@ def dm_create_directory(exp_start, exp_id, mode = 'local'):
         cmd2 = globus_ssh + " " + globus_mkdir2
         os.system(cmd1)
         os.system(cmd2)
-        print cmd1
-        print cmd2
+        print(cmd1)
+        print(cmd2)
         
     return unique_directory
 
@@ -162,24 +162,24 @@ def dm_settings():
     remote_folder = cf.get('globus remote server', 'folder')  
     
     globus_ssh = "ssh " + globus_user + globus_address
-    print "\n\nCurrent Globus Settings:"
+    print("\n\nCurrent Globus Settings:")
 
-    print "\tCLI user: ", globus_user
-    print "\tCLI address: ", globus_address
-    print "\tCLI ssh: ", globus_ssh
+    print("\tCLI user: ", globus_user)
+    print("\tCLI address: ", globus_address)
+    print("\tCLI ssh: ", globus_ssh)
 
-    print "Globus Connect Personal Configuration: "
-    print "\tGlobus User: ", personal_user
-    print "\tPersonal Host: ", personal_host
-    print "\tPersonal share: ", personal_share
-    print "\tPersonal folder under data management: " + personal_folder 
+    print("Globus Connect Personal Configuration: ")
+    print("\tGlobus User: ", personal_user)
+    print("\tPersonal Host: ", personal_host)
+    print("\tPersonal share: ", personal_share)
+    print("\tPersonal folder under data management: %s " % personal_folder) 
 
-    print "Globus Server Configuration: "
-    print "\tRemote Host: ", remote_host
+    print("Globus Server Configuration: ")
+    print("\tRemote Host: ", remote_host)
 
-    print "\tRemote Share: " + remote_user + remote_share
-    print "\tRemote folder under data management: " + remote_folder 
-    print "\nEdit globus.ini to match your globus configuration"
+    print("\tRemote Share: %s" % (remote_user + remote_share))
+    print("\tRemote folder under data management: %s" % remote_folder) 
+    print("\nEdit globus.ini to match your globus configuration")
 
 def dm_monitor(directory, protocol='scp'):
     """
@@ -215,15 +215,15 @@ def dm_monitor(directory, protocol='scp'):
     cmd = 'scp -p ' + '$f ' + personal_host + ':' + personal_path 
     # start directory monitoring
     sys.argv  = ['react', directory, '-p', monitor, cmd]
-    print "\nStart raw data monitoring:" 
-    print "\tserver: ", local_host
-    print "\tdirectory: ", directory
-    print "\tfiles: ", monitor
-    print "\nNew files will be copied to: " 
-    print "\tserver: ", personal_host
-    print "\tdirectory: ", personal_path
+    print("\nStart raw data monitoring:")
+    print("\tserver: ", local_host)
+    print("\tdirectory: ", directory)
+    print("\tfiles: ", monitor)
+    print("\nNew files will be copied to: ") 
+    print("\tserver: ", personal_host)
+    print("\tdirectory: ", personal_path)
 
-    print "\nControl-C to exit"
+    print("\nControl-C to exit")
     react.main(sys.argv)
 
 def dm_upload(directory):
