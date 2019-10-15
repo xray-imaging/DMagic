@@ -31,7 +31,7 @@ Installing from source
 
 Install the following::
 
-    pip install suds
+    pip install suds-py3 
     pip install ipdb
     pip install validate-email
     pip install pyinotify
