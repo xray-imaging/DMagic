@@ -296,45 +296,45 @@ texinfo_documents = [
 #ztexinfo_no_detailmenu = False
 
 # picked from http://read-the-docs.readthedocs.org/en/latest/faq.html
-# class Mock(object):
+class Mock(object):
 
-#     __all__ = []
+    __all__ = []
 
-#     def __init__(self, *args, **kwargs):
-#         pass
+    def __init__(self, *args, **kwargs):
+        pass
 
-#     def __call__(self, *args, **kwargs):
-#         return Mock()
+    def __call__(self, *args, **kwargs):
+        return Mock()
 
-#     @classmethod
-#     def __getattr__(cls, name):
-#         return Mock()
-#     def __mul__(self, other):
-#         return Mock()
-#     def __rmul__(self, other):
-#         return Mock()
-#     def __pow__(self, other):
-#         return Mock()
-#     def __div__(self, other):
-#         return Mock()
-#     def __add__(self, other):
-#         return Mock()
-#     def __radd__(self, other):
-#         return Mock()
+    @classmethod
+    def __getattr__(cls, name):
+        return Mock()
+    def __mul__(self, other):
+        return Mock()
+    def __rmul__(self, other):
+        return Mock()
+    def __pow__(self, other):
+        return Mock()
+    def __div__(self, other):
+        return Mock()
+    def __add__(self, other):
+        return Mock()
+    def __radd__(self, other):
+        return Mock()
             
 #MOCK_MODULES = [
 #    'pyinotify', 'validate_email', 'subprocess', 'argparse',
 #    'fnmatch', 'suds', 'logging', 'traceback', 'urllib2',
 #    'httplib', 'xml', 'ipdb', 'collections', 'unicodedata', 'string']
 
-# MOCK_MODULES = [
-#     'numpy', 'scipy', 'scipy.misc', 'scipy.optimize', 'h5py', 'ctypes',
-#     'matplotlib', 'matplotlib.pylab', 'tifffile', 'EdfFile', 'netCDF4',  
-#     'spefile', 'scipy.ndimage', 'pywt', 'scikit-image', 'skimage',
-#     'skimage.io', 'skimage.filter', 'skimage.morphology', 'DM3lib', 'suds']
+MOCK_MODULES = [
+    'numpy', 'scipy', 'scipy.misc', 'scipy.optimize', 'h5py', 'ctypes',
+    'matplotlib', 'matplotlib.pylab', 'tifffile', 'EdfFile', 'netCDF4',  
+    'spefile', 'scipy.ndimage', 'pywt', 'scikit-image', 'skimage',
+    'skimage.io', 'skimage.filter', 'skimage.morphology', 'DM3lib']
 
 # for mod_name in MOCK_MODULES:
 #     sys.modules[mod_name] = Mock()
 
-# http://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_mock_imports
-autodoc_mock_imports = "numpy ConfigParser validate_email subprocess pyinotify suds urllib http xml ipdb".split()
+# # http://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_mock_imports
+# autodoc_mock_imports = "numpy ConfigParser validate_email subprocess pyinotify suds urllib http xml ipdb".split()
