@@ -322,10 +322,10 @@ texinfo_documents = [
 #     def __radd__(self, other):
 #         return Mock()
 
-# MOCK_MODULES = ['suds', 'os', 'os.path', 'datetime', 'logging', 'sys', 'traceback', 'urllib', 
-#     'urllib.request', 'http', 'http.client', 'xml', 'xml.sax', 'ipdb', 'ollections', 'configparser', 
-#     'unicodedata', 'string', 'ConfigParser', 'validate_email', 'pyinotify', 'subprocess', 're', 
-#     'argparse', 'fnmatch' ]
+MOCK_MODULES = ['suds', 'os', 'os.path', 'datetime', 'logging', 'sys', 'traceback', 'urllib', 
+    'urllib.request', 'http', 'http.client', 'xml', 'xml.sax', 'ipdb', 'collections', 'configparser', 
+    'unicodedata', 'string', 'validate_email', 'pyinotify', 'subprocess', 're', 
+    'argparse', 'fnmatch' ]
 
            
 # MOCK_MODULES = [
@@ -346,4 +346,4 @@ texinfo_documents = [
 # autodoc_mock_imports = "numpy ConfigParser validate_email subprocess pyinotify suds urllib http xml ipdb".split()
 
 # http://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_mock_imports
-autodoc_mock_imports = "suds numpy ConfigParser validate_email subprocess pyinotify suds urllib http xml ipdb".split()
+autodoc_mock_imports = "suds os datetime logging sys traceback ipdb collections numpy configparser unicodedata string validate_email subprocess pyinotify re urllib http xml argparse fnmatch".split()
