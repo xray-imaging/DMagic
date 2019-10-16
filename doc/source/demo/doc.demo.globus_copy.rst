@@ -32,6 +32,9 @@ Tasks
 
     globus_copy copies a folder from a `Globus Connect Personal endpoint <https://www.globus.org/globus-connect-personal/>`__ to a Globus remote server and, optionally, sends an invitation e-mail (drop-dox style) to the user to access the remote folder. Since what is shared is a link to the folder, users will have access to the current and any future content. 
 
-Download file: :download:`globus_copy.py<../../../doc/demo/globus_copy.py>`
+Download file: :download:`globus_copy.py <../../../doc/demo/globus_copy.py>`
 
-.. literalinclude:: ../../../doc/demo/globus_copy.py    :tab-width: 4    :linenos:    :language: guess
+.. literalinclude:: ../../../doc/demo/globus_copy.py
+    :tab-width: 4
+    :linenos:
+    :language: guess

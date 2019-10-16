@@ -11,6 +11,7 @@ This section contains examples on how to implement various data management tasks
    doc.demo.dm_monitor
 
 .. automodule:: doc.demo
+   :noindex:
    :members:
    :undoc-members:
    :show-inheritance: 

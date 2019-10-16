@@ -9,6 +9,7 @@ This section contains code examples for various DMagic tasks.
    demo/doc.demo.dm
 
 .. automodule:: doc.demo
+   :noindex:
    :members:
    :undoc-members:
    :show-inheritance: 

@@ -31,6 +31,10 @@ Tasks
     globus_share sends an invitation e-mail (drop-dox style) to the user. Since what is shared is a link to the folder, users will have access to the current and any future content. 
 
 
-Download file: :download:`globus_share.py<../../../doc/demo/globus_share.py>`
+Download file: :download:`globus_share.py <../../../doc/demo/globus_share.py>`
 
-.. literalinclude:: ../../../doc/demo/globus_share.py    :tab-width: 4    :linenos:    :language: guess
+
+.. literalinclude:: ../../../doc/demo/globus_share.py
+    :tab-width: 4
+    :linenos:
+    :language: guess

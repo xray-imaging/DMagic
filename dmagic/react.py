@@ -56,16 +56,15 @@ class Process(ProcessEvent):
 
 def main(args):
     """
-    args : [-h] [-r REGEX | -p REGEX] directory script
+    args: [-h] [-r REGEX | -p REGEX] directory script
 
-    example :
-        react.py /local/data -p '*.hdf' 'echo $f'
-        
-    positional arguments :
+    example: react.py /local/data -p ``*.hdf`` ``echo $f``
+
+    positional arguments:
         - directory:             the directory which is recursively monitored
         - script:                the script that is executed upon reaction
 
-    optional arguments :
+    optional arguments:
         -h, --help            show this help message and exit
         -r REGEX, --regex REGEX
                         files only trigger the reaction if their name matches
@@ -73,8 +72,11 @@ def main(args):
         -p REGEX, --pattern REGEX
                         files only trigger the reaction if their name matches
                         this shell pattern
-     
+
+
+
     """
+
 
     parser = argparse.ArgumentParser(description='Launch a script if specified files change.')
     parser.add_argument('directory', help='the directory which is recursively monitored')
