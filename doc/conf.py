@@ -296,31 +296,31 @@ texinfo_documents = [
 #ztexinfo_no_detailmenu = False
 
 # picked from http://read-the-docs.readthedocs.org/en/latest/faq.html
-class Mock(object):
+# class Mock(object):
 
-    __all__ = []
+#     __all__ = []
 
-    def __init__(self, *args, **kwargs):
-        pass
+#     def __init__(self, *args, **kwargs):
+#         pass
 
-    def __call__(self, *args, **kwargs):
-        return Mock()
+#     def __call__(self, *args, **kwargs):
+#         return Mock()
 
-    @classmethod
-    def __getattr__(cls, name):
-        return Mock()
-    def __mul__(self, other):
-        return Mock()
-    def __rmul__(self, other):
-        return Mock()
-    def __pow__(self, other):
-        return Mock()
-    def __div__(self, other):
-        return Mock()
-    def __add__(self, other):
-        return Mock()
-    def __radd__(self, other):
-        return Mock()
+#     @classmethod
+#     def __getattr__(cls, name):
+#         return Mock()
+#     def __mul__(self, other):
+#         return Mock()
+#     def __rmul__(self, other):
+#         return Mock()
+#     def __pow__(self, other):
+#         return Mock()
+#     def __div__(self, other):
+#         return Mock()
+#     def __add__(self, other):
+#         return Mock()
+#     def __radd__(self, other):
+#         return Mock()
             
 #MOCK_MODULES = [
 #    'pyinotify', 'validate_email', 'subprocess', 'argparse',
