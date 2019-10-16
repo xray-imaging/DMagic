@@ -307,7 +307,21 @@ class Mock(object):
         return Mock()
 
     @classmethod
-    def __getattr__(cls, name):        return Mock()    def __mul__(self, other):        return Mock()    def __rmul__(self, other):        return Mock()    def __pow__(self, other):        return Mock()    def __div__(self, other):        return Mock()    def __add__(self, other):        return Mock()    def __radd__(self, other):        return Mock()            
+    def __getattr__(cls, name):
+        return Mock()
+    def __mul__(self, other):
+        return Mock()
+    def __rmul__(self, other):
+        return Mock()
+    def __pow__(self, other):
+        return Mock()
+    def __div__(self, other):
+        return Mock()
+    def __add__(self, other):
+        return Mock()
+    def __radd__(self, other):
+        return Mock()
+            
 #MOCK_MODULES = [
 #    'pyinotify', 'validate_email', 'subprocess', 'argparse',
 #    'fnmatch', 'suds', 'logging', 'traceback', 'urllib2',
@@ -317,7 +331,7 @@ MOCK_MODULES = [
     'numpy', 'scipy', 'scipy.misc', 'scipy.optimize', 'h5py', 'ctypes',
     'matplotlib', 'matplotlib.pylab', 'tifffile', 'EdfFile', 'netCDF4',  
     'spefile', 'scipy.ndimage', 'pywt', 'scikit-image', 'skimage',
-    'skimage.io', 'skimage.filter', 'skimage.morphology', 'DM3lib']
+    'skimage.io', 'skimage.filter', 'skimage.morphology', 'DM3lib', 'suds']
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
