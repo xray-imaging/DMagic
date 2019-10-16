@@ -321,11 +321,26 @@ class Mock(object):
         return Mock()
     def __radd__(self, other):
         return Mock()
+
+MOCK_MODULES = ['suds', 'os', 'os.path', 'datetime', 'logging', 'sys', 'traceback', 'urllib', 
+    'urllib.request', 'http', 'http.client', 'xml', 'xml.sax', 'ipdb', 'ollections', 'configparser', 
+    'unicodedata', 'string', 'ConfigParser', 'validate_email', 'pyinotify', 'subprocess', 're', 
+    'argparse', 'fnmatch' ]
+
+
+
+from pyinotify import WatchManager, IN_DELETE, IN_CREATE, IN_CLOSE_WRITE, ProcessEvent, Notifier
+import subprocess
+import sys
+import re
+import argparse
+import fnmatch
+
             
-MOCK_MODULES = [
-   'pyinotify', 'validate_email', 'subprocess', 'argparse',
-   'fnmatch', 'suds', 'logging', 'traceback', 'urllib2',
-   'httplib', 'xml', 'ipdb', 'collections', 'unicodedata', 'string']
+# MOCK_MODULES = [
+#    'pyinotify', 'validate_email', 'subprocess', 'argparse',
+#    'fnmatch', 'suds', 'logging', 'traceback', 'urllib2',
+#    'httplib', 'xml', 'ipdb', 'collections', 'unicodedata', 'string']
 
 # MOCK_MODULES = [
 #     'numpy', 'scipy', 'scipy.misc', 'scipy.optimize', 'h5py', 'ctypes',
