@@ -11,6 +11,9 @@ This section covers the basics of how to download and install `DMagic <https://g
 Pre-requisites
 ==============
 
+
+Install from `Anaconda <https://www.anaconda.com/distribution/>`_ python3.x.
+
 Before using `DMagic <https://github.com/decarlof/DMagic>`_  you need to have setup an account 
 on `Globus <https://www.globus.org/>`__, installed a 
 `Globus Connect Personal endpoint <https://www.globus.org/globus-connect-personal/>`__
