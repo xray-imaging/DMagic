@@ -327,16 +327,7 @@ MOCK_MODULES = ['suds', 'os', 'os.path', 'datetime', 'logging', 'sys', 'tracebac
     'unicodedata', 'string', 'ConfigParser', 'validate_email', 'pyinotify', 'subprocess', 're', 
     'argparse', 'fnmatch' ]
 
-
-
-from pyinotify import WatchManager, IN_DELETE, IN_CREATE, IN_CLOSE_WRITE, ProcessEvent, Notifier
-import subprocess
-import sys
-import re
-import argparse
-import fnmatch
-
-            
+           
 # MOCK_MODULES = [
 #    'pyinotify', 'validate_email', 'subprocess', 'argparse',
 #    'fnmatch', 'suds', 'logging', 'traceback', 'urllib2',
