@@ -327,11 +327,14 @@ class Mock(object):
 #    'fnmatch', 'suds', 'logging', 'traceback', 'urllib2',
 #    'httplib', 'xml', 'ipdb', 'collections', 'unicodedata', 'string']
 
-MOCK_MODULES = [
-    'numpy', 'scipy', 'scipy.misc', 'scipy.optimize', 'h5py', 'ctypes',
-    'matplotlib', 'matplotlib.pylab', 'tifffile', 'EdfFile', 'netCDF4',  
-    'spefile', 'scipy.ndimage', 'pywt', 'scikit-image', 'skimage',
-    'skimage.io', 'skimage.filter', 'skimage.morphology', 'DM3lib', 'suds']
+# MOCK_MODULES = [
+#     'numpy', 'scipy', 'scipy.misc', 'scipy.optimize', 'h5py', 'ctypes',
+#     'matplotlib', 'matplotlib.pylab', 'tifffile', 'EdfFile', 'netCDF4',  
+#     'spefile', 'scipy.ndimage', 'pywt', 'scikit-image', 'skimage',
+#     'skimage.io', 'skimage.filter', 'skimage.morphology', 'DM3lib', 'suds']
 
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = Mock()
+# for mod_name in MOCK_MODULES:
+#     sys.modules[mod_name] = Mock()
+
+# http://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_mock_imports
+autodoc_mock_imports = "numpy ConfigParser validate_email subprocess pyinotify suds urllib http xml ipdb".split()
