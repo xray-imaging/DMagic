@@ -317,7 +317,7 @@ def get_proposal_title(date=None):
         except:
             ipdb.set_trace()
             raise
-
+    print("xx:", proposal_title)
     return clean_entry(proposal_title)
 
 
@@ -452,7 +452,7 @@ def find_experiment_info(date=None):
     proposal_title = get_proposal_title(date.replace(tzinfo=None))
     experiment_start = get_experiment_start(date.replace(tzinfo=None))
     #print proposal_id, proposal_title
-    
+    print(proposal_title )
     return str(proposal_id), str(proposal_title[:256]), str(experiment_start.strftime(datetime_format))
 
 def find_experiment_start(date=None):
@@ -658,7 +658,12 @@ def clean_entry(entry):
     valid_folder_entry_chars = "-_%s%s" % (string.ascii_letters, string.digits)
     utf_8_str = str(entry) 
     norml_str = unicodedata.normalize('NFKD', utf_8_str)
-    cleaned_folder_name = norml_str.encode('ASCII', 'ignore')
-        
-    return ''.join(c for c in list(cleaned_folder_name) if c in list(valid_folder_entry_chars))
+    cleaned_folder_name = norml_str.replace(' ', '_')
+    cleaned_folder_name = cleaned_folder_name.encode('ASCII', 'ignore')
 
+    # print("valid_folder_entry_chars", valid_folder_entry_chars)    
+    # print("utf_8_str", utf_8_str)    
+    # print("norml_str", norml_str)    
+    # print("cleaned_folder_name1", cleaned_folder_name)  
+
+    return "".join([chr(c) for c in cleaned_folder_name])
