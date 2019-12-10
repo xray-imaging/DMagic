@@ -82,6 +82,7 @@ __all__ = ['create_experiment_id',
            'find_users',
            'find_pi_info',
            'find_experiment_info',
+           'find_email',
            'print_experiment_info',
            'print_users'
            ]
@@ -557,6 +558,31 @@ def print_users(users):
     print("(*) Proposal PI"        )
 
 
+def find_emails(users):
+    """
+    Print the user emails running at beamline at a specific date
+     
+    Parameters
+    ----------
+    users : dictionary-like object containing user information
+    
+    
+    Returns
+    -------
+    List of user mails        
+    """
+    emails = []
+    i = 0
+
+    for lastname in users:
+        if users[lastname].get('email') != None:
+            email = str(users[lastname]['email'])
+            emails.append(email)
+        else:            
+            print("\tMissing e-mail for:", users[lastname]['badge'], users[lastname]['firstName'], users[lastname]['lastName'], strip_accents(users[lastname]['institution']))
+    return emails
+
+
 def find_pi_info(date=None):
     """
     Find info the Principal Investigator (PI) running at beamline at a specific date
@@ -658,12 +684,13 @@ def clean_entry(entry):
     valid_folder_entry_chars = "-_%s%s" % (string.ascii_letters, string.digits)
     utf_8_str = str(entry) 
     norml_str = unicodedata.normalize('NFKD', utf_8_str)
-    cleaned_folder_name = norml_str.replace(' ', '_')
-    cleaned_folder_name = cleaned_folder_name.encode('ASCII', 'ignore')
+    cleaned_folder_name = norml_str.encode('ASCII', 'ignore')
+    
+    print("valid_folder_entry_chars", valid_folder_entry_chars)    
+    print("utf_8_str", utf_8_str)    
+    print("norml_str", norml_str)    
+    print("cleaned_folder_name", cleaned_folder_name)  
+    string = cleaned_folder_name.replace(' ', '_')  
+    print(''.join(c for c in list(cleaned_folder_name) if c in list(valid_folder_entry_chars)))   
+    return ''.join(c for c in list(cleaned_folder_name) if c in list(valid_folder_entry_chars))
 
-    # print("valid_folder_entry_chars", valid_folder_entry_chars)    
-    # print("utf_8_str", utf_8_str)    
-    # print("norml_str", norml_str)    
-    # print("cleaned_folder_name1", cleaned_folder_name)  
-
-    return "".join([chr(c) for c in cleaned_folder_name])
