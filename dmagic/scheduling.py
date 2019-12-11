@@ -82,7 +82,7 @@ __all__ = ['create_experiment_id',
            'find_users',
            'find_pi_info',
            'find_experiment_info',
-           'find_email',
+           'find_emails',
            'print_experiment_info',
            'print_users'
            ]
@@ -558,9 +558,9 @@ def print_users(users):
     print("(*) Proposal PI"        )
 
 
-def find_emails(users):
+def find_emails(users, exclude_pi=True):
     """
-    Print the user emails running at beamline at a specific date
+    Print the user emails running at beamline at a specific date (all except the PI)
      
     Parameters
     ----------
@@ -569,17 +569,26 @@ def find_emails(users):
     
     Returns
     -------
-    List of user mails        
+    List of user mails (all but PI)       
     """
     emails = []
     i = 0
 
     for lastname in users:
-        if users[lastname].get('email') != None:
-            email = str(users[lastname]['email'])
-            emails.append(email)
-        else:            
-            print("\tMissing e-mail for:", users[lastname]['badge'], users[lastname]['firstName'], users[lastname]['lastName'], strip_accents(users[lastname]['institution']))
+        if exclude_pi:
+            if users[lastname].get('piFlag') == None:
+                if users[lastname].get('email') != None:
+                    email = str(users[lastname]['email'])
+                    emails.append(email)
+                else:            
+                    print("\tMissing e-mail for:", users[lastname]['badge'], users[lastname]['firstName'], users[lastname]['lastName'], strip_accents(users[lastname]['institution']))
+        else:
+            if users[lastname].get('email') != None:
+                email = str(users[lastname]['email'])
+                emails.append(email)
+            else:            
+                print("\tMissing e-mail for:", users[lastname]['badge'], users[lastname]['firstName'], users[lastname]['lastName'], strip_accents(users[lastname]['institution']))
+        
     return emails
 
 
