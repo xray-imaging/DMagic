@@ -579,13 +579,13 @@ def find_emails(users, exclude_pi=True):
             if users[lastname].get('piFlag') == None:
                 if users[lastname].get('email') != None:
                     email = str(users[lastname]['email'])
-                    emails.append(email)
+                    emails.append(email.lower())
                 else:            
                     print("\tMissing e-mail for:", users[lastname]['badge'], users[lastname]['firstName'], users[lastname]['lastName'], strip_accents(users[lastname]['institution']))
         else:
             if users[lastname].get('email') != None:
                 email = str(users[lastname]['email'])
-                emails.append(email)
+                emails.append(email.lower())
             else:            
                 print("\tMissing e-mail for:", users[lastname]['badge'], users[lastname]['firstName'], users[lastname]['lastName'], strip_accents(users[lastname]['institution']))
         
