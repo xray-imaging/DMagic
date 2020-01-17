@@ -72,6 +72,8 @@ from collections import defaultdict
 import configparser
 import unicodedata
 import string
+
+
 __author__ = "Francesco De Carlo"
 __credits__ = "John Hammonds"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
@@ -318,7 +320,6 @@ def get_proposal_title(date=None):
         except:
             ipdb.set_trace()
             raise
-    print("xx:", proposal_title)
     return clean_entry(proposal_title)
 
 
@@ -452,8 +453,7 @@ def find_experiment_info(date=None):
     proposal_id = get_proposal_id(date.replace(tzinfo=None))
     proposal_title = get_proposal_title(date.replace(tzinfo=None))
     experiment_start = get_experiment_start(date.replace(tzinfo=None))
-    #print proposal_id, proposal_title
-    print(proposal_title )
+
     return str(proposal_id), str(proposal_title[:256]), str(experiment_start.strftime(datetime_format))
 
 def find_experiment_start(date=None):
@@ -695,11 +695,5 @@ def clean_entry(entry):
     norml_str = unicodedata.normalize('NFKD', utf_8_str)
     cleaned_folder_name = norml_str.encode('ASCII', 'ignore')
     
-    print("valid_folder_entry_chars", valid_folder_entry_chars)    
-    print("utf_8_str", utf_8_str)    
-    print("norml_str", norml_str)    
-    print("cleaned_folder_name", cleaned_folder_name)  
-    string = cleaned_folder_name.replace(' ', '_')  
-    print(''.join(c for c in list(cleaned_folder_name) if c in list(valid_folder_entry_chars)))   
-    return ''.join(c for c in list(cleaned_folder_name) if c in list(valid_folder_entry_chars))
-
+    cfn = norml_str.replace(' ', '_')  
+    return ''.join(c for c in list(cfn) if c in list(valid_folder_entry_chars))
