@@ -120,12 +120,12 @@ def setSoapHeader(client, username, password):
         log.warning(security)
     client.set_options(wsse=security)
 
-def findRunName(startDate, endDate):
+def findRunName(args, startDate, endDate):
     """Find the official run name for the run that spans the
     given startDate and endDate
 
     Returns string."""
-    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection(args)
     try:
         result = runScheduleServiceClient.service.findAllRuns()
     except Exception:
@@ -157,10 +157,10 @@ def findRunName(startDate, endDate):
             raise ex
     return runName
 
-def findBeamlineSchedule(beamlineName, runName):
+def findBeamlineSchedule(args, beamlineName, runName):
     """Find beamline schedule for given beamlineName and runName"""
 
-    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection(args)
     try:
         result  = beamlineScheduleServiceClient.service.findBeamlineSchedule(beamlineName, runName)
     except SAXParseException as ex:
@@ -184,20 +184,21 @@ def findBeamtimeRequestsByBeamline(beamlineName, runName):
         sys.exit(2)
     return result
 
-def setup_connection():
+def setup_connection(args):
     
-    home = expanduser("~")
-    credentials = os.path.join(home, 'scheduling.ini')
+    # home = expanduser("~")
+    # credentials = os.path.join(home, 'scheduling.ini')
     
-    cf = configparser.ConfigParser()
-    cf.read(credentials)
-    username = cf.get('credentials', 'username')
-    password = cf.get('credentials', 'password')
-    beamline = cf.get('settings', 'beamline')
+    # cf = configparser.ConfigParser()
+    # cf.read(credentials)
+    username = args.username
+    password = args.password
+    beamline = args.beamline
     
     # Uncomment one if using ANL INTERNAL or EXTERNAL network
     #base = cf.get('hosts', 'internal')
-    base = cf.get('hosts', 'external')
+    # base = args.internal
+    base = args.external
 
     result = urllib.request.install_opener(urllib.request.build_opener(HTTPSHandlerV3()))
     logging.raiseExceptions = 0
@@ -227,7 +228,7 @@ def setup_connection():
 
     return runScheduleServiceClient, beamlineScheduleServiceClient, beamline
 
-def get_users(date=None):
+def get_users(args, date=None):
     """
     Get users running at beamline at a specific date
      
@@ -241,11 +242,11 @@ def get_users(date=None):
     users : dictionary-like object containing user information      
     """
     
-    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection(args)
     if not date:
         date = datetime.datetime.now()
-    run_name = findRunName(date, date)
-    schedule = findBeamlineSchedule(beamline, run_name)
+    run_name = findRunName(args, date, date)
+    schedule = findBeamlineSchedule(args, beamline, run_name)
 
     events = schedule.activities.activity
     users = defaultdict(dict)
@@ -264,17 +265,17 @@ def get_users(date=None):
 
     return users
 
-def get_proposal_id(date=None):
+def get_proposal_id(args, date=None):
     """Find the proposal number (GUP) for a given beamline and date
 
     Returns proposal id."""
 
     proposal_id = "empty_proposal_id"
-    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection(args)
     if not date:
         date = datetime.datetime.now()
-    run_name = findRunName(date, date)
-    schedule = findBeamlineSchedule(beamline, run_name)
+    run_name = findRunName(args, date, date)
+    schedule = findBeamlineSchedule(args, beamline, run_name)
 
     events = schedule.activities.activity
 
@@ -293,17 +294,18 @@ def get_proposal_id(date=None):
 
     return proposal_id
 
-def get_proposal_title(date=None):
+
+def get_proposal_title(args, date=None):
     """Find the proposal title for a given beamline and date
 
     Returns proposal title."""
 
     proposal_title = "empty_proposal_title"
-    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection(args)
     if not date:
         date = datetime.datetime.now()
-    run_name = findRunName(date, date)
-    schedule = findBeamlineSchedule(beamline, run_name)
+    run_name = findRunName(args, date, date)
+    schedule = findBeamlineSchedule(args, beamline, run_name)
 
     events = schedule.activities.activity
     users = defaultdict(dict)
@@ -320,15 +322,15 @@ def get_proposal_title(date=None):
     return clean_entry(proposal_title)
 
 
-def get_experiment_start(date=None):
+def get_experiment_start(args, date=None):
     """Find the experiment start date for a given beamline and date
 
     Returns experiment_start."""
-    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection(args)
     if not date:
         date = datetime.datetime.now()
-    run_name = findRunName(date, date)
-    schedule = findBeamlineSchedule(beamline, run_name)
+    run_name = findRunName(args, date, date)
+    schedule = findBeamlineSchedule(args, beamline, run_name)
     experiment_start = date
 
     events = schedule.activities.activity
@@ -348,15 +350,15 @@ def get_experiment_start(date=None):
     return experiment_start
 
 
-def get_experiment_end(date=None):
+def get_experiment_end(args, date=None):
     """Find the experiment end date for a given beamline and date
 
     Returns experiment_end."""
-    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection(args)
     if not date:
         date = datetime.datetime.now()
-    run_name = findRunName(date, date)
-    schedule = findBeamlineSchedule(beamline, run_name)
+    run_name = findRunName(args, date, date)
+    schedule = findBeamlineSchedule(args, beamline, run_name)
 
     events = schedule.activities.activity
     users = defaultdict(dict)
@@ -375,15 +377,15 @@ def get_experiment_end(date=None):
     return experiment_end
 
 
-def get_beamtime_request(date=None):
+def get_beamtime_request(args, date=None):
     """Find the proposal beamtime request id for a given beamline and date
 
     Returns users."""
-    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection(args)
     if not date:
         date = datetime.datetime.now()
-    run_name = findRunName(date, date)
-    schedule = findBeamlineSchedule(beamline, run_name)
+    run_name = findRunName(args, date, date)
+    schedule = findBeamlineSchedule(args, beamline, run_name)
 
     events = schedule.activities.activity
 
@@ -403,7 +405,7 @@ def get_beamtime_request(date=None):
     return beamtime_request
 
 
-def find_pi_info(date=None):
+def find_pi_info(args, date=None):
     """
     Find info the Principal Investigator (PI) running at beamline at a specific date
      
@@ -418,9 +420,9 @@ def find_pi_info(date=None):
         PI last name as a valid folder name       
     """
 
-    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection(args)
 
-    users = get_users(date)
+    users = get_users(args, date)
 
     pi = dict()
 
@@ -442,7 +444,7 @@ def find_pi_info(date=None):
     return pi
 
 
-def find_experiment_info(date=None):
+def find_experiment_info(args, date=None):
     """
     Find experiment info (GUP, Title, Start date)
      
@@ -461,17 +463,17 @@ def find_experiment_info(date=None):
     experiment = dict()
    
     # scheduling system settings
-    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
-    experiment['id'] = get_proposal_id(date.replace(tzinfo=None))
-    experiment['title'] = get_proposal_title(date.replace(tzinfo=None))
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection(args)
+    experiment['id'] = get_proposal_id(args, date.replace(tzinfo=None))
+    experiment['title'] = get_proposal_title(args, date.replace(tzinfo=None))
     experiment['title'] = experiment['title'][:256]
-    experiment['start'] = get_experiment_start(date.replace(tzinfo=None))
+    experiment['start'] = get_experiment_start(args, date.replace(tzinfo=None))
     experiment['start'] = str(experiment['start'].strftime(datetime_format))
 
     return experiment
 
 
-def find_experiment_start(date=None):
+def find_experiment_start(args, date=None):
     """
     Find the experiment starting date
      
@@ -487,14 +489,14 @@ def find_experiment_start(date=None):
 
     # scheduling system settings
     log.info("Finding experiment start date ... ")
-    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection(args)
 
-    experiment_start = get_experiment_start(date.replace(tzinfo=None))
+    experiment_start = get_experiment_start(args, date.replace(tzinfo=None))
  
     return experiment_start
 
 
-def find_users(date=None):
+def find_users(args, date=None):
     """
     Find users running at beamline at a specific date
      
@@ -509,13 +511,13 @@ def find_users(date=None):
     """
 
     log.info("Finding users ... ")
-    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
-    users = get_users(date.replace(tzinfo=None))
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection(args)
+    users = get_users(args, date.replace(tzinfo=None))
     
     return users
 
 
-def find_pi_last_name(date=None):
+def find_pi_last_name(args, date=None):
     """
     Find the Principal Investigator (PI) running at beamline at a specific date
      
@@ -530,8 +532,8 @@ def find_pi_last_name(date=None):
         PI last name as a valid folder name       
     """
     log.info("Finding PI last name ... ")
-    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
-    users = get_users(date.replace(tzinfo=None))
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection(args)
+    users = get_users(args, date.replace(tzinfo=None))
 
     for tag in users:
         if users[tag].get('piFlag') != None:
@@ -602,7 +604,7 @@ def find_emails(users, exclude_pi=True):
     return emails
 
 
-def print_experiment_info(date=None):
+def print_experiment_info(args, date=None):
     """
     Print the experiment info running at beamline at a specific date
      
@@ -622,13 +624,13 @@ def print_experiment_info(date=None):
 
     # scheduling system settings
     log.info("\tAccessing the APS Scheduling System ... ")
-    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection()
+    runScheduleServiceClient, beamlineScheduleServiceClient, beamline = setup_connection(args)
 
-    run_name = findRunName(now.replace(tzinfo=None), now.replace(tzinfo=None))
-    proposal_title = get_proposal_title(date.replace(tzinfo=None))
-    users = get_users(beamline, date.replace(tzinfo=None))
-    experiment_start = get_experiment_start(date.replace(tzinfo=None))
-    experiment_end = get_experiment_end(date.replace(tzinfo=None))
+    run_name = findRunName(args, now.replace(tzinfo=None), now.replace(tzinfo=None))
+    proposal_title = get_proposal_title(args, date.replace(tzinfo=None))
+    users = get_users(args, beamline, date.replace(tzinfo=None))
+    experiment_start = get_experiment_start(args, date.replace(tzinfo=None))
+    experiment_end = get_experiment_end(args, date.replace(tzinfo=None))
 
     log.info("\tRun Name: ", run_name) 
     log.info("\tProposal Title: ", proposal_title)

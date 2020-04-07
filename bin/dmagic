@@ -78,7 +78,7 @@ def show(args):
     log.info("Today's date: %s" % now)
 
     # get PI information
-    pi = scheduling.find_pi_info(now)
+    pi = scheduling.find_pi_info(args, now)
 
     log.info('PI full name: %s' % pi['name'])
     log.info('PI last name: %s' % pi['last_name'])
@@ -87,7 +87,7 @@ def show(args):
     log.info('badge: %s' % pi['badge'])
 
     # get experiment information
-    experiment = scheduling.find_experiment_info(now)
+    experiment = scheduling.find_experiment_info(args, now)
     log.info('GUP: %s' % experiment['id'])
     log.info('Title: %s' % experiment['title'])
     log.info('Start: %s' % experiment['start'])
