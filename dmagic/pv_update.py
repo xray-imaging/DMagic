@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # #########################################################################
-# Copyright (c) 2015, UChicago Argonne, LLC. All rights reserved.         #
+# Copyright (c) 2015-2016, UChicago Argonne, LLC. All rights reserved.    #
 #                                                                         #
 # Copyright 2015. UChicago Argonne, LLC. This software was produced       #
 # under U.S. Government contract DE-AC02-06CH11357 for Argonne National   #
@@ -47,107 +47,48 @@
 # #########################################################################
 
 """
-Module containing an example on how to use DMagic to access the APS scheduling
-system information.
-
+Module generating user and proposal info PVs
 """
 
-import os
-import sys
 import pytz
 import datetime
-import argparse
+import time
+import sys
 
 from dmagic import scheduling
-from dmagic import pv_daemon
+from dmagic import pv_beamline_2bm as pv
+# from dmagic import pv_beamline_7bm as pv
 from dmagic import log
-from dmagic import config
 
-def init(args):
-    if not os.path.exists(str(args.config)):
-        config.write(str(args.config))
-    else:
-        raise RuntimeError("{0} already exists".format(args.config))
+__author__ = "Francesco De Carlo"
+__copyright__ = "Copyright (c) 2015-2016, UChicago Argonne, LLC."
+__docformat__ = 'restructuredtext en'
 
-def show(args):
+def pv_daemon():
+
     # set the experiment date 
     # testing date
     # now = datetime.datetime(2016, 2, 19, 10, 10, 30)
     now = datetime.datetime.today()
 
-    log.info("Today's date: %s" % now)
+    # set iso format time
+    central = pytz.timezone('US/Central')
+    local_time = central.localize(now)
+    local_time_iso = local_time.isoformat()
+
+    pv.user_info_update_time.put(local_time_iso)
+    log.info("User/Experiment PV update")
 
     # get PI information
-    pi = scheduling.find_pi_info(args, now)
-
-    log.info('PI full name: %s' % pi['name'])
-    log.info('PI last name: %s' % pi['last_name'])
-    log.info('Institution: %s' % pi['institution'])
-    log.info('email: %s' % pi['email'])
-    log.info('badge: %s' % pi['badge'])
-
+    pi = scheduling.find_pi_info(now)
+    pv.user_name.put(pi['name'])
+    pv.user_last_name.put(pi['last_name'])    
+    pv.user_affiliation.put(pi['institution'])
+    pv.user_email.put(pi['email'])
+    pv.user_badge.put(pi['badge'])
+    
     # get experiment information
-    experiment = scheduling.find_experiment_info(args, now)
-    log.info('GUP: %s' % experiment['id'])
-    log.info('Title: %s' % experiment['title'])
-    log.info('Start: %s' % experiment['start'])
-
-
-def tag(args):
-    try:
-        while True:
-            pv_daemon(args)
-            time.sleep(14400)
-    except (KeyboardInterrupt, SystemExit):
-        pass  
-
-
-def main():
- 
-    home = os.path.expanduser("~")
-    logs_home = home + '/logs/'
-
-    # make sure logs directory exists
-    if not os.path.exists(logs_home):
-        os.makedirs(logs_home)
-
-    lfname = logs_home + 'dmagic_' + datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d_%H:%M:%S") + '.log'
-    log.setup_custom_logger(lfname)
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config', **config.SECTIONS['general']['config'])
-    show_params = config.DMAGIC_PARAMS
-    tag_params = config.DMAGIC_PARAMS
-
-    cmd_parsers = [
-        ('init',        init,           (),                             "Create configuration file"),
-        ('show',        show,           show_params,                    "Show user and experiment info from the APS schedule"),
-        ('taag',        tag,            tag_params,                     "Show user and experiment info from the APS schedule"),
-    ]
-
-    subparsers = parser.add_subparsers(title="Commands", metavar='')
-
-    for cmd, func, sections, text in cmd_parsers:
-        cmd_params = config.Params(sections=sections)
-        cmd_parser = subparsers.add_parser(cmd, help=text, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        cmd_parser = cmd_params.add_arguments(cmd_parser)
-        cmd_parser.set_defaults(_func=func)
-
-    args = config.parse_known_args(parser, subparser=True)
-
-    print(args)
-    try:
-        # load args from default (config.py) if not changed
-        config.log_values(args)
-        args._func(args)
-        # undate globus.config file
-        sections = config.DMAGIC_PARAMS
-        config.write(args.config, args=args, sections=sections)
-    except RuntimeError as e:
-        log.error(str(e))
-        sys.exit(1)
-
-
-if __name__ == '__main__':
-    main()
-
+    experiment = scheduling.find_experiment_info(now)
+    pv.proposal_number.put(experiment['id'])
+    pv.proposal_title.put(experiment['title'])
+    pv.experiment_date.put(experiment['start'])
