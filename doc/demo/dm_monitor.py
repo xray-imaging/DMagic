@@ -55,8 +55,8 @@ system information.
 import os
 import sys
 import pytz
-# import datetime
-from datetime import datetime
+import datetime
+# from datetime import datetime
 
 # set ~/globus.ini and ~/scheduling.ini to match your configuration
 from dmagic import scheduling
@@ -66,14 +66,14 @@ def main():
 
     # logs_home = '~'
     # lfname = os.path.join(logs_home, 'dmagic_' + datetime.strftime(datetime.now(), "%Y-%m-%d_%H_%M_%S") + '.log')
-    lfname = 'dmagic_' + datetime.strftime(datetime.now(), "%Y-%m-%d_%H_%M_%S") + '.log'
+    lfname = 'dmagic_' + datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d_%H_%M_%S") + '.log'
  
     log.setup_custom_logger(lfname)
     log.info("Saving log at %s" % lfname)
 
     # set the experiment date 
     # testing date
-    now = datetime(2016, 2, 19, 10, 10, 30)
+    now = datetime.datetime(2016, 2, 19, 10, 10, 30)
     # now = datetime.datetime.today()
 
     log.info("Today's date: %s" % now)
