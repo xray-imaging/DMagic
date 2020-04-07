@@ -58,7 +58,6 @@ import pytz
 import datetime
 import argparse
 
-# set ~/globus.ini and ~/scheduling.ini to match your configuration
 from dmagic import scheduling
 from dmagic import log
 from dmagic import config
