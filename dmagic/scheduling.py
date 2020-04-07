@@ -186,11 +186,6 @@ def findBeamtimeRequestsByBeamline(beamlineName, runName):
 
 def setup_connection(args):
     
-    # home = expanduser("~")
-    # credentials = os.path.join(home, 'scheduling.ini')
-    
-    # cf = configparser.ConfigParser()
-    # cf.read(credentials)
     username = args.username
     password = args.password
     beamline = args.beamline
