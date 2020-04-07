@@ -14,19 +14,8 @@ Pre-requisites
 
 Install from `Anaconda <https://www.anaconda.com/distribution/>`_ python3.x.
 
-Before using `DMagic <https://github.com/decarlof/DMagic>`_  you need to have setup an account 
-on `Globus <https://www.globus.org/>`__, installed a 
-`Globus Connect Personal endpoint <https://www.globus.org/globus-connect-personal/>`__
-on the APS computer you want to share data from and met the the Globus 
-Command Line Interface (CLI) `pre-requisites <http://dev.globus.org/cli/using-the-cli/#prerequisites>`__.
-
-To access the `APS scheduling system <https://schedule.aps.anl.gov/>`__ you need 
-valid APS credentials.
-
-Finally you must also create in your home directory configuration files for 
-`globus <https://github.com/decarlof/DMagic/blob/master/config/globus.ini>`__ 
-and `scheduling <https://github.com/decarlof/DMagic/blob/master/config/scheduling.ini>`__ 
-systems.
+Before using `DMagic <https://github.com/xray-imaging/DMagic>`_  you need to have valid APS credentials
+to access the `APS scheduling system <https://schedule.aps.anl.gov/>`__.
 
 
 Installing from source
@@ -42,7 +31,7 @@ Install the following::
 Clone the `DMagic <https://github.com/decarlof/DMagic>`_  
 from `GitHub <https://github.com>`_ repository::
 
-    git clone https://github.com/decarlof/DMagic.git DMagic
+    git clone https://github.com/xray-imaging/DMagic DMagic
 
 then::
 

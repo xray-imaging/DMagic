@@ -5,11 +5,11 @@
    :alt: DMagic
 
 `DMagic <https://github.com/decarlof/dmagic.git>`_ is an open-sourced Python
-toolbox to perform data management and data sharing for users of the Imaging Group of
-the `Advanced Photon Source <http://www.aps.anl.gov>`_.
+toolbox to to interface with the `Advanced Photon Source <http://www.aps.anl.gov>`_
+`scheduling system  <https://schedule.aps.anl.gov/>`_
 
 This guide is maintained on 
-`GitHub <https://github.com/decarlof/dmagic/tree/master/doc>`_.
+`GitHub <https://github.com/xray-imaging/DMagic/tree/master/doc>`_.
 
 .. toctree::
    :maxdepth: 1
