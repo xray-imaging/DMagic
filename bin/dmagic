@@ -130,7 +130,7 @@ def main():
     cmd_parsers = [
         ('init',        init,           (),                             "Create configuration file"),
         ('show',        show,           show_params,                    "Show user and experiment info from the APS schedule"),
-        ('tag',         tag,            tag_params,                     "Show user and experiment info from the APS schedule"),
+        ('tag',         tag,            tag_params,                     "Update user info EPICS PVs with info from the APS schedule"),
     ]
 
     subparsers = parser.add_subparsers(title="Commands", metavar='')
