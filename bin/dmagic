@@ -71,8 +71,8 @@ def init(args):
 def show(args):
     # set the experiment date 
     # testing date
-    now = datetime.datetime(2016, 2, 19, 10, 10, 30)
-    # now = datetime.datetime.today()
+    # now = datetime.datetime(2016, 2, 19, 10, 10, 30)
+    now = datetime.datetime.today()
 
     log.info("Today's date: %s" % now)
 
