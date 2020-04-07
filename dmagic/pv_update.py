@@ -64,23 +64,18 @@ __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2015-2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 
-def pv_daemon():
-
-    # set the experiment date 
-    # testing date
-    # now = datetime.datetime(2016, 2, 19, 10, 10, 30)
-    now = datetime.datetime.today()
+def pv_daemon(args, date=None):
 
     # set iso format time
     central = pytz.timezone('US/Central')
-    local_time = central.localize(now)
+    local_time = central.localize(date)
     local_time_iso = local_time.isoformat()
 
     pv.user_info_update_time.put(local_time_iso)
     log.info("User/Experiment PV update")
 
     # get PI information
-    pi = scheduling.find_pi_info(now)
+    pi = scheduling.find_pi_info(args, date)
     pv.user_name.put(pi['name'])
     pv.user_last_name.put(pi['last_name'])    
     pv.user_affiliation.put(pi['institution'])
@@ -88,7 +83,7 @@ def pv_daemon():
     pv.user_badge.put(pi['badge'])
     
     # get experiment information
-    experiment = scheduling.find_experiment_info(now)
+    experiment = scheduling.find_experiment_info(args, date)
     pv.proposal_number.put(experiment['id'])
     pv.proposal_title.put(experiment['title'])
     pv.experiment_date.put(experiment['start'])
