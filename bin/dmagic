@@ -55,6 +55,7 @@ system information.
 import os
 import sys
 import pytz
+import time
 import datetime
 import argparse
 
@@ -129,7 +130,7 @@ def main():
     cmd_parsers = [
         ('init',        init,           (),                             "Create configuration file"),
         ('show',        show,           show_params,                    "Show user and experiment info from the APS schedule"),
-        ('taag',        tag,            tag_params,                     "Show user and experiment info from the APS schedule"),
+        ('tag',         tag,            tag_params,                     "Show user and experiment info from the APS schedule"),
     ]
 
     subparsers = parser.add_subparsers(title="Commands", metavar='')
@@ -142,7 +143,6 @@ def main():
 
     args = config.parse_known_args(parser, subparser=True)
 
-    print(args)
     try:
         # load args from default (config.py) if not changed
         config.log_values(args)

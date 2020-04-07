@@ -49,11 +49,7 @@
 """
 Module generating user and proposal info PVs
 """
-
 import pytz
-import datetime
-import time
-import sys
 
 from dmagic import scheduling
 from dmagic import pv_beamline_2bm as pv
