@@ -290,7 +290,7 @@ def get_proposal_id(date=None):
 
             if event.activityType.activityTypeName in ['GUP', 'PUP', 'rapid-access', 'sector staff']:
                 if date >= start_time and date <= ed:
-                        proposal_id = event.beamtimeRequest.proposal.id
+                        proposal_id = str(event.beamtimeRequest.proposal.id)
         except:
             ipdb.set_trace()
             raise
