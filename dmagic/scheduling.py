@@ -344,7 +344,7 @@ def get_experiment_start(date=None):
 
             if event.activityType.activityTypeName in ['GUP', 'PUP', 'rapid-access', 'sector staff']:
                 if date >= start_time and date <= ed:
-                        experiment_start = str(event.startTime)
+                        experiment_start = event.startTime
         except:
             ipdb.set_trace()
             raise
@@ -470,6 +470,7 @@ def find_experiment_info(date=None):
     experiment['title'] = get_proposal_title(date.replace(tzinfo=None))
     experiment['title'] = experiment['title'][:256]
     experiment['start'] = get_experiment_start(date.replace(tzinfo=None))
+    experiment['start'] = str(experiment['start'].strftime(datetime_format))
 
     return experiment
 
