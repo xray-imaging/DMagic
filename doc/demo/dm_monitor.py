@@ -72,8 +72,10 @@ def main():
     log.info("Saving log at %s" % lfname)
 
     # set the experiment date 
-    # now = datetime.today()
+    # testing date
     now = datetime(2016, 2, 19, 10, 10, 30)
+    # now = datetime.datetime.today()
+
     log.info("Today's date: %s" % now)
 
     # # find the experiment starting date
