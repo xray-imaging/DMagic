@@ -9,8 +9,9 @@ from dmagic import log
 
 CONFIG_FILE_NAME = os.path.join(str(pathlib.Path.home()), 'dmagic.conf')
 USERNAME = '123456'
-PASSWORD = 'asdfsadfasdf'
-
+PASSWORD = 'password'
+BEAMLINE = "2-BM-A,B"
+    
 SECTIONS = OrderedDict()
 
 SECTIONS['general'] = {
@@ -49,7 +50,7 @@ SECTIONS['hosts'] = {
 
 SECTIONS['settings'] = {
     'beamline' : {
-        'default' : "2-BM-A,B",
+        'default' : BEAMLINE,
         'type': str,
         'help': "beam line"},
     }
