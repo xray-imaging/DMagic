@@ -16,6 +16,7 @@ This guide is maintained on
    
    source/about
    source/install
+   source/example
    source/api
 
 
