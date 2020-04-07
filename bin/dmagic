@@ -59,7 +59,7 @@ import datetime
 import argparse
 
 from dmagic import scheduling
-from dmagic import pv_daemon
+from dmagic import pv_update
 from dmagic import log
 from dmagic import config
 
