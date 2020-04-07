@@ -3,13 +3,13 @@ from setuptools import setup, Extension, find_packages
 setup(
     name = 'dmagic',
     author = 'Francesco De Carlo',
-    author_email = 'decarlof@aps.anl.gov',
+    author_email = 'decarlo@anl.gov',
     description = 'Data Management Magic Tools.',
     packages = find_packages(),
     version = open('VERSION').read().strip(),
     zip_safe = False,
     url='http://dmagic.readthedocs.org',
-    download_url='http://github.com/decarlof/dmagic.git',
+    download_url='https://github.com/xray-imaging/DMagic.git',
     license='BSD-3',
     platforms='Any',
     classifiers=[
@@ -22,6 +22,7 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-        ]
+        ],
+    scripts=['bin/dmagic']
 )
 

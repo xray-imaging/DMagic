@@ -75,7 +75,7 @@ main.py
 
 # Distribution / packaging #
 ############################
-bin/
+# bin/
 build/
 develop-eggs/
 dist/
