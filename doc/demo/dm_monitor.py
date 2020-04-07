@@ -56,19 +56,23 @@ import os
 import sys
 import pytz
 import datetime
-# from datetime import datetime
 
 # set ~/globus.ini and ~/scheduling.ini to match your configuration
 from dmagic import scheduling
 from dmagic import log
 
 def main():
-
-    # logs_home = '~'
-    # lfname = os.path.join(logs_home, 'dmagic_' + datetime.strftime(datetime.now(), "%Y-%m-%d_%H_%M_%S") + '.log')
-    lfname = 'dmagic_' + datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d_%H_%M_%S") + '.log'
  
+    home = os.path.expanduser("~")
+    logs_home = home + '/logs/'
+
+    # make sure logs directory exists
+    if not os.path.exists(logs_home):
+        os.makedirs(logs_home)
+
+    lfname = logs_home + 'dmagic_' + datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d_%H:%M:%S") + '.log'
     log.setup_custom_logger(lfname)
+
     log.info("Saving log at %s" % lfname)
 
     # set the experiment date 
@@ -77,21 +81,6 @@ def main():
     # now = datetime.datetime.today()
 
     log.info("Today's date: %s" % now)
-
-    # # find the experiment starting date
-    # exp_start = scheduling.find_experiment_start(now)
-    # log.info("Experiment starting date/time: %s" % exp_start)
-
-    # # create an experiment ID using the PI last name 
-    # exp_id = scheduling.find_pi_last_name(now)
-    # log.info("Experiment ID: %s " % exp_id)
-
-    # # find the user running now
-    # users = scheduling.find_users(now)
-    # scheduling.print_users(users)
-
-
-    # scheduling.find_emails(users)
 
     # get PI information
     pi = scheduling.find_pi_info(now)

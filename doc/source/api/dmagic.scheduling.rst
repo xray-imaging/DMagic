@@ -10,9 +10,7 @@
 
    .. autosummary::
    
-      create_experiment_id
-      find_experiment_start
-      find_pi_last_name
-      find_users
-      print_experiment_info
-      print_users
+      get_users
+      find_emails
+      find_pi_info
+      find_experiment_info

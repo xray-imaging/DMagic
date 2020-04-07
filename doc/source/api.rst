@@ -9,8 +9,6 @@ for `DMagic <https://github.com/decarlof/DMagic>`_.
 .. toctree::
 
    api/dmagic.scheduling
-   api/dmagic.globus
-   api/dmagic.react
 
 
 .. automodule:: dmagic

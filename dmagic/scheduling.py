@@ -80,14 +80,10 @@ __author__ = "Francesco De Carlo"
 __credits__ = "John Hammonds"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['find_experiment_start',
-           'find_pi_last_name',
-           'find_users',
+__all__ = ['get_users',
+           'find_emails',
            'find_pi_info',
            'find_experiment_info',
-           'find_emails',
-           'print_experiment_info',
-           'print_users'
            ]
 
 debug = False
@@ -448,7 +444,7 @@ def find_pi_info(date=None):
 
 def find_experiment_info(date=None):
     """
-    Generate a unique experiment id as g + GUP # + r + Beamtime Request
+    Find experiment info (GUP, Title, Start date)
      
     Parameters
     ----------
@@ -473,8 +469,6 @@ def find_experiment_info(date=None):
     experiment['start'] = str(experiment['start'].strftime(datetime_format))
 
     return experiment
-
-    # return str(proposal_id), str(proposal_title[:256]), str(experiment_start.strftime(datetime_format))
 
 
 def find_experiment_start(date=None):
@@ -577,7 +571,7 @@ def print_users(users):
 
 def find_emails(users, exclude_pi=True):
     """
-    Print the user emails running at beamline at a specific date (all except the PI)
+    Find user's emails running at beamline at a specific date)
      
     Parameters
     ----------
@@ -586,7 +580,7 @@ def find_emails(users, exclude_pi=True):
     
     Returns
     -------
-    List of user mails (all but PI)       
+    List of user emails (default: all but PI)       
     """
     emails = []
     i = 0
