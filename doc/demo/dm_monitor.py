@@ -47,64 +47,65 @@
 # #########################################################################
 
 """
-Module containing an example on how to use DMagic to setup an experiment for 
-managed data saving by monitoring the raw data collection folder and 
-automatically copy to the data processing machine and share to users via Globus.
+Module containing an example on how to use DMagic to access the APS scheduling
+system information.
 
 """
 
-import pytz
-import datetime
-import sys
 import os
+import sys
+import pytz
+# import datetime
+from datetime import datetime
 
 # set ~/globus.ini and ~/scheduling.ini to match your configuration
-import dmagic.scheduling as sch
-import dmagic.globus as gb
+from dmagic import scheduling
+from dmagic import log
 
-# print the current Globus settings
-gb.dm_settings()
+def main():
 
-# set the experiment date 
-now = datetime.datetime.today()
-#now = datetime.datetime(2016, 02, 19, 10, 10, 30)
-#now = datetime.datetime(2016, 02, 21, 10, 10, 30)
-#now = datetime.datetime(2016, 02, 24, 10, 10, 30)
-#now = datetime.datetime(2016, 02, 26, 10, 10, 30)
-print "Today's date: ", now
+    # logs_home = '~'
+    # lfname = os.path.join(logs_home, 'dmagic_' + datetime.strftime(datetime.now(), "%Y-%m-%d_%H_%M_%S") + '.log')
+    lfname = 'dmagic_' + datetime.strftime(datetime.now(), "%Y-%m-%d_%H_%M_%S") + '.log'
+ 
+    log.setup_custom_logger(lfname)
+    log.info("Saving log at %s" % lfname)
 
-# find the experiment starting date
-exp_start = sch.find_experiment_start(now)
-print "Experiment starting date/time: ", exp_start
+    # set the experiment date 
+    # now = datetime.today()
+    now = datetime(2016, 2, 19, 10, 10, 30)
+    log.info("Today's date: %s" % now)
 
-# create a unique experiment ID using GUP and beamtime request (BR) numbers:  g + GUP# + r + BR#
-#exp_id = sch.create_experiment_id(now)
-             
-# create an experiment ID using the PI last name 
-exp_id = sch.find_pi_last_name(now)
-print "Experiment ID: ", exp_id
+    # # find the experiment starting date
+    # exp_start = scheduling.find_experiment_start(now)
+    # log.info("Experiment starting date/time: %s" % exp_start)
 
-# create a local directory to store the raw data as: 
-# \local_folder\YYYY-MM\gGUP#rBR#\  or \local_folder\YYYY-MM\PI_last_name\  
-directory = gb.dm_create_directory(exp_start, exp_id, 'local')
+    # # create an experiment ID using the PI last name 
+    # exp_id = scheduling.find_pi_last_name(now)
+    # log.info("Experiment ID: %s " % exp_id)
 
-# create the same directory on the globus personal endpoint
-gb.dm_create_directory(exp_start, exp_id, 'personal')
+    # # find the user running now
+    # users = scheduling.find_users(now)
+    # scheduling.print_users(users)
 
-# find the user running now
-users = sch.find_users(now)
 
-# print user information
-#sch.print_users(users)
+    # scheduling.find_emails(users)
 
-# share the personal endpoint directory with the users. 
-# users will receive an e-mail with a drop-box style link to access the data
-cmd = gb.dm_share(directory, users, 'personal')
-for share in cmd: 
-    print share
-    os.system(share)
+    # get PI information
+    pi = scheduling.find_pi_info(now)
 
-# monitor the local directory and automatically copy any new file
-# to the shared directory on the globus personal endpoint
-gb.dm_monitor(directory)
+    log.info('PI full name: %s' % pi['name'])
+    log.info('PI last name: %s' % pi['last_name'])
+    log.info('Institution: %s' % pi['institution'])
+    log.info('email: %s' % pi['email'])
+    log.info('badge: %s' % pi['badge'])
 
+    # get experiment information
+    experiment = scheduling.find_experiment_info(now)
+    log.info('GUP: %s' % experiment['id'])
+    log.info('Title: %s' % experiment['title'])
+    log.info('Start: %s' % experiment['start'])
+
+
+if __name__ == '__main__':
+    main()
