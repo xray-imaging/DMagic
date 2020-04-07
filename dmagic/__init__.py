@@ -47,4 +47,3 @@
 # #########################################################################
 
 from dmagic.scheduling import *
-#from globus import *
