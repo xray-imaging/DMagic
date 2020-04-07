@@ -1,5 +1,3 @@
 setuptools
 suds-py3
 ipdb
-validate_email
-pyinotify
