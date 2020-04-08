@@ -2,11 +2,13 @@
 Usage
 =====
 
-Initlialize DMagic status::
+DMagic retrieves user and experiment information from the APS scheduling system. To initlialize DMagic status::
 
     $ dmagic init
 
-this creates the DMagic config file: ~/dmagic.conf.
+this creates the DMagic config file: ~/dmagic.conf with default values.
+
+To show the list of users currently running at the beameline:
 
 ::
 
