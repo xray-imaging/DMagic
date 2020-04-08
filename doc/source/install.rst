@@ -1,6 +1,6 @@
-==================
-Install directions
-==================
+=======
+Install
+=======
 
 This section covers the basics of how to download and install `DMagic <https://github.com/xray-imaging/DMagic>`_.
 
@@ -21,15 +21,10 @@ to access the `APS scheduling system <https://schedule.aps.anl.gov/>`__.
 Installing from source
 ======================
 
-Install the following::
+In a prepared virtualenv or as root for system-wide installation clone the `DMagic <https://github.com/xray-imaging/DMagic>`_
+from `GitHub <https://github.com>`_ repository
 
-    $ pip install suds-py3 
-    $ pip install ipdb
-    $ pip install validate-email
-    $ pip install pyinotify
-
-Clone the `DMagic <https://github.com/decarlof/DMagic>`_  
-from `GitHub <https://github.com>`_ repository::
+::
 
     $ git clone https://github.com/xray-imaging/DMagic DMagic
 
@@ -48,17 +43,53 @@ then::
     $ cd DMagic
     $ python setup.py install
 
-Usage
-=====
+.. warning:: If your python installation is in a location different from #!/usr/bin/env python please edit the first line of the bin/dmagic file to match yours.
 
-First initialize DMagic status with::
+EPICS tools
+===========
 
-    $ dmagic init
 
-then you can test the installation with::
+* Copy and customize in your EPICS ioc boot directory the :download:`experimentInfo.db <../demo/epics/experimentInfo.db>` and :download:`experimentInfo_settings.req <../demo/epics/experimentInfo_settings.req>` files.
 
-    $ dmagic show
+* Edit your EPICS ioc start up script by adding:
 
-for help::
+::
 
-    dmagic -h
+    dbLoadRecords("$(TOP)/experimentInfo.db", "P=32idcTXM:")
+
+* Add a link to your main MEDM screen to load the :download:`experiment_info.adl <../demo/epics/experiment_info.adl>`
+
+.. image:: img/medm_screen.png
+  :width: 400
+  :alt: medm screen
+
+* Customize the dmagic/pv_beamline.py file to match the PV names in use at your beamline (see examples for 2-BM :download:`pv_beamline_2bm.py <../demo/epics/pv_beamline_2bm.py>` and 7-BM :download:`pv_beamline_7bm.py <../demo/epics/pv_beamline_2bm.py>`
+
+
+
+
+Update
+======
+
+**dmagic** is constantly updated to include new features. To update your locally installed version::
+
+    $ cd dmagic
+    $ git pull
+    $ python setup.py install
+
+
+Dependencies
+============
+
+Install the following package::
+
+    $ pip install suds-py3 
+    $ pip install ipdb
+    $ pip install validate-email
+    $ pip install pyinotify
+    $ pip install pyepics
+
+
+.. warning:: If requiere edit your .cshrc to set PYEPICS_LIBCA: Example: setenv PYEPICS_LIBCA /APSshare/epics/extensions-base/3.14.12.2-ext1/lib/linux-x86_64/libca.so
+
+

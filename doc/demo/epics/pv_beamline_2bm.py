@@ -47,39 +47,26 @@
 # #########################################################################
 
 """
-Module generating user and proposal info PVs
+User info process variable definition. Please customize the prefix (2bmS1:) to match the one used by your IOC
+
 """
-import pytz
 
-from dmagic import scheduling
-from dmagic import pv_beamline as pv
-
-from dmagic import log
+from epics import PV
 
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2015-2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 
-def pv_daemon(args, date=None):
+# User Status
+user_name = PV('2bmS1:ExpInfo:UserName')
+user_last_name = PV('2bmS1:ExpInfo:UserLastName')
+user_affiliation = PV('2bmS1:ExpInfo:UserInstitution')
+user_badge = PV('2bmS1:ExpInfo:UserBadge')
+user_email = PV('2bmS1:ExpInfo:UserEmail')
+proposal_number = PV('2bmS1:ExpInfo:ProposalNumber')
+proposal_title = PV('2bmS1:ExpInfo:ProposalTitle')
+user_info_update_time= PV('2bmS1:ExpInfo:UserInfoUpdate')
+experiment_date = PV('2bmS1:ExpInfo:ExperimentYearMonth')
+#file_name = PV('32idcPG3:HDF1:FileName')
+#file_path = PV('32idcPG3:HDF1:FilePath_RBV')
 
-    # set iso format time
-    central = pytz.timezone('US/Central')
-    local_time = central.localize(date)
-    local_time_iso = local_time.isoformat()
-
-    pv.user_info_update_time.put(local_time_iso)
-    log.info("User/Experiment PV update")
-
-    # get PI information
-    pi = scheduling.find_pi_info(args, date)
-    pv.user_name.put(pi['name'])
-    pv.user_last_name.put(pi['last_name'])    
-    pv.user_affiliation.put(pi['institution'])
-    pv.user_email.put(pi['email'])
-    pv.user_badge.put(pi['badge'])
-    
-    # get experiment information
-    experiment = scheduling.find_experiment_info(args, date)
-    pv.proposal_number.put(experiment['id'])
-    pv.proposal_title.put(experiment['title'])
-    pv.experiment_date.put(experiment['start'])
