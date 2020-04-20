@@ -44,6 +44,13 @@ record(waveform, "$(P)ExpInfo:ProposalTitle") {
     field(FTVL, "CHAR")
 }
 
+record(waveform, "$(P)ExpInfo:ESAFNumber") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(NELM, "256")
+    field(FTVL, "CHAR")
+}
+
 record(waveform, "$(P)ExpInfo:SampleName") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
@@ -51,7 +58,21 @@ record(waveform, "$(P)ExpInfo:SampleName") {
     field(FTVL, "CHAR")
 }
 
-record(waveform, "$(P)ExpInfo:SampleDescription") {
+record(waveform, "$(P)ExpInfo:SampleDescription1") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(NELM, "256")
+    field(FTVL, "CHAR")
+}
+
+record(waveform, "$(P)ExpInfo:SampleDescription2") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(NELM, "256")
+    field(FTVL, "CHAR")
+}
+
+record(waveform, "$(P)ExpInfo:SampleDescription3") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
     field(NELM, "256")
@@ -65,18 +86,6 @@ record(waveform, "$(P)ExpInfo:UserInfoUpdate") {
     field(FTVL, "CHAR")
 }
 
-record(ao, "$(P)ExpInfo:LensMagnification") {
-    field(SCAN, "Passive")
-    field(DTYP, "Soft Channel")
-    field(PREC, 3)
-}
-
-record(ao, "$(P)ExpInfo:ImageResolution") {
-    field(SCAN, "Passive")
-    field(DTYP, "Soft Channel")
-    field(PREC, 3)
-}
-
 record(waveform, "$(P)ExpInfo:ScintillatorType") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
@@ -84,7 +93,44 @@ record(waveform, "$(P)ExpInfo:ScintillatorType") {
     field(FTVL, "CHAR")
 }
 
+record(ao, "$(P)ExpInfo:ScintillatorThickness") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(PREC, 3)
+}
+
+record(ao, "$(P)ExpInfo:ImagePixelSize") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(PREC, 3)
+}
+
+record(ao, "$(P)ExpInfo:DetectorPixelSize") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(PREC, 3)
+}
+
+record(ao, "$(P)ExpInfo:CameraObjective") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(PREC, 3)
+}
+
+record(ao, "$(P)ExpInfo:CameraTubeLength") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(PREC, 3)
+}
+
 record(waveform, "$(P)ExpInfo:Filters") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(NELM, "256")
+    field(FTVL, "CHAR")
+}
+
+record(waveform, "$(P)ExpInfo:FileName") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
     field(NELM, "256")
@@ -126,13 +172,6 @@ record(waveform, "$(P)ExpInfo:Station") {
     field(FTVL, "CHAR")
 }
 
-record(waveform, "$(P)ExpInfo:FileName") {
-    field(SCAN, "Passive")
-    field(DTYP, "Soft Channel")
-    field(NELM, "256")
-    field(FTVL, "CHAR")
-}
-
 record(bo, "$(P)ExpInfo:UseFurnace") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
@@ -140,7 +179,19 @@ record(bo, "$(P)ExpInfo:UseFurnace") {
     field(ONAM, "True")
 }
 
-record(mbbo, "$(P)ExpInfo:WhiteFieldMotion") {
+record(ao, "$(P)ExpInfo:FurnaceInPosition") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(PREC, 3)
+}
+
+record(ao, "$(P)ExpInfo:FurnaceOutPosition") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(PREC, 3)
+}
+
+record(mbbo, "$(P)ExpInfo:FlatFieldAxis") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
     field(ZRVL, "0")
@@ -173,75 +224,108 @@ record(mbbo, "$(P)ExpInfo:ScanType") {
     field(THST, "Mosaic")
 }
 
-record(longout, "$(P)ExpInfo:NumProjections") {
+record(longout, "$(P)ExpInfo:NumAngles") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
     field(DRVL, "0")
     field(DRVH, "10000000")
 }
 
-record(longout, "$(P)ExpInfo:NumWhiteImages") {
+record(waveform, "$(P)ExpInfo:ReturnRotation") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(NELM, "256")
+    field(FTVL, "CHAR")
+}
+
+record(longout, "$(P)ExpInfo:NumFlatFields") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
     field(DRVL, "0")
     field(DRVH, "10000000")
 }
 
-record(longout, "$(P)ExpInfo:NumDarkImages") {
+record(waveform, "$(P)ExpInfo:FlatFieldMode") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(NELM, "256")
+    field(FTVL, "CHAR")
+}
+
+record(ao, "$(P)ExpInfo:FlatFieldValue") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
     field(DRVL, "0")
     field(DRVH, "10000000")
 }
 
-record(ao, "$(P)ExpInfo:ScintillatorThickness") {
+record(longout, "$(P)ExpInfo:NumDarkFields") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(DRVL, "0")
+    field(DRVH, "10000000")
+}
+
+record(waveform, "$(P)ExpInfo:DarkFieldMode") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(NELM, "256")
+    field(FTVL, "CHAR")
+}
+
+record(ao, "$(P)ExpInfo:DarkFieldValue") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(DRVL, "0")
+    field(DRVH, "10000000")
+}
+
+record(ao, "$(P)ExpInfo:CameraDistance") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
     field(PREC, 3)
 }
 
-record(ao, "$(P)ExpInfo:SampleDetectorDistance") {
-    field(DOL, "2bma:m22.VAL CP")
-    field(OMSL, "closed_loop")
+record(ao, "$(P)ExpInfo:SampleInX") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
     field(PREC, 3)
 }
 
-record(ao, "$(P)ExpInfo:SampleInPosition") {
+record(ao, "$(P)ExpInfo:SampleOutX") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
     field(PREC, 3)
 }
 
-record(ao, "$(P)ExpInfo:SampleOutPosition") {
+record(ao, "$(P)ExpInfo:SampleInY") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
     field(PREC, 3)
 }
 
-record(ao, "$(P)ExpInfo:SampleRotationStart") {
+record(ao, "$(P)ExpInfo:SampleOutY") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(PREC, 3)
+}
+
+record(ao, "$(P)ExpInfo:RotationStart") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
     field(PREC, 1)
 }
 
-record(ao, "$(P)ExpInfo:SampleRotationEnd") {
+record(ao, "$(P)ExpInfo:RotationStep") {
+    field(SCAN, "Passive")
+    field(DTYP, "Soft Channel")
+    field(PREC, 3)
+}
+
+record(ao, "$(P)ExpInfo:RotationEnd") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
     field(PREC, 1)
-}
-
-record(ao, "$(P)ExpInfo:FurnaceInPosition") {
-    field(SCAN, "Passive")
-    field(DTYP, "Soft Channel")
-    field(PREC, 3)
-}
-
-record(ao, "$(P)ExpInfo:FurnaceOutPosition") {
-    field(SCAN, "Passive")
-    field(DTYP, "Soft Channel")
-    field(PREC, 3)
 }
 
 record(ao, "$(P)ExpInfo:SleepTime") {
@@ -290,12 +374,6 @@ record(ao, "$(P)ExpInfo:Energy") {
     field(SCAN, "Passive")
     field(DTYP, "Soft Channel")
     field(PREC, 2)
-}
-
-record(ao, "$(P)ExpInfo:CCDPixelSize") {
-    field(SCAN, "Passive")
-    field(DTYP, "Soft Channel")
-    field(PREC, 3)
 }
 
 record(mbbo, "$(P)ExpInfo:EnergyMode") {
