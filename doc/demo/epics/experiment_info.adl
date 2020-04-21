@@ -1,14 +1,14 @@
 
 file {
-	name="/home/beams1/BCDA/DTagging/epics/experiment_info.adl"
+	name="/net/s2dserv/xorApps/epics/synApps_5_8/ioc/2bma/2bmaApp/op/adl/../../../../2bmS1/2bmS1App/op/adl/experiment_info.adl"
 	version=030111
 }
 display {
 	object {
-		x=797
-		y=502
+		x=3067
+		y=41
 		width=500
-		height=1040
+		height=1100
 	}
 	clr=14
 	bclr=4
@@ -100,144 +100,23 @@ text {
 	textix="Time:"
 	align="horiz. right"
 }
-composite {
+rectangle {
 	object {
 		x=4
-		y=636
+		y=721
 		width=490
-		height=94
+		height=70
 	}
-	"composite name"=""
-	children {
-		text {
-			object {
-				x=113
-				y=662
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Use Furnace"
-			align="horiz. right"
-		}
-		text {
-			object {
-				x=113
-				y=640
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="White Field Motion"
-			align="horiz. right"
-		}
-		text {
-			object {
-				x=113
-				y=684
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Furnace In Position"
-			align="horiz. right"
-		}
-		text {
-			object {
-				x=113
-				y=706
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Furnace Out Position"
-			align="horiz. right"
-		}
-		"text entry" {
-			object {
-				x=242
-				y=706
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:FurnaceOutPosition"
-				clr=14
-				bclr=4
-			}
-			format="string"
-			limits {
-			}
-		}
-		"text entry" {
-			object {
-				x=242
-				y=684
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:FurnaceInPosition"
-				clr=14
-				bclr=4
-			}
-			format="string"
-			limits {
-			}
-		}
-		menu {
-			object {
-				x=242
-				y=662
-				width=150
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:UseFurnace"
-				clr=14
-				bclr=51
-			}
-		}
-		menu {
-			object {
-				x=242
-				y=640
-				width=150
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:WhiteFieldMotion"
-				clr=14
-				bclr=51
-			}
-		}
-		rectangle {
-			object {
-				x=4
-				y=636
-				width=490
-				height=94
-			}
-			"basic attribute" {
-				clr=14
-				fill="outline"
-				width=2
-			}
-		}
+	"basic attribute" {
+		clr=14
+		fill="outline"
+		width=2
 	}
 }
 composite {
 	object {
 		x=4
-		y=915
+		y=976
 		width=490
 		height=120
 	}
@@ -246,7 +125,7 @@ composite {
 		rectangle {
 			object {
 				x=4
-				y=915
+				y=976
 				width=490
 				height=120
 			}
@@ -259,7 +138,7 @@ composite {
 		text {
 			object {
 				x=113
-				y=921
+				y=982
 				width=119
 				height=20
 			}
@@ -272,7 +151,7 @@ composite {
 		"text entry" {
 			object {
 				x=242
-				y=921
+				y=982
 				width=249
 				height=20
 			}
@@ -288,7 +167,7 @@ composite {
 		text {
 			object {
 				x=113
-				y=943
+				y=1004
 				width=119
 				height=20
 			}
@@ -301,7 +180,7 @@ composite {
 		"text entry" {
 			object {
 				x=242
-				y=943
+				y=1004
 				width=249
 				height=20
 			}
@@ -317,7 +196,7 @@ composite {
 		text {
 			object {
 				x=113
-				y=965
+				y=1026
 				width=119
 				height=20
 			}
@@ -330,7 +209,7 @@ composite {
 		"text entry" {
 			object {
 				x=242
-				y=965
+				y=1026
 				width=249
 				height=20
 			}
@@ -346,7 +225,7 @@ composite {
 		menu {
 			object {
 				x=242
-				y=987
+				y=1048
 				width=150
 				height=20
 			}
@@ -359,7 +238,7 @@ composite {
 		text {
 			object {
 				x=113
-				y=987
+				y=1048
 				width=119
 				height=20
 			}
@@ -372,7 +251,7 @@ composite {
 		text {
 			object {
 				x=113
-				y=1009
+				y=1070
 				width=119
 				height=20
 			}
@@ -385,7 +264,7 @@ composite {
 		"text entry" {
 			object {
 				x=242
-				y=1009
+				y=1070
 				width=249
 				height=20
 			}
@@ -589,21 +468,6 @@ text {
 	limits {
 	}
 }
-"shell command" {
-	object {
-		x=9
-		y=186
-		width=119
-		height=20
-	}
-	command[0] {
-		label="Start DTagging"
-		name="/local/user2bmb/conda/DTagging/dtagging.sh &"
-	}
-	clr=14
-	bclr=51
-	label="- Update@arcturus"
-}
 text {
 	object {
 		x=114
@@ -745,234 +609,7 @@ menu {
 composite {
 	object {
 		x=4
-		y=473
-		width=490
-		height=160
-	}
-	"composite name"=""
-	children {
-		rectangle {
-			object {
-				x=4
-				y=473
-				width=490
-				height=160
-			}
-			"basic attribute" {
-				clr=14
-				fill="outline"
-				width=2
-			}
-		}
-		text {
-			object {
-				x=113
-				y=477
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Num Projections"
-			align="horiz. right"
-		}
-		text {
-			object {
-				x=113
-				y=499
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Num White Fields"
-			align="horiz. right"
-		}
-		text {
-			object {
-				x=113
-				y=521
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Num Dark Fields"
-			align="horiz. right"
-		}
-		text {
-			object {
-				x=113
-				y=587
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Sample In Position"
-			align="horiz. right"
-		}
-		text {
-			object {
-				x=113
-				y=609
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Sample Out Position"
-			align="horiz. right"
-		}
-		text {
-			object {
-				x=113
-				y=543
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Sample Rotation Start"
-			align="horiz. right"
-		}
-		text {
-			object {
-				x=113
-				y=565
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Sample Rotation End"
-			align="horiz. right"
-		}
-		"text entry" {
-			object {
-				x=242
-				y=477
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:NumProjections"
-				clr=14
-				bclr=4
-			}
-			format="string"
-			limits {
-			}
-		}
-		"text entry" {
-			object {
-				x=242
-				y=499
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:NumWhiteImages"
-				clr=14
-				bclr=4
-			}
-			format="string"
-			limits {
-			}
-		}
-		"text entry" {
-			object {
-				x=242
-				y=521
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:NumDarkImages"
-				clr=14
-				bclr=4
-			}
-			format="string"
-			limits {
-			}
-		}
-		"text entry" {
-			object {
-				x=242
-				y=543
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:SampleRotationStart"
-				clr=14
-				bclr=4
-			}
-			format="string"
-			limits {
-			}
-		}
-		"text entry" {
-			object {
-				x=242
-				y=565
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:SampleRotationEnd"
-				clr=14
-				bclr=4
-			}
-			format="string"
-			limits {
-			}
-		}
-		"text entry" {
-			object {
-				x=242
-				y=587
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:SampleInPosition"
-				clr=14
-				bclr=4
-			}
-			format="string"
-			limits {
-			}
-		}
-		"text entry" {
-			object {
-				x=242
-				y=609
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:SampleOutPosition"
-				clr=14
-				bclr=4
-			}
-			format="string"
-			limits {
-			}
-		}
-	}
-}
-composite {
-	object {
-		x=4
-		y=732
+		y=793
 		width=490
 		height=180
 	}
@@ -981,7 +618,7 @@ composite {
 		text {
 			object {
 				x=113
-				y=736
+				y=797
 				width=119
 				height=20
 			}
@@ -994,7 +631,7 @@ composite {
 		text {
 			object {
 				x=113
-				y=758
+				y=819
 				width=119
 				height=20
 			}
@@ -1007,7 +644,7 @@ composite {
 		text {
 			object {
 				x=113
-				y=780
+				y=841
 				width=119
 				height=20
 			}
@@ -1020,7 +657,7 @@ composite {
 		text {
 			object {
 				x=113
-				y=802
+				y=863
 				width=119
 				height=20
 			}
@@ -1033,7 +670,7 @@ composite {
 		text {
 			object {
 				x=113
-				y=824
+				y=885
 				width=119
 				height=20
 			}
@@ -1046,7 +683,7 @@ composite {
 		text {
 			object {
 				x=113
-				y=846
+				y=907
 				width=119
 				height=20
 			}
@@ -1059,7 +696,7 @@ composite {
 		text {
 			object {
 				x=113
-				y=868
+				y=929
 				width=119
 				height=20
 			}
@@ -1072,7 +709,7 @@ composite {
 		text {
 			object {
 				x=113
-				y=890
+				y=951
 				width=119
 				height=20
 			}
@@ -1085,7 +722,7 @@ composite {
 		"text entry" {
 			object {
 				x=242
-				y=890
+				y=951
 				width=249
 				height=20
 			}
@@ -1101,7 +738,7 @@ composite {
 		"text entry" {
 			object {
 				x=242
-				y=868
+				y=929
 				width=249
 				height=20
 			}
@@ -1117,7 +754,7 @@ composite {
 		"text entry" {
 			object {
 				x=242
-				y=846
+				y=907
 				width=249
 				height=20
 			}
@@ -1133,7 +770,7 @@ composite {
 		"text entry" {
 			object {
 				x=242
-				y=824
+				y=885
 				width=249
 				height=20
 			}
@@ -1149,7 +786,7 @@ composite {
 		"text entry" {
 			object {
 				x=242
-				y=802
+				y=863
 				width=249
 				height=20
 			}
@@ -1165,7 +802,7 @@ composite {
 		"text entry" {
 			object {
 				x=242
-				y=780
+				y=841
 				width=249
 				height=20
 			}
@@ -1181,7 +818,7 @@ composite {
 		"text entry" {
 			object {
 				x=242
-				y=758
+				y=819
 				width=249
 				height=20
 			}
@@ -1197,7 +834,7 @@ composite {
 		menu {
 			object {
 				x=242
-				y=736
+				y=797
 				width=150
 				height=20
 			}
@@ -1210,7 +847,7 @@ composite {
 		rectangle {
 			object {
 				x=4
-				y=732
+				y=793
 				width=490
 				height=180
 			}
@@ -1222,279 +859,62 @@ composite {
 		}
 	}
 }
-composite {
+text {
+	object {
+		x=114
+		y=275
+		width=119
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Camera Objective (x)"
+	align="horiz. right"
+}
+"text entry" {
+	object {
+		x=243
+		y=275
+		width=249
+		height=20
+	}
+	control {
+		chan="$(P)ExpInfo:CameraObjective"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+rectangle {
 	object {
 		x=4
 		y=271
 		width=490
-		height=200
+		height=220
+	}
+	"basic attribute" {
+		clr=14
+		fill="outline"
+		width=2
+	}
+}
+composite {
+	object {
+		x=4
+		y=495
+		width=490
+		height=225
 	}
 	"composite name"=""
 	children {
-		text {
-			object {
-				x=113
-				y=275
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Lens Mag (x)"
-			align="horiz. right"
-		}
-		"text entry" {
-			object {
-				x=242
-				y=275
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:LensMagnification"
-				clr=14
-				bclr=4
-			}
-			limits {
-			}
-		}
-		text {
-			object {
-				x=113
-				y=337
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Scin Type"
-			align="horiz. right"
-		}
-		"text entry" {
-			object {
-				x=242
-				y=337
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:ScintillatorType"
-				clr=14
-				bclr=4
-			}
-			format="string"
-			limits {
-			}
-		}
-		text {
-			object {
-				x=113
-				y=359
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Scin Thickness (um)"
-			align="horiz. right"
-		}
-		"text entry" {
-			object {
-				x=242
-				y=359
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:ScintillatorThickness"
-				clr=14
-				bclr=4
-			}
-			format="string"
-			limits {
-			}
-		}
-		text {
-			object {
-				x=113
-				y=381
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Sam-Det dist (mm)"
-			align="horiz. right"
-		}
-		"text entry" {
-			object {
-				x=242
-				y=381
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:SampleDetectorDistance"
-				clr=14
-				bclr=4
-			}
-			format="string"
-			limits {
-			}
-		}
-		text {
-			object {
-				x=113
-				y=403
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Filters"
-			align="horiz. right"
-		}
-		"text entry" {
-			object {
-				x=242
-				y=403
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:Filters"
-				clr=14
-				bclr=4
-			}
-			format="string"
-			limits {
-			}
-		}
-		text {
-			object {
-				x=113
-				y=425
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Sample Name"
-			align="horiz. right"
-		}
-		"text entry" {
-			object {
-				x=242
-				y=425
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:SampleName"
-				clr=14
-				bclr=4
-			}
-			format="string"
-			limits {
-			}
-		}
-		text {
-			object {
-				x=113
-				y=447
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="File Name"
-			align="horiz. right"
-		}
-		"text update" {
-			object {
-				x=242
-				y=447
-				width=249
-				height=20
-			}
-			monitor {
-				chan="$(PG)HDF1:FileName"
-				clr=54
-				bclr=4
-			}
-			format="string"
-			limits {
-			}
-		}
-		text {
-			object {
-				x=113
-				y=295
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="Image Resolution (um/pixel)"
-			align="horiz. right"
-		}
-		"text entry" {
-			object {
-				x=242
-				y=295
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:ImageResolution"
-				clr=14
-				bclr=4
-			}
-			limits {
-			}
-		}
-		text {
-			object {
-				x=113
-				y=317
-				width=119
-				height=20
-			}
-			"basic attribute" {
-				clr=14
-			}
-			textix="CCD Pixel Size (um)"
-			align="horiz. right"
-		}
-		"text entry" {
-			object {
-				x=242
-				y=317
-				width=249
-				height=20
-			}
-			control {
-				chan="$(P)ExpInfo:CCDPixelSize"
-				clr=14
-				bclr=4
-			}
-			limits {
-			}
-		}
 		rectangle {
 			object {
 				x=4
-				y=271
+				y=495
 				width=490
-				height=200
+				height=225
 			}
 			"basic attribute" {
 				clr=14
@@ -1502,5 +922,661 @@ composite {
 				width=2
 			}
 		}
+		"text entry" {
+			object {
+				x=242
+				y=499
+				width=249
+				height=20
+			}
+			control {
+				chan="$(P)ExpInfo:NumAngles"
+				clr=14
+				bclr=4
+			}
+			format="string"
+			limits {
+			}
+		}
+		"text entry" {
+			object {
+				x=242
+				y=521
+				width=249
+				height=20
+			}
+			control {
+				chan="$(P)ExpInfo:NumFlatFields"
+				clr=14
+				bclr=4
+			}
+			format="string"
+			limits {
+			}
+		}
+		"text entry" {
+			object {
+				x=242
+				y=543
+				width=249
+				height=20
+			}
+			control {
+				chan="$(P)ExpInfo:NumDarkFields"
+				clr=14
+				bclr=4
+			}
+			format="string"
+			limits {
+			}
+		}
+		"text entry" {
+			object {
+				x=242
+				y=565
+				width=249
+				height=20
+			}
+			control {
+				chan="$(P)ExpInfo:RotationStart"
+				clr=14
+				bclr=4
+			}
+			format="string"
+			limits {
+			}
+		}
+		"text entry" {
+			object {
+				x=242
+				y=587
+				width=249
+				height=20
+			}
+			control {
+				chan="$(P)ExpInfo:RotationEnd"
+				clr=14
+				bclr=4
+			}
+			format="string"
+			limits {
+			}
+		}
+		text {
+			object {
+				x=113
+				y=499
+				width=119
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Num Angles"
+			align="horiz. right"
+		}
+		text {
+			object {
+				x=113
+				y=521
+				width=119
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Num Flat Fields"
+			align="horiz. right"
+		}
+		text {
+			object {
+				x=113
+				y=543
+				width=119
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Num Dark Fields"
+			align="horiz. right"
+		}
+		text {
+			object {
+				x=113
+				y=565
+				width=119
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Rotation Start"
+			align="horiz. right"
+		}
+		text {
+			object {
+				x=113
+				y=587
+				width=119
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Rotation End"
+			align="horiz. right"
+		}
+		text {
+			object {
+				x=115
+				y=609
+				width=119
+				height=20
+			}
+			"basic attribute" {
+				clr=14
+			}
+			textix="Flat Field Axis"
+			align="horiz. right"
+		}
+		composite {
+			object {
+				x=112
+				y=631
+				width=379
+				height=86
+			}
+			"composite name"=""
+			children {
+				text {
+					object {
+						x=113
+						y=631
+						width=119
+						height=20
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="Sample in X"
+					align="horiz. right"
+				}
+				"text entry" {
+					object {
+						x=242
+						y=631
+						width=249
+						height=20
+					}
+					control {
+						chan="$(P)ExpInfo:SampleInX"
+						clr=14
+						bclr=4
+					}
+					format="string"
+					limits {
+					}
+				}
+				"text entry" {
+					object {
+						x=242
+						y=653
+						width=249
+						height=20
+					}
+					control {
+						chan="$(P)ExpInfo:SampleOutX"
+						clr=14
+						bclr=4
+					}
+					format="string"
+					limits {
+					}
+				}
+				text {
+					object {
+						x=113
+						y=653
+						width=119
+						height=20
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="Sample out X"
+					align="horiz. right"
+				}
+				text {
+					object {
+						x=112
+						y=675
+						width=119
+						height=20
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="Sample in Y"
+					align="horiz. right"
+				}
+				"text entry" {
+					object {
+						x=241
+						y=675
+						width=249
+						height=20
+					}
+					control {
+						chan="$(P)ExpInfo:SampleInY"
+						clr=14
+						bclr=4
+					}
+					format="string"
+					limits {
+					}
+				}
+				"text entry" {
+					object {
+						x=241
+						y=697
+						width=249
+						height=20
+					}
+					control {
+						chan="$(P)ExpInfo:SampleOutY"
+						clr=14
+						bclr=4
+					}
+					format="string"
+					limits {
+					}
+				}
+				text {
+					object {
+						x=112
+						y=697
+						width=119
+						height=20
+					}
+					"basic attribute" {
+						clr=14
+					}
+					textix="Sample out Y"
+					align="horiz. right"
+				}
+			}
+		}
+		menu {
+			object {
+				x=244
+				y=609
+				width=150
+				height=20
+			}
+			control {
+				chan="$(P)ExpInfo:FlatFieldAxis"
+				clr=14
+				bclr=51
+			}
+		}
 	}
+}
+text {
+	object {
+		x=114
+		y=315
+		width=119
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Image Pixel Size (um/pixel)"
+	align="horiz. right"
+}
+"text entry" {
+	object {
+		x=243
+		y=315
+		width=249
+		height=20
+	}
+	control {
+		chan="$(P)ExpInfo:ImagePixelSize"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=243
+		y=337
+		width=249
+		height=20
+	}
+	control {
+		chan="$(P)ExpInfo:DetectorPixelSize"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=114
+		y=337
+		width=119
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Detector Pixel Size (um)"
+	align="horiz. right"
+}
+text {
+	object {
+		x=114
+		y=357
+		width=119
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Scin Type"
+	align="horiz. right"
+}
+"text entry" {
+	object {
+		x=243
+		y=357
+		width=249
+		height=20
+	}
+	control {
+		chan="$(P)ExpInfo:ScintillatorType"
+		clr=14
+		bclr=4
+	}
+	format="string"
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=243
+		y=379
+		width=249
+		height=20
+	}
+	control {
+		chan="$(P)ExpInfo:ScintillatorThickness"
+		clr=14
+		bclr=4
+	}
+	format="string"
+	limits {
+	}
+}
+text {
+	object {
+		x=114
+		y=379
+		width=119
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Scin Thickness (um)"
+	align="horiz. right"
+}
+text {
+	object {
+		x=114
+		y=401
+		width=119
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Sam-Det dist (mm)"
+	align="horiz. right"
+}
+"text entry" {
+	object {
+		x=243
+		y=401
+		width=249
+		height=20
+	}
+	control {
+		chan="$(P)ExpInfo:CameraDistance"
+		clr=14
+		bclr=4
+	}
+	format="string"
+	limits {
+	}
+}
+"text entry" {
+	object {
+		x=243
+		y=423
+		width=249
+		height=20
+	}
+	control {
+		chan="$(P)ExpInfo:Filters"
+		clr=14
+		bclr=4
+	}
+	format="string"
+	limits {
+	}
+}
+text {
+	object {
+		x=114
+		y=423
+		width=119
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Filters"
+	align="horiz. right"
+}
+text {
+	object {
+		x=114
+		y=445
+		width=119
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Sample Name"
+	align="horiz. right"
+}
+"text entry" {
+	object {
+		x=243
+		y=445
+		width=249
+		height=20
+	}
+	control {
+		chan="$(P)ExpInfo:SampleName"
+		clr=14
+		bclr=4
+	}
+	format="string"
+	limits {
+	}
+}
+text {
+	object {
+		x=114
+		y=467
+		width=119
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="File Name"
+	align="horiz. right"
+}
+"text update" {
+	object {
+		x=243
+		y=467
+		width=249
+		height=20
+	}
+	monitor {
+		chan="$(PG)HDF1:FileName"
+		clr=54
+		bclr=4
+	}
+	format="string"
+	limits {
+	}
+}
+text {
+	object {
+		x=114
+		y=295
+		width=119
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Camera Tube Length (mm)"
+	align="horiz. right"
+}
+"text entry" {
+	object {
+		x=243
+		y=295
+		width=249
+		height=20
+	}
+	control {
+		chan="$(P)ExpInfo:CameraTubeLength"
+		clr=14
+		bclr=4
+	}
+	limits {
+	}
+}
+text {
+	object {
+		x=114
+		y=725
+		width=119
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Use Furnace"
+	align="horiz. right"
+}
+menu {
+	object {
+		x=243
+		y=725
+		width=150
+		height=20
+	}
+	control {
+		chan="$(P)ExpInfo:UseFurnace"
+		clr=14
+		bclr=51
+	}
+}
+text {
+	object {
+		x=114
+		y=745
+		width=119
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Furnace In Position"
+	align="horiz. right"
+}
+"text entry" {
+	object {
+		x=243
+		y=745
+		width=249
+		height=20
+	}
+	control {
+		chan="$(P)ExpInfo:FurnaceInPosition"
+		clr=14
+		bclr=4
+	}
+	format="string"
+	limits {
+	}
+}
+text {
+	object {
+		x=114
+		y=765
+		width=119
+		height=20
+	}
+	"basic attribute" {
+		clr=14
+	}
+	textix="Furnace Out Position"
+	align="horiz. right"
+}
+"text entry" {
+	object {
+		x=243
+		y=765
+		width=249
+		height=20
+	}
+	control {
+		chan="$(P)ExpInfo:FurnaceOutPosition"
+		clr=14
+		bclr=4
+	}
+	format="string"
+	limits {
+	}
+}
+"related display" {
+	object {
+		x=9
+		y=186
+		width=119
+		height=20
+	}
+	display[0] {
+		label="DTaggingUpdate"
+		name="DTaggingUpdate.adl"
+		args=" "
+	}
+	clr=14
+	bclr=51
+	label="-Update"
 }
