@@ -57,16 +57,20 @@ __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2015-2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 
+
+tomoscan_prefix = '2bma:'
+tomoscan = 'TomoScan:'
+
+
 # User Status
-user_name = PV('2bmS1:ExpInfo:UserName')
-user_last_name = PV('2bmS1:ExpInfo:UserLastName')
-user_affiliation = PV('2bmS1:ExpInfo:UserInstitution')
-user_badge = PV('2bmS1:ExpInfo:UserBadge')
-user_email = PV('2bmS1:ExpInfo:UserEmail')
-proposal_number = PV('2bmS1:ExpInfo:ProposalNumber')
-proposal_title = PV('2bmS1:ExpInfo:ProposalTitle')
-user_info_update_time= PV('2bmS1:ExpInfo:UserInfoUpdate')
-experiment_date = PV('2bmS1:ExpInfo:ExperimentYearMonth')
-#file_name = PV('32idcPG3:HDF1:FileName')
-#file_path = PV('32idcPG3:HDF1:FilePath_RBV')
+user_name = PV(tomoscan_prefix + tomoscan + 'UserName')
+user_last_name = PV(tomoscan_prefix + tomoscan + 'UserLastName')
+user_affiliation = PV(tomoscan_prefix + tomoscan + 'UserInstitution')
+user_badge = PV(tomoscan_prefix + tomoscan + 'UserBadge')
+user_email = PV(tomoscan_prefix + tomoscan + 'UserEmail')
+proposal_number = PV(tomoscan_prefix + tomoscan + 'ProposalNumber')
+proposal_title = PV(tomoscan_prefix + tomoscan + 'ProposalTitle')
+user_info_update_time= PV(tomoscan_prefix + tomoscan + 'UserInfoUpdate')
+experiment_date = PV(tomoscan_prefix + tomoscan + 'ExperimentYearMonth')
+
 
