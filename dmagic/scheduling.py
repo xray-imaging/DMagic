@@ -421,11 +421,11 @@ def find_pi_info(args, date=None):
 
     pi = dict()
 
-    pi['name'] = "empty pi_full_name"
-    pi['last_name'] = "empty pi_last_name"
-    pi['institution'] = "empty pi_institution"
-    pi['badge'] =  "empty pi_badge" 
-    pi['email'] = "empty pi_email"
+    pi['name'] = "empty_pi_full_name"
+    pi['last_name'] = "empty_pi_last_name"
+    pi['institution'] = "empty_pi_institution"
+    pi['badge'] =  "empty_pi_badge" 
+    pi['email'] = "empty_pi_email"
 
     for tag in users:
         if users[tag].get('piFlag') != None:
