@@ -8,9 +8,6 @@ from collections import OrderedDict
 from dmagic import log
 
 CONFIG_FILE_NAME = os.path.join(str(pathlib.Path.home()), 'dmagic.conf')
-USERNAME = '123456'
-PASSWORD = 'password'
-BEAMLINE = "2-BM-A,B"
     
 SECTIONS = OrderedDict()
 
@@ -28,11 +25,11 @@ SECTIONS['general'] = {
 # Customize to match your configuration
 SECTIONS['credentials'] = {
     'username' : {
-        'default': USERNAME,
+        'default': '',
         'type': str,
         'help': "scheduling system username (badge #)"},
     'password' : {
-        'default': PASSWORD,
+        'default': '',
         'type': str,
         'help': "scheduling system password"},
     }
@@ -50,9 +47,17 @@ SECTIONS['hosts'] = {
 
 SECTIONS['settings'] = {
     'beamline' : {
-        'default' : BEAMLINE,
+        'default' : '7-BM-B',
         'type': str,
         'help': "beam line"},
+    'pv_prefix' : {
+        'default' : '7bmb1:',
+        'type': str,
+        'help': "IOC prefix for PVs:"},
+    'scan_prefix' : {
+        'default' : '',
+        'type': str,
+        'help': "scan prefix for PVs:"},
     }
 
 DMAGIC_PARAMS = ('credentials', 'hosts', 'settings')
