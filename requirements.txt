@@ -1,3 +1,4 @@
 setuptools
 suds-py3
 ipdb
+pyepics
