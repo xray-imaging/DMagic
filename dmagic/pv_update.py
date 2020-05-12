@@ -123,14 +123,22 @@ def pv_daemon(args, date=None):
     # get PI information
     pi = scheduling.find_pi_info(args, date)
     user_pvs['user_name'].put(pi['name'])
+    log.info('PI full name: %s' % pi['name'])
     user_pvs['user_last_name'].put(pi['last_name'])    
+    log.info('PI last name: %s' % pi['last_name'])
     user_pvs['user_affiliation'].put(pi['institution'])
+    log.info('Institution: %s' % pi['institution'])
     user_pvs['user_email'].put(pi['email'])
+    log.info('email: %s' % pi['email'])
     user_pvs['user_badge'].put(pi['badge'])
+    log.info('badge: %s' % pi['badge'])
     
     # get experiment information
     experiment = scheduling.find_experiment_info(args, date)
     user_pvs['proposal_number'].put(experiment['id'])
+    log.info('GUP: %s' % experiment['id'])
     user_pvs['proposal_title'].put(experiment['title'])
+    log.info('Title: %s' % experiment['title'])
     user_pvs['experiment_date'].put(experiment['start'])
+    log.info('Start: %s' % experiment['start'])
     args = erase_credentials(args, clear_credentials)
