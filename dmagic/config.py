@@ -182,7 +182,7 @@ def log_values(args):
     args = args.__dict__
 
     for section, name in zip(SECTIONS, NICE_NAMES):
-        entries = sorted((k for k in args.keys() if k in SECTIONS[section]))
+        entries = sorted((k for k in args.keys() if k.replace('_', '-') in SECTIONS[section]))
 
         if entries:
             log.info(name)
