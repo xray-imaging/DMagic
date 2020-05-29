@@ -64,17 +64,16 @@ __docformat__ = 'restructuredtext en'
 def init_PVs(args):
     
     user_pvs = {}
-    tomoscan_prefix = args.pv_prefix
-    tomoscan = args.scan_prefix
-    user_pvs['user_name'] = PV(tomoscan_prefix + tomoscan + 'UserName')
-    user_pvs['user_last_name'] = PV(tomoscan_prefix + tomoscan + 'UserLastName')
-    user_pvs['user_affiliation'] = PV(tomoscan_prefix + tomoscan + 'UserInstitution')
-    user_pvs['user_badge'] = PV(tomoscan_prefix + tomoscan + 'UserBadge')
-    user_pvs['user_email'] = PV(tomoscan_prefix + tomoscan + 'UserEmail')
-    user_pvs['proposal_number'] = PV(tomoscan_prefix + tomoscan + 'ProposalNumber')
-    user_pvs['proposal_title'] = PV(tomoscan_prefix + tomoscan + 'ProposalTitle')
-    user_pvs['user_info_update_time'] = PV(tomoscan_prefix + tomoscan + 'UserInfoUpdate')
-    user_pvs['experiment_date'] = PV(tomoscan_prefix + tomoscan + 'ExperimentYearMonth')
+    tomoscan_prefix = args.tomoscan_prefix
+    user_pvs['user_name'] = PV(tomoscan_prefix + 'UserName')
+    user_pvs['user_last_name'] = PV(tomoscan_prefix + 'UserLastName')
+    user_pvs['user_affiliation'] = PV(tomoscan_prefix + 'UserInstitution')
+    user_pvs['user_badge'] = PV(tomoscan_prefix + 'UserBadge')
+    user_pvs['user_email'] = PV(tomoscan_prefix + 'UserEmail')
+    user_pvs['proposal_number'] = PV(tomoscan_prefix + 'ProposalNumber')
+    user_pvs['proposal_title'] = PV(tomoscan_prefix + 'ProposalTitle')
+    user_pvs['user_info_update_time'] = PV(tomoscan_prefix + 'UserInfoUpdate')
+    user_pvs['experiment_date'] = PV(tomoscan_prefix + 'ExperimentYearMonth')
     return user_pvs
 
 

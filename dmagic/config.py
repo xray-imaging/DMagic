@@ -50,14 +50,10 @@ SECTIONS['settings'] = {
         'default' : '7-BM-B',
         'type': str,
         'help': "beam line"},
-    'pv_prefix' : {
-        'default' : '7bmb1:',
+    'tomoscan-prefix':{
+        'default': '7bmb1:',
         'type': str,
-        'help': "IOC prefix for PVs:"},
-    'scan_prefix' : {
-        'default' : '',
-        'type': str,
-        'help': "scan prefix for PVs:"},
+        'help': "The tomoscan prefix, i.e.'7bmb1:' or '2bma:TomoScan:' "},
     }
 
 DMAGIC_PARAMS = ('credentials', 'hosts', 'settings')
