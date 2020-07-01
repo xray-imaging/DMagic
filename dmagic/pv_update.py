@@ -78,40 +78,8 @@ def init_PVs(args):
     return user_pvs
 
 
-def get_credentials(args):
-    '''Get the username and password from the user.
-    Inputs:
-    args: dictionary of configuration parameters
-    Returns:
-    args with username and password added.
-    '''
-    clear_credentials = False
-    if len(args.username) == 0 or len(args.password) == 0:
-        clear_credentials = True
-    while len(args.username) == 0:
-        try:
-            args.username = str(int(input("Enter badge number: ")))
-        except:
-            log.error('Incorrect username entered.')
-            args.username = ''
-            continue
-    if args.password == '':
-        args.password = getpass.getpass()
-    return args, clear_credentials
-
-
-def erase_credentials(args, clear_credentials):
-    '''Deletes entries for username and password from input args.
-    '''
-    if clear_credentials:
-        args.username = ''
-        args.password = ''
-    return args
-
-
 def pv_daemon(args, date=None):
     user_pvs = init_PVs(args)
-    args, clear_credentials = get_credentials(args)
     # set iso format time
     central = pytz.timezone('US/Central')
     local_time = central.localize(date)
@@ -120,17 +88,20 @@ def pv_daemon(args, date=None):
     user_pvs['user_info_update_time'].put(local_time_iso)
     log.info("User/Experiment PV update")
 
+    proposal = scheduling.get_current_proposal(args)
+    if not proposal:
+        log.warning('No valid current proposal')
+        return
+    
     # get PI information
-    pi = scheduling.find_pi_info(args, date)
-    user_pvs['user_name'].put(pi['name'])
-    user_pvs['user_last_name'].put(pi['last_name'])    
+    pi = scheduling.get_current_pi(args)
+    user_pvs['user_name'].put(pi['firstName'])
+    user_pvs['user_last_name'].put(pi['lastName'])    
     user_pvs['user_affiliation'].put(pi['institution'])
     user_pvs['user_email'].put(pi['email'])
     user_pvs['user_badge'].put(pi['badge'])
     
     # get experiment information
-    experiment = scheduling.find_experiment_info(args, date)
-    user_pvs['proposal_number'].put(experiment['id'])
-    user_pvs['proposal_title'].put(experiment['title'])
-    user_pvs['experiment_date'].put(experiment['start'])
-    args = erase_credentials(args, clear_credentials)
+    user_pvs['proposal_number'].put(scheduling.get_current_proposal_id(args))
+    user_pvs['proposal_title'].put(scheduling.get_current_proposal_title(args))
+    user_pvs['experiment_date'].put(proposal['startTime'])

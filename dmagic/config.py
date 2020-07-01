@@ -22,28 +22,6 @@ SECTIONS['general'] = {
         'help': 'Verbose output',
         'action': 'store_true'}}
 
-# Customize to match your configuration
-SECTIONS['credentials'] = {
-    'username' : {
-        'default': '',
-        'type': str,
-        'help': "scheduling system username (badge #)"},
-    'password' : {
-        'default': '',
-        'type': str,
-        'help': "scheduling system password"},
-    }
-
-SECTIONS['hosts'] = {
-    'internal' : {
-        'default' : "https://schedule.aps.anl.gov:8443/beamschedds/springws/",
-        'type': str,
-        'help': "File name of configuration"},
-    'external' : {
-        'default' : "https://schedule.aps.anl.gov/beamschedds/springws/",
-        'type': str,
-        'help': "scheduling system hosts"}
-    }
 
 SECTIONS['settings'] = {
     'beamline' : {
@@ -60,8 +38,9 @@ SECTIONS['settings'] = {
         'help': "scan prefix for PVs:"},
     }
 
-DMAGIC_PARAMS = ('credentials', 'hosts', 'settings')
-NICE_NAMES = ('General', 'Credentials', 'Hosts', 'Settings')
+
+DMAGIC_PARAMS = ('settings',)
+NICE_NAMES = ('General', 'Settings')
 
 def get_config_name():
     """Get the command line --config option."""
@@ -131,7 +110,7 @@ def config_to_list(config_name=CONFIG_FILE_NAME):
 
 class Params(object):
     def __init__(self, sections=()):
-        self.sections = sections + ('general', )
+        self.sections = sections + ('general',)
 
     def add_parser_args(self, parser):
         for section in self.sections:
