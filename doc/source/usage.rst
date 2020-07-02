@@ -31,7 +31,3 @@ For help and to access all options::
     dmagic -h
     dmagic show -h
     dmagic tag -h
-
-
-
-
