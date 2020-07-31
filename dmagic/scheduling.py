@@ -204,6 +204,7 @@ def print_current_experiment_info(args):
     """
     proposal = get_current_proposal(args)
     if not proposal:
+        log.warning('No valid current experiment')
         return None
     pi = get_current_pi(args)
     user_emails = get_current_emails(args, False)

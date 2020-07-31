@@ -54,7 +54,6 @@ system information.
 
 import os
 import sys
-import pytz
 import time
 import datetime
 import argparse
@@ -77,9 +76,7 @@ def show(args):
     # testing date
     # now = datetime.datetime(2016, 2, 19, 10, 10, 30)
     now = datetime.datetime.today()
-
     log.info("Today's date: %s" % now)
-
     scheduling.print_current_experiment_info(args)
 
 
@@ -91,7 +88,6 @@ def tag(args):
 
 
 def main():
- 
     home = os.path.expanduser("~")
     logs_home = home + '/logs/'
 

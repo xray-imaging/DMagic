@@ -49,9 +49,9 @@
 """
 Module generating user and proposal info PVs
 """
+import datetime
 import pytz
 from epics import PV
-import getpass
 
 from dmagic import scheduling
 from dmagic import log
@@ -104,4 +104,6 @@ def pv_daemon(args, date=None):
     # get experiment information
     user_pvs['proposal_number'].put(scheduling.get_current_proposal_id(args))
     user_pvs['proposal_title'].put(scheduling.get_current_proposal_title(args))
-    user_pvs['experiment_date'].put(proposal['startTime'])
+    #Make the start date of the experiment into a year - month
+    start_datetime = datetime.datetime.strptime(proposal['startTime'],'%Y-%m-%d %H:%M:%S')
+    user_pvs['experiment_date'].put(start_datetime.strftime('%Y-%m'))
