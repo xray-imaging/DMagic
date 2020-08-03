@@ -14,8 +14,14 @@ Pre-requisites
 
 Install from `Anaconda <https://www.anaconda.com/distribution/>`_ python3.x.
 
-Before using `DMagic <https://github.com/xray-imaging/DMagic>`_  you need to have valid APS credentials
-to access the `APS scheduling system <https://schedule.aps.anl.gov/>`__.
+You will also need to have the APS Data Management system installed for your beamline; contact 
+the SDM group for this installation.  You will need to download the Data Management API via conda
+
+::
+
+    conda install -c aps-anl-tag aps-dm-api
+
+There are also several environment variables that must be set for the DM API to work properly.  They can be found in the /home/dm_bm/etc/dm.conda.setup.sh script.  Copy everything in this script except the change to the PATH to your account's ~/.bashrc file.
 
 
 Installing from source
@@ -28,22 +34,17 @@ from `GitHub <https://github.com>`_ repository
 
     $ git clone https://github.com/xray-imaging/DMagic DMagic
 
-Edit the config.py file::
+Edit the config.py file with the name of your beamline, the IOC prefix for the experiment info PVs for your beamline, and any portions of the EPICS name between this IOC prefix and the actual PV names::
 
     $ gedit DMagic/dmagic/config.py
 
-by entering the correct values for::
-
-    USERNAME = '123456'
-    PASSWORD = 'password'
-    BEAMLINE = "2-BM-A,B"
-
-then::
+To install DMagic, run::
 
     $ cd DMagic
     $ python setup.py install
 
 .. warning:: If your python installation is in a location different from #!/usr/bin/env python please edit the first line of the bin/dmagic file to match yours.
+
 
 EPICS tools
 ===========
@@ -51,7 +52,7 @@ EPICS tools
 
 * Copy and customize in your EPICS ioc boot directory the :download:`experimentInfo.db <../demo/epics/experimentInfo.db>` and :download:`experimentInfo_settings.req <../demo/epics/experimentInfo_settings.req>` files.
 
-* Edit your EPICS ioc start up script by adding:
+* Edit your EPICS ioc start up script by adding (as an example for an IOC named 32idcTXM):
 
 ::
 
@@ -64,8 +65,6 @@ EPICS tools
   :alt: medm screen
 
 * Customize the dmagic/pv_beamline.py file to match the PV names in use at your beamline (see examples for 2-BM :download:`pv_beamline_2bm.py <../demo/epics/pv_beamline_2bm.py>` and 7-BM :download:`pv_beamline_7bm.py <../demo/epics/pv_beamline_2bm.py>`
-
-
 
 
 Update
@@ -83,8 +82,6 @@ Dependencies
 
 Install the following package::
 
-    $ pip install suds-py3 
-    $ pip install ipdb
     $ pip install validate-email
     $ pip install pyinotify
     $ pip install pyepics
