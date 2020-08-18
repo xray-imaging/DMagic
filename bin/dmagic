@@ -54,7 +54,6 @@ system information.
 
 import os
 import sys
-import pytz
 import time
 import datetime
 import argparse
@@ -77,25 +76,8 @@ def show(args):
     # testing date
     # now = datetime.datetime(2016, 2, 19, 10, 10, 30)
     now = datetime.datetime.today()
-
     log.info("Today's date: %s" % now)
-    args, clear_credentials = pv_update.get_credentials(args)
-
-    # get PI information
-    pi = scheduling.find_pi_info(args, now)
-
-    log.info('PI full name: %s' % pi['name'])
-    log.info('PI last name: %s' % pi['last_name'])
-    log.info('Institution: %s' % pi['institution'])
-    log.info('email: %s' % pi['email'])
-    log.info('badge: %s' % pi['badge'])
-
-    # get experiment information
-    experiment = scheduling.find_experiment_info(args, now)
-    log.info('GUP: %s' % experiment['id'])
-    log.info('Title: %s' % experiment['title'])
-    log.info('Start: %s' % experiment['start'])
-    args = pv_update.erase_credentials(args, clear_credentials)
+    scheduling.print_current_experiment_info(args)
 
 
 def tag(args):
@@ -106,7 +88,6 @@ def tag(args):
 
 
 def main():
- 
     home = os.path.expanduser("~")
     logs_home = home + '/logs/'
 
