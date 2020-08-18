@@ -97,8 +97,6 @@ If you are not running `tomoScan <https://tomoscan.readthedocs.io/en/latest/>`_:
   :width: 400
   :alt: medm screen
 
-* Customize the dmagic/pv_beamline.py file to match the PV names in use at your beamline (see examples for 2-BM :download:`pv_beamline_2bm.py <../demo/epics/pv_beamline_2bm.py>` and 7-BM :download:`pv_beamline_7bm.py <../demo/epics/pv_beamline_2bm.py>`
-
 
 Update
 ======
