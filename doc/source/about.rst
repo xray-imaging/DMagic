@@ -2,7 +2,7 @@
 About
 =====
 
-`DMagic <https://github.com/xray-imaging/DMagic>`_ aims to provide easy command-like
+`DMagic <https://github.com/xray-imaging/DMagic>`_ aims to provide easy command-line
 interface to the `APS scheduling system <https://schedule.aps.anl.gov/>`_
 
 Basic functionalities include the ability, for the current experiment, to retrieve the users' 
