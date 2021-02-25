@@ -22,46 +22,21 @@ SECTIONS['general'] = {
         'help': 'Verbose output',
         'action': 'store_true'}}
 
-# Customize to match your configuration
-SECTIONS['credentials'] = {
-    'username' : {
-        'default': '',
-        'type': str,
-        'help': "scheduling system username (badge #)"},
-    'password' : {
-        'default': '',
-        'type': str,
-        'help': "scheduling system password"},
-    }
-
-SECTIONS['hosts'] = {
-    'internal' : {
-        'default' : "https://schedule.aps.anl.gov:8443/beamschedds/springws/",
-        'type': str,
-        'help': "File name of configuration"},
-    'external' : {
-        'default' : "https://schedule.aps.anl.gov/beamschedds/springws/",
-        'type': str,
-        'help': "scheduling system hosts"}
-    }
 
 SECTIONS['settings'] = {
     'beamline' : {
         'default' : '7-BM-B',
         'type': str,
         'help': "beam line"},
-    'pv_prefix' : {
-        'default' : '7bmb1:',
+    'tomoscan-prefix':{
+        'default': '7bmb1:',
         'type': str,
-        'help': "IOC prefix for PVs:"},
-    'scan_prefix' : {
-        'default' : '',
-        'type': str,
-        'help': "scan prefix for PVs:"},
+        'help': "The tomoscan prefix, i.e.'7bmb1:' or '2bma:TomoScan:' "},
     }
 
-DMAGIC_PARAMS = ('credentials', 'hosts', 'settings')
-NICE_NAMES = ('General', 'Credentials', 'Hosts', 'Settings')
+
+DMAGIC_PARAMS = ('settings',)
+NICE_NAMES = ('General', 'Settings')
 
 def get_config_name():
     """Get the command line --config option."""
@@ -112,7 +87,7 @@ def config_to_list(config_name=CONFIG_FILE_NAME):
         for name, opts in ((n, o) for n, o in SECTIONS[section].items() if config.has_option(section, n)):
             value = config.get(section, name)
 
-            if value is not '' and value != 'None':
+            if value != '' and value != 'None':
                 action = opts.get('action', None)
 
                 if action == 'store_true' and value == 'True':
@@ -131,7 +106,7 @@ def config_to_list(config_name=CONFIG_FILE_NAME):
 
 class Params(object):
     def __init__(self, sections=()):
-        self.sections = sections + ('general', )
+        self.sections = sections + ('general',)
 
     def add_parser_args(self, parser):
         for section in self.sections:
@@ -169,7 +144,7 @@ def write(config_file, args=None, sections=None):
             else:
                 value = opts['default'] if opts['default'] is not None else ''
 
-            prefix = '# ' if value is '' else ''
+            prefix = '# ' if value == '' else ''
 
             if name != 'config':
                 config.set(section, prefix + name, str(value))
@@ -186,7 +161,7 @@ def log_values(args):
     args = args.__dict__
 
     for section, name in zip(SECTIONS, NICE_NAMES):
-        entries = sorted((k for k in args.keys() if k in SECTIONS[section]))
+        entries = sorted((k for k in args.keys() if k.replace('_', '-') in SECTIONS[section]))
 
         if entries:
             log.info(name)

@@ -49,9 +49,9 @@
 """
 Module generating user and proposal info PVs
 """
+import datetime
 import pytz
 from epics import PV
-import getpass
 
 from dmagic import scheduling
 from dmagic import log
@@ -64,54 +64,21 @@ __docformat__ = 'restructuredtext en'
 def init_PVs(args):
     
     user_pvs = {}
-    tomoscan_prefix = args.pv_prefix
-    tomoscan = args.scan_prefix
-    user_pvs['user_name'] = PV(tomoscan_prefix + tomoscan + 'UserName')
-    user_pvs['user_last_name'] = PV(tomoscan_prefix + tomoscan + 'UserLastName')
-    user_pvs['user_affiliation'] = PV(tomoscan_prefix + tomoscan + 'UserInstitution')
-    user_pvs['user_badge'] = PV(tomoscan_prefix + tomoscan + 'UserBadge')
-    user_pvs['user_email'] = PV(tomoscan_prefix + tomoscan + 'UserEmail')
-    user_pvs['proposal_number'] = PV(tomoscan_prefix + tomoscan + 'ProposalNumber')
-    user_pvs['proposal_title'] = PV(tomoscan_prefix + tomoscan + 'ProposalTitle')
-    user_pvs['user_info_update_time'] = PV(tomoscan_prefix + tomoscan + 'UserInfoUpdate')
-    user_pvs['experiment_date'] = PV(tomoscan_prefix + tomoscan + 'ExperimentYearMonth')
+    tomoscan_prefix = args.tomoscan_prefix
+    user_pvs['user_name'] = PV(tomoscan_prefix + 'UserName')
+    user_pvs['user_last_name'] = PV(tomoscan_prefix + 'UserLastName')
+    user_pvs['user_affiliation'] = PV(tomoscan_prefix + 'UserInstitution')
+    user_pvs['user_badge'] = PV(tomoscan_prefix + 'UserBadge')
+    user_pvs['user_email'] = PV(tomoscan_prefix + 'UserEmail')
+    user_pvs['proposal_number'] = PV(tomoscan_prefix + 'ProposalNumber')
+    user_pvs['proposal_title'] = PV(tomoscan_prefix + 'ProposalTitle')
+    user_pvs['user_info_update_time'] = PV(tomoscan_prefix + 'UserInfoUpdate')
+    user_pvs['experiment_date'] = PV(tomoscan_prefix + 'ExperimentYearMonth')
     return user_pvs
-
-
-def get_credentials(args):
-    '''Get the username and password from the user.
-    Inputs:
-    args: dictionary of configuration parameters
-    Returns:
-    args with username and password added.
-    '''
-    clear_credentials = False
-    if len(args.username) == 0 or len(args.password) == 0:
-        clear_credentials = True
-    while len(args.username) == 0:
-        try:
-            args.username = str(int(input("Enter badge number: ")))
-        except:
-            log.error('Incorrect username entered.')
-            args.username = ''
-            continue
-    if args.password == '':
-        args.password = getpass.getpass()
-    return args, clear_credentials
-
-
-def erase_credentials(args, clear_credentials):
-    '''Deletes entries for username and password from input args.
-    '''
-    if clear_credentials:
-        args.username = ''
-        args.password = ''
-    return args
 
 
 def pv_daemon(args, date=None):
     user_pvs = init_PVs(args)
-    args, clear_credentials = get_credentials(args)
     # set iso format time
     central = pytz.timezone('US/Central')
     local_time = central.localize(date)
@@ -120,12 +87,23 @@ def pv_daemon(args, date=None):
     user_pvs['user_info_update_time'].put(local_time_iso)
     log.info("User/Experiment PV update")
 
+    proposal = scheduling.get_current_proposal(args)
+    if not proposal:
+        log.warning('No valid current proposal')
+        return
+    
     # get PI information
+<<<<<<< HEAD
     pi = scheduling.find_pi_info(args, date)
     user_pvs['user_name'].put(pi['name'])
     log.info('PI full name: %s' % pi['name'])
     user_pvs['user_last_name'].put(pi['last_name'])    
     log.info('PI last name: %s' % pi['last_name'])
+=======
+    pi = scheduling.get_current_pi(args)
+    user_pvs['user_name'].put(pi['firstName'])
+    user_pvs['user_last_name'].put(pi['lastName'])    
+>>>>>>> bb37bb4c26493e2fecec34bd695644c82ec56527
     user_pvs['user_affiliation'].put(pi['institution'])
     log.info('Institution: %s' % pi['institution'])
     user_pvs['user_email'].put(pi['email'])
@@ -134,6 +112,7 @@ def pv_daemon(args, date=None):
     log.info('badge: %s' % pi['badge'])
     
     # get experiment information
+<<<<<<< HEAD
     experiment = scheduling.find_experiment_info(args, date)
     user_pvs['proposal_number'].put(experiment['id'])
     log.info('GUP: %s' % experiment['id'])
@@ -142,3 +121,10 @@ def pv_daemon(args, date=None):
     user_pvs['experiment_date'].put(experiment['start'])
     log.info('Start: %s' % experiment['start'])
     args = erase_credentials(args, clear_credentials)
+=======
+    user_pvs['proposal_number'].put(scheduling.get_current_proposal_id(args))
+    user_pvs['proposal_title'].put(scheduling.get_current_proposal_title(args))
+    #Make the start date of the experiment into a year - month
+    start_datetime = datetime.datetime.strptime(proposal['startTime'],'%Y-%m-%d %H:%M:%S')
+    user_pvs['experiment_date'].put(start_datetime.strftime('%Y-%m'))
+>>>>>>> bb37bb4c26493e2fecec34bd695644c82ec56527
