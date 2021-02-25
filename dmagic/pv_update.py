@@ -93,17 +93,9 @@ def pv_daemon(args, date=None):
         return
     
     # get PI information
-<<<<<<< HEAD
-    pi = scheduling.find_pi_info(args, date)
-    user_pvs['user_name'].put(pi['name'])
-    log.info('PI full name: %s' % pi['name'])
-    user_pvs['user_last_name'].put(pi['last_name'])    
-    log.info('PI last name: %s' % pi['last_name'])
-=======
     pi = scheduling.get_current_pi(args)
     user_pvs['user_name'].put(pi['firstName'])
     user_pvs['user_last_name'].put(pi['lastName'])    
->>>>>>> bb37bb4c26493e2fecec34bd695644c82ec56527
     user_pvs['user_affiliation'].put(pi['institution'])
     log.info('Institution: %s' % pi['institution'])
     user_pvs['user_email'].put(pi['email'])
@@ -112,19 +104,8 @@ def pv_daemon(args, date=None):
     log.info('badge: %s' % pi['badge'])
     
     # get experiment information
-<<<<<<< HEAD
-    experiment = scheduling.find_experiment_info(args, date)
-    user_pvs['proposal_number'].put(experiment['id'])
-    log.info('GUP: %s' % experiment['id'])
-    user_pvs['proposal_title'].put(experiment['title'])
-    log.info('Title: %s' % experiment['title'])
-    user_pvs['experiment_date'].put(experiment['start'])
-    log.info('Start: %s' % experiment['start'])
-    args = erase_credentials(args, clear_credentials)
-=======
     user_pvs['proposal_number'].put(scheduling.get_current_proposal_id(args))
     user_pvs['proposal_title'].put(scheduling.get_current_proposal_title(args))
     #Make the start date of the experiment into a year - month
     start_datetime = datetime.datetime.strptime(proposal['startTime'],'%Y-%m-%d %H:%M:%S')
     user_pvs['experiment_date'].put(start_datetime.strftime('%Y-%m'))
->>>>>>> bb37bb4c26493e2fecec34bd695644c82ec56527
