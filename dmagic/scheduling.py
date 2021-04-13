@@ -60,6 +60,7 @@ from os.path import expanduser
 from datetime import datetime
 import sys
 import unicodedata
+import pytz 
 
 from dm import BssApsDbApi
 
@@ -154,7 +155,7 @@ def get_current_proposal(args):
     dict-like object with information for current proposal
     """
     proposals = dm_api.listProposals()
-    time_now = datetime.now()
+    time_now = datetime.now(pytz.utc)
     for prop in proposals:
         prop_start = datetime.fromisoformat(prop['startTime'])
         prop_end = datetime.fromisoformat(prop['endTime'])

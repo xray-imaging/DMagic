@@ -116,6 +116,7 @@ Install the following package::
     $ pip install validate-email
     $ pip install pyinotify
     $ pip install pyepics
+    $ pip install pytz
 
 
 .. warning:: If requiere edit your .cshrc to set PYEPICS_LIBCA: Example: setenv PYEPICS_LIBCA /APSshare/epics/extensions-base/3.14.12.2-ext1/lib/linux-x86_64/libca.so

@@ -1,2 +1,5 @@
 setuptools
 pyepics
+validate-email
+pyinotify
+pytz
