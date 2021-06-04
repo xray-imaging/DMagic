@@ -97,8 +97,11 @@ def pv_daemon(args, date=None):
     user_pvs['user_name'].put(pi['firstName'])
     user_pvs['user_last_name'].put(pi['lastName'])    
     user_pvs['user_affiliation'].put(pi['institution'])
+    log.info('Institution: %s' % pi['institution'])
     user_pvs['user_email'].put(pi['email'])
+    log.info('email: %s' % pi['email'])
     user_pvs['user_badge'].put(pi['badge'])
+    log.info('badge: %s' % pi['badge'])
     
     # get experiment information
     user_pvs['proposal_number'].put(scheduling.get_current_proposal_id(args))
