@@ -14,6 +14,11 @@ To show the list of users currently running at the beameline:
 
     $ dmagic show
 
+
+To configure for your beamline::
+
+    $ dmagic show --beamline 32-ID --tomoscan-prefix 32id:TomoScan
+    
 To update the EPICS PVs with data retrieved from the APS scheduling system run:
 
 ::
