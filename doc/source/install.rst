@@ -16,9 +16,18 @@ Install from `Anaconda <https://www.anaconda.com/distribution/>`_ python3.x.
 
 You will also need to have the APS Data Management system installed for your beamline; contact 
 the `SDM group <https://www.aps.anl.gov/Scientific-Software-Engineering-And-Data-Management>`_ 
-for this installation. Once installed you can run dmagic in a terminal with::
+for this installation. Once installed you can run dmagic in a terminal with:
+
+On a BM line::
 
     $ source /home/dm_bm/etc/dm.setup.sh
+ 
+On an ID line::
+
+    $ source /home/dm_id/etc/dm.setup.sh
+    
+then::
+
     $ dmagic show
 
 Alternatively you can download the Data Management API via conda
