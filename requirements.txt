@@ -1,5 +1,7 @@
-setuptools
+decorator
+numpy
 pyepics
-validate-email
 pyinotify
 pytz
+setuptools
+validate-email
