@@ -56,12 +56,12 @@ configuration file
 """
 
 import os
-from os.path import expanduser
-from datetime import datetime
 import sys
 import unicodedata
 import pytz 
+import datetime as dt
 
+from os.path import expanduser
 from dm import BssApsDbApi
 
 from dmagic import log
@@ -155,11 +155,13 @@ def get_current_proposal(args):
     dict-like object with information for current proposal
     """
     proposals = dm_api.listProposals()
-    time_now = datetime.now(pytz.utc)
+    time_now = dt.datetime.now(pytz.utc)
+    # test mode during shutdown
+    # time_now = time_now + dt.timedelta(days=6.3413516)
     for prop in proposals:
         for i in range(len(prop['activities'])):
-            prop_start = datetime.fromisoformat(prop['activities'][i]['startTime'])
-            prop_end = datetime.fromisoformat(prop['activities'][i]['endTime'])
+            prop_start = dt.datetime.fromisoformat(prop['activities'][i]['startTime'])
+            prop_end = dt.datetime.fromisoformat(prop['activities'][i]['endTime'])
             if prop_start <= time_now and prop_end >= time_now:
                 return prop
     return None
