@@ -1,3 +1,4 @@
+decorator
 setuptools
 pyepics
 validate-email
