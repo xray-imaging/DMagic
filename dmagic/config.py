@@ -32,6 +32,10 @@ SECTIONS['settings'] = {
         'default': '7bmb1:',
         'type': str,
         'help': "The tomoscan prefix, i.e.'7bmb1:' or '2bma:TomoScan:' "},
+    'testing': {     
+        'type': float,
+        'default': 0,
+        'help': "Number of +/- number days for the current date. Used for testing"},
     }
 
 

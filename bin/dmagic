@@ -57,6 +57,7 @@ import sys
 import time
 import datetime
 import argparse
+import datetime as dt
 
 from dmagic import scheduling
 from dmagic import pv_update
@@ -72,7 +73,7 @@ def init(args):
 
 
 def show(args):
-    now = datetime.datetime.today()
+    now = datetime.datetime.today() + dt.timedelta(args.testing)
     log.info("Today's date: %s" % now)
     scheduling.print_current_experiment_info(args)
 
