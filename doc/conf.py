@@ -346,4 +346,4 @@ texinfo_documents = [
 # autodoc_mock_imports = "numpy ConfigParser validate_email subprocess pyinotify suds urllib http xml ipdb".split()
 
 # http://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_mock_imports
-autodoc_mock_imports = "suds os datetime logging sys traceback ipdb collections numpy configparser unicodedata string validate_email subprocess pyinotify re urllib http xml argparse fnmatch ConfigParser".split()
+autodoc_mock_imports = "dm suds os datetime logging sys traceback ipdb collections numpy configparser unicodedata string validate_email subprocess pyinotify re urllib http xml argparse fnmatch ConfigParser".split()
