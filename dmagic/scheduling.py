@@ -155,7 +155,7 @@ def get_current_proposal(args):
     dict-like object with information for current proposal
     """
     proposals = dm_api.listProposals()
-    time_now = dt.datetime.now(pytz.utc) + dt.timedelta(args.testing)
+    time_now = dt.datetime.now(pytz.utc) + dt.timedelta(args.set)
     for prop in proposals:
         for i in range(len(prop['activities'])):
             prop_start = dt.datetime.fromisoformat(prop['activities'][i]['startTime'])
