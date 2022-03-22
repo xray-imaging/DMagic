@@ -73,7 +73,7 @@ def init(args):
 
 
 def show(args):
-    now = datetime.datetime.today() + dt.timedelta(args.testing)
+    now = datetime.datetime.today() + dt.timedelta(args.set)
     log.info("Today's date: %s" % now)
     scheduling.print_current_experiment_info(args)
 
