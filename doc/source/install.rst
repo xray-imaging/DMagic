@@ -38,6 +38,21 @@ Alternatively you can download the Data Management API via conda
 
 There are also several environment variables that must be set for the DM API to work properly.  They can be found in the /home/dm_bm/etc/dm.conda.setup.sh script.  Copy everything in this script except the change to the PATH to your account's ~/.bashrc file.
 
+this includes adding in your .bashrc::
+
+    DM_APS_DB_WEB_SERVICE_URL=https://xraydtn02.xray.aps.anl.gov:11236
+    export DM_APS_DB_WEB_SERVICE_URL
+    DM_BEAMLINE_NAME=20-BM-B
+    export DM_BEAMLINE_NAME
+
+Please  use the DM_BEAMLINE_NAME as defined in the `beamline directory <https://www.aps.anl.gov/Beamlines/Directory>`_
+
+To test the access to the APS scheduling system::
+
+    python -c "from dm.aps_db_web_service.api.esafApsDbApi import EsafApsDbApi; api = EsafApsDbApi();print(api.listEsafs(sector='20',     year=2021))"
+
+
+
 
 Installing from source
 ======================
@@ -126,7 +141,8 @@ Install the following package::
     $ pip install pyinotify
     $ pip install pyepics
     $ pip install pytz
-
+    $ conda install decorator
+    $ conda install numpy
 
 .. warning:: If requiere edit your .cshrc to set PYEPICS_LIBCA: Example: setenv PYEPICS_LIBCA /APSshare/epics/extensions-base/3.14.12.2-ext1/lib/linux-x86_64/libca.so
 
