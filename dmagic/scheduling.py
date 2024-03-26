@@ -154,7 +154,8 @@ def get_current_proposal(args):
     -------------
     dict-like object with information for current proposal
     """
-    proposals = dm_api.listProposals()
+    proposals = dm_api.listProposals('2023-1') # temporary fix during the dark time
+    # proposals = dm_api.listProposals()
     time_now = dt.datetime.now(pytz.utc) + dt.timedelta(args.set)
     for prop in proposals:
         for i in range(len(prop['activities'])):
@@ -210,7 +211,8 @@ def print_current_experiment_info(args):
         return None
     pi = get_current_pi(args)
     user_emails = get_current_emails(args, False)
-    log.info("\tRun Name: {0:s}".format(dm_api.getCurrentRun()['name']))
+    log.info("\tRun Name: {0:s}".format('2023-1')) # temporary fix during the dark time
+    # log.info("\tRun Name: {0:s}".format(dm_api.getCurrentRun()['name']))
     log.info("\tProposal Title: {0:s}".format(proposal['title']))
     log.info("\tPI Name: {0:s} {1:s}".format(pi['firstName'], pi['lastName']))
     log.info("\tStart time: {:s}".format(proposal['startTime']))
