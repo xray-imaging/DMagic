@@ -16,6 +16,8 @@
 import sys
 import os
 
+import sphinx_rtd_theme
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -120,7 +122,8 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = 'sphinx_rtd_theme'
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # on_rtd is whether we are on readthedocs.org
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
@@ -129,6 +132,12 @@ if not on_rtd:  # only import and set the theme if we're building docs locally
     import sphinx_rtd_theme
     html_theme = 'sphinx_rtd_theme'
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+
+html_theme_options = {
+    'style_nav_header_background': '#4f8fb8ff',
+    'collapse_navigation': False,
+    'logo_only': True,
+}
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -295,55 +304,20 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #ztexinfo_no_detailmenu = False
 
-# # picked from http://read-the-docs.readthedocs.org/en/latest/faq.html
-# class Mock(object):
-
-#     __all__ = []
-
-#     def __init__(self, *args, **kwargs):
-#         pass
-
-#     def __call__(self, *args, **kwargs):
-#         return Mock()
-
-#     @classmethod
-#     def __getattr__(cls, name):
-#         return Mock()
-#     def __mul__(self, other):
-#         return Mock()
-#     def __rmul__(self, other):
-#         return Mock()
-#     def __pow__(self, other):
-#         return Mock()
-#     def __div__(self, other):
-#         return Mock()
-#     def __add__(self, other):
-#         return Mock()
-#     def __radd__(self, other):
-#         return Mock()
-
-# MOCK_MODULES = ['suds', 'os', 'os.path', 'datetime', 'logging', 'sys', 'traceback', 'urllib', 
-#     'urllib.request', 'http', 'http.client', 'xml', 'xml.sax', 'ipdb', 'collections', 'configparser', 
-#     'unicodedata', 'string', 'validate_email', 'pyinotify', 'subprocess', 're', 
-#     'argparse', 'fnmatch' 'ConfigParser']
-
-           
-# MOCK_MODULES = [
-#    'pyinotify', 'validate_email', 'subprocess', 'argparse',
-#    'fnmatch', 'suds', 'logging', 'traceback', 'urllib2',
-#    'httplib', 'xml', 'ipdb', 'collections', 'unicodedata', 'string']
-
-# MOCK_MODULES = [
-#     'numpy', 'scipy', 'scipy.misc', 'scipy.optimize', 'h5py', 'ctypes',
-#     'matplotlib', 'matplotlib.pylab', 'tifffile', 'EdfFile', 'netCDF4',  
-#     'spefile', 'scipy.ndimage', 'pywt', 'scikit-image', 'skimage',
-#     'skimage.io', 'skimage.filter', 'skimage.morphology', 'DM3lib']
-
-# for mod_name in MOCK_MODULES:
-#     sys.modules[mod_name] = Mock()
-
-# # http://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_mock_imports
-# autodoc_mock_imports = "numpy ConfigParser validate_email subprocess pyinotify suds urllib http xml ipdb".split()
-
+# -- Options for Texinfo output -------------------------------------------
 # http://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_mock_imports
-autodoc_mock_imports = "dm suds os datetime logging sys traceback ipdb collections numpy configparser unicodedata string validate_email subprocess pyinotify re urllib http xml argparse fnmatch ConfigParser".split()
+autodoc_mock_imports = ['os',
+                        'os.path',
+                        'json',
+                        'pathlib',
+                        'sys',
+                        'unicodedata',
+                        'pytz',
+                        'requests',
+                        'requests.auth',
+                        'datetime',
+                        'pytz',
+                        'logging',
+                        'epics']
+
+

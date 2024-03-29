@@ -34,7 +34,7 @@
 #                                                                         #
 # THIS SOFTWARE IS PROVIDED BY UChicago Argonne, LLC AND CONTRIBUTORS     #
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT       #
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS       #
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS       #f
 # FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL UChicago     #
 # Argonne, LLC OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,        #
 # INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,    #
@@ -47,87 +47,16 @@
 # #########################################################################
 
 """
-Module containing an example on how to use DMagic to access the APS scheduling
-system information.
-
+Module containing utils routines to access the APS scheduling system.
 """
 
-import os
-import sys
-import time
-import datetime
-import argparse
-import datetime as dt
-
-from dmagic import scheduling
-from dmagic import pv_update
-from dmagic import log
-from dmagic import config
-
-
-def init(args):
-    if not os.path.exists(str(args.config)):
-        config.write(str(args.config))
-    else:
-        raise RuntimeError("{0} already exists".format(args.config))
-
-
-def show(args):
-    now = datetime.datetime.today() + dt.timedelta(args.set)
-    log.info("Today's date: %s" % now)
-    scheduling.print_current_experiment_info(args)
-
-
-def tag(args):
-    # set the experiment date 
-    now = datetime.datetime.today()
-    log.info("Today's date: %s" % now)
-    args = pv_update.pv_daemon(args, now)
-
-
-def main():
-    home = os.path.expanduser("~")
-    logs_home = home + '/logs/'
-
-    # make sure logs directory exists
-    if not os.path.exists(logs_home):
-        os.makedirs(logs_home)
-
-    lfname = logs_home + 'dmagic_' + datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d_%H:%M:%S") + '.log'
-    log.setup_custom_logger(lfname)
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--config', **config.SECTIONS['general']['config'])
-    show_params = config.DMAGIC_PARAMS
-    tag_params = config.DMAGIC_PARAMS
-
-    cmd_parsers = [
-        ('init',        init,           (),                             "Create configuration file"),
-        ('show',        show,           show_params,                    "Show user and experiment info from the APS schedule"),
-        ('tag',         tag,            tag_params,                     "Update user info EPICS PVs with info from the APS schedule"),
-    ]
-
-    subparsers = parser.add_subparsers(title="Commands", metavar='')
-
-    for cmd, func, sections, text in cmd_parsers:
-        cmd_params = config.Params(sections=sections)
-        cmd_parser = subparsers.add_parser(cmd, help=text, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-        cmd_parser = cmd_params.add_arguments(cmd_parser)
-        cmd_parser.set_defaults(_func=func)
-
-    args = config.parse_known_args(parser, subparser=True)
-
-    try:
-        # load args from default (config.py) if not changed
-        args._func(args)
-        config.log_values(args)
-        # undate globus.config file
-        sections = config.DMAGIC_PARAMS
-        config.write(args.config, args=args, sections=sections)
-    except RuntimeError as e:
-        log.error(str(e))
-        sys.exit(1)
-
-
-if __name__ == '__main__':
-    main()
+def fix_iso(s):
+    """
+    This is a temporary fix until timezone is returned as -05:00 instead of -0500
+    """
+    pos = len("2022-07-31T01:51:05-0400") - 2 # take off end "00"
+    if len(s) == pos:                 # missing minutes completely
+        s += ":00"
+    elif s[pos:pos+1] != ':':         # missing UTC offset colon
+        s = f"{s[:pos]}:{s[pos:]}"
+    return s

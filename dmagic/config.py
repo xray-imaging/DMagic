@@ -27,7 +27,7 @@ SECTIONS['settings'] = {
     'beamline' : {
         'default' : '7-BM-B',
         'type': str,
-        'help': "beam line"},
+        'help': "beamline ID as stored in the APS scheduling system, e.g. 2-BM-A,B or 7-BM-B or 32-ID-B,C"},
     'tomoscan-prefix':{
         'default': '7bmb1:',
         'type': str,
@@ -36,6 +36,10 @@ SECTIONS['settings'] = {
         'type': float,
         'default': 0,
         'help': "Number of +/- number days for the current date. Used for setting user info for past/future user groups"},
+    'url':{
+        'default': 'https://mis7.aps.anl.gov:7004',
+        'type': str,
+        'help': "URL address of the scheduling system REST API' "},
     }
 
 

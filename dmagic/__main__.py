@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # #########################################################################
-# Copyright (c) 2015-2016, UChicago Argonne, LLC. All rights reserved.    #
+# Copyright (c) 2015, UChicago Argonne, LLC. All rights reserved.         #
 #                                                                         #
 # Copyright 2015. UChicago Argonne, LLC. This software was produced       #
 # under U.S. Government contract DE-AC02-06CH11357 for Argonne National   #
@@ -47,62 +47,87 @@
 # #########################################################################
 
 """
-Module generating user and proposal info PVs
+Module containing an example on how to use DMagic to access the APS scheduling
+system information.
+
 """
+
+import os
+import sys
+import time
 import datetime
-import pytz
-from epics import PV
+import argparse
+import datetime as dt
 
 from dmagic import scheduling
+from dmagic import pv
 from dmagic import log
-
-__author__ = "Francesco De Carlo"
-__copyright__ = "Copyright (c) 2015-2016, UChicago Argonne, LLC."
-__docformat__ = 'restructuredtext en'
+from dmagic import config
 
 
-def init_PVs(args):
-    
-    user_pvs = {}
-    tomoscan_prefix = args.tomoscan_prefix
-    user_pvs['user_name'] = PV(tomoscan_prefix + 'UserName')
-    user_pvs['user_last_name'] = PV(tomoscan_prefix + 'UserLastName')
-    user_pvs['user_affiliation'] = PV(tomoscan_prefix + 'UserInstitution')
-    user_pvs['user_badge'] = PV(tomoscan_prefix + 'UserBadge')
-    user_pvs['user_email'] = PV(tomoscan_prefix + 'UserEmail')
-    user_pvs['proposal_number'] = PV(tomoscan_prefix + 'ProposalNumber')
-    user_pvs['proposal_title'] = PV(tomoscan_prefix + 'ProposalTitle')
-    user_pvs['user_info_update_time'] = PV(tomoscan_prefix + 'UserInfoUpdate')
-    user_pvs['experiment_date'] = PV(tomoscan_prefix + 'ExperimentYearMonth')
-    return user_pvs
+def init(args):
+    if not os.path.exists(str(args.config)):
+        config.write(str(args.config))
+    else:
+        raise RuntimeError("{0} already exists".format(args.config))
 
 
-def pv_daemon(args, date=None):
-    user_pvs = init_PVs(args)
-    # set iso format time
-    central = pytz.timezone('US/Central')
-    local_time = central.localize(date)
-    local_time_iso = local_time.isoformat()
+def show(args):
+    now = datetime.datetime.today() + dt.timedelta(args.set)
+    log.info("Today's date: %s" % now)
+    scheduling.print_current_experiment_info(args)
 
-    user_pvs['user_info_update_time'].put(local_time_iso)
-    log.info("User/Experiment PV update")
 
-    proposal = scheduling.get_current_proposal(args)
-    if not proposal:
-        log.warning('No valid current proposal')
-        return
-    
-    # get PI information
-    pi = scheduling.get_current_pi(args)
-    user_pvs['user_name'].put(pi['firstName'])
-    user_pvs['user_last_name'].put(pi['lastName'])    
-    user_pvs['user_affiliation'].put(pi['institution'])
-    user_pvs['user_email'].put(pi['email'])
-    user_pvs['user_badge'].put(pi['badge'])
-    
-    # get experiment information
-    user_pvs['proposal_number'].put(scheduling.get_current_proposal_id(args))
-    user_pvs['proposal_title'].put(scheduling.get_current_proposal_title(args))
-    #Make the start date of the experiment into a year - month
-    start_datetime = datetime.datetime.strptime(proposal['startTime'],'%Y-%m-%d %H:%M:%S%z')
-    user_pvs['experiment_date'].put(start_datetime.strftime('%Y-%m'))
+def tag(args):
+    # set the experiment date 
+    now = datetime.datetime.today()
+    log.info("Today's date: %s" % now)
+    args = pv.update(args, now)
+
+
+def main():
+    home = os.path.expanduser("~")
+    logs_home = home + '/logs/'
+
+    # make sure logs directory exists
+    if not os.path.exists(logs_home):
+        os.makedirs(logs_home)
+
+    lfname = logs_home + 'dmagic_' + datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d_%H:%M:%S") + '.log'
+    log.setup_custom_logger(lfname)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', **config.SECTIONS['general']['config'])
+    show_params = config.DMAGIC_PARAMS
+    tag_params = config.DMAGIC_PARAMS
+
+    cmd_parsers = [
+        ('init',        init,           (),                             "Create configuration file"),
+        ('show',        show,           show_params,                    "Show user and experiment info from the APS schedule"),
+        ('tag',         tag,            tag_params,                     "Update user info EPICS PVs with info from the APS schedule"),
+    ]
+
+    subparsers = parser.add_subparsers(title="Commands", metavar='')
+
+    for cmd, func, sections, text in cmd_parsers:
+        cmd_params = config.Params(sections=sections)
+        cmd_parser = subparsers.add_parser(cmd, help=text, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        cmd_parser = cmd_params.add_arguments(cmd_parser)
+        cmd_parser.set_defaults(_func=func)
+
+    args = config.parse_known_args(parser, subparser=True)
+
+    try:
+        # load args from default (config.py) if not changed
+        args._func(args)
+        config.log_values(args)
+        # undate globus.config file
+        sections = config.DMAGIC_PARAMS
+        config.write(args.config, args=args, sections=sections)
+    except RuntimeError as e:
+        log.error(str(e))
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()

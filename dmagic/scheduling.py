@@ -56,124 +56,234 @@ configuration file
 """
 
 import os
+import json
+import pathlib
 import sys
 import unicodedata
 import pytz 
+import requests
+
 import datetime as dt
 
 from os.path import expanduser
-from dm import BssApsDbApi
+from requests.auth import HTTPBasicAuth
 
 from dmagic import log
+from dmagic import utils
 
 
 __author__ = "Francesco De Carlo"
 __credits__ = "John Hammonds"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['get_current_users',
-           'get_current_emails',
+__all__ = ['read_credentials',
+           'authorize',
+           'authorize',
+           'current_run',
+           'beamtime_requests',
+           'get_current_users',
            'get_current_pi',
            'get_current_proposal_id',
            'get_current_proposal_title',
+           'get_current_proposal',
+           'get_current_emails',
            'print_current_experiment_info',
            ]
 
 debug = False
-dm_api = BssApsDbApi()
 
-
-def get_current_users(args):
+def read_credentials(filename):
     """
-    Get users running at beamline currently
+    Read username and password from filename.
+    Must create filename in the user home directory with | separated values: user|pwd
+    """
+    credentials = []
+    with open(filename, 'r') as file:
+        for line in file:
+            username, password = line.strip().split('|')  
+            credentials.append((username, password))
+    return credentials
+
+def authorize(filename='.scheduling_credentials'):
+    """
+    Get authorization using username and password contained in filename.
+    """
+    credentials = read_credentials(pathlib.PurePath(pathlib.Path.home(), filename))
+
+    username          = credentials[0][0]
+    password          = credentials[0][1]
+    auth = HTTPBasicAuth(username, password)
+
+    return auth
+
+def current_run(auth, args):
+    """
+    Determine the current run
+
+    Parameters
+    ----------
+    auth : Basic http authorization object
+        Basic http authorization.
+
+
+    Returns
+    -------
+    run : string
+        Run name 2024-1.
+    """
+    end_point         = "sched-api/run/getAllRuns"
+    api_url = args.url + "/" + end_point 
+
+    reply = requests.get(api_url, auth=auth)
+
+    start_times = [item['startTime'] for item in reply.json()]
+    end_times   = [item['endTime']   for item in reply.json()]
+    runs        = [item['runName']   for item in reply.json()]
+    
+    time_now = dt.datetime.now(pytz.timezone('America/Chicago')) + dt.timedelta(args.set)
+    for i in range(len(start_times)):
+        prop_start = dt.datetime.fromisoformat(utils.fix_iso(start_times[i]))
+        prop_end   = dt.datetime.fromisoformat(utils.fix_iso(end_times[i]))
+        if prop_start <= time_now and prop_end >= time_now:
+            return runs[i]
+    return None
+
+
+def beamtime_requests(run, auth, args):
+    """
+    Get a dictionary-like object with all proposals that have a beamtime request scheduled during the run.
+    If no proposal is active or auth does not have permission for beamline, return None.
+    
+    Parameters
+    ----------
+    run : string
+        Run name e.g. '2024-1'
+    auth : Basic http authorization object
+        Basic http authorization.
+    beamline : string
+        beamline ID as stored in the APS scheduling system, e.g. 2-BM-A,B or 7-BM-B or 32-ID-B,C
+
+    Returns
+    -------
+    proposals : list
+        dict-like object with proposals that have a beamtime request scheduled during the run.
+        Returns None if there are no proposals or if auth does not have permission for beamline.
+    """
+    if not run:
+        return None
+    else:
+        end_point="sched-api/activity/findByRunNameAndBeamlineId"
+        api_url = args.url + "/" + end_point + "/" + run + "/" + args.beamline
+        reply = requests.get(api_url, auth=auth)
+
+        return reply.json()
+
+def get_current_users(proposal): ##
+    """
+    Get users listed in the currently active proposal.
+     
+    Parameters
+    ----------
+    proposal : dictionary-like object containing proposal information
     
     Returns
     -------
     users : dictionary-like object containing user information      
     """
-    proposal = get_current_proposal(args)
     if not proposal:
-        log.warning("No current valid proposal")
+        print("No current valid proposal")
         return None
-    return proposal['experimenters']
+    return proposal['beamtime']['proposal']['experimenters']
 
 
-def get_current_pi(args):
+def get_current_pi(proposal): ##
     """
-    Get information about the PI for the current experiment.
+    Get information about the currently active proposal PI.
+     
+    Parameters
+    ----------
+    proposal : dictionary-like object containing proposal information
     
     Returns
-    ------------
-    dictionary-like object containing information for PI
+    -------
+    dictionary-like object containing PI information
     """
-    users = get_current_users(args)
+    users = get_current_users(proposal)
     for u in users:
         if 'piFlag' in u.keys():
             if u['piFlag'] == 'Y':
                 return u
-    #If we are here, nothing was listed as PI.  Use first user
+    # If we are here, nothing was listed as PI.  Use first user
     return users[0]
 
 
-def get_current_proposal_id(args):
+def get_current_proposal_id(proposal): ##
     """
-    Get the proposal id for the current proposal.
-
-    Returns
-    ---------
-    proposal ID as an int
-    """
-    proposal = get_current_proposal(args)
-    if not proposal:
-        log.warning("No current valid proposal")
-        return None
-    return str(get_current_proposal(args)['id'])
-
-
-def get_current_proposal_title(args):
-    """
-    Get the title of the current proposal.
-    
-    Returns
-    ----------
-    str: title of the proposal
-    """
-    proposal = get_current_proposal(args)
-    if not proposal:
-        log.warning("No current valid proposal")
-        return None
-    return proposal['title']
-     
-
-def get_current_proposal(args):
-    """
-    Get a dictionary-like object with current proposal information.
-    If no proposal is active, return None
-    
-    Returns
-    -------------
-    dict-like object with information for current proposal
-    """
-    proposals = dm_api.listProposals('2023-1') # temporary fix during the dark time
-    # proposals = dm_api.listProposals()
-    time_now = dt.datetime.now(pytz.utc) + dt.timedelta(args.set)
-    for prop in proposals:
-        for i in range(len(prop['activities'])):
-            prop_start = dt.datetime.fromisoformat(prop['activities'][i]['startTime'])
-            prop_end = dt.datetime.fromisoformat(prop['activities'][i]['endTime'])
-            if prop_start <= time_now and prop_end >= time_now:
-                return prop
-    return None
-
-
-def get_current_emails(args, exclude_pi=True):
-    """
-    Find user's emails currently running at beamline
+    Get the proposal id for the currently active proposal.
      
     Parameters
     ----------
-    users : dictionary-like object containing user information
+    proposal : dictionary-like object containing proposal information
+
+    Returns
+    -------
+    currently active proposal ID as an int
+    """
+    if not proposal:
+        print("No current valid proposal")
+        return None
+    return proposal['beamtime']['proposal']['gupId']
+
+
+def get_current_proposal_title(proposal): ##
+    """
+    Get the title of the currently active proposal.
+     
+    Parameters
+    ----------
+    proposal : dictionary-like object containing proposal information
     
+    Returns
+    -------
+    str: title of the currently active proposal
+    """
+    if not proposal:
+        print("No current valid proposal")
+        return None
+    return proposal['beamtime']['proposal']['proposalTitle']
+     
+
+def get_current_proposal(proposals, args): ##
+    """
+    Get a dictionary-like object with currently active proposal information.
+    If no proposal is active, return None
+     
+    Parameters
+    ----------
+    proposal : dictionary-like object containing proposal information
+    
+    Returns
+    -------
+    dict-like object with information for currently active proposal
+    """
+    time_now = dt.datetime.now(pytz.timezone('America/Chicago')) + dt.timedelta(args.set)
+    for prop in proposals:
+        prop_start = dt.datetime.fromisoformat(utils.fix_iso(prop['startTime']))
+        prop_end = dt.datetime.fromisoformat(utils.fix_iso(prop['endTime']))
+        if prop_start <= time_now and prop_end >= time_now:
+            # pprint.pprint(prop, compact=True)
+            return prop
+    return None
+
+
+
+def get_current_emails(proposal, exclude_pi=True): ##
+    """
+    Find user's emails listed in the currently active proposal
+     
+    Parameters
+    ----------
+    proposal : dictionary-like object containing proposal information
     
     Returns
     -------
@@ -181,7 +291,8 @@ def get_current_emails(args, exclude_pi=True):
     """
     emails = []
     
-    users = get_current_users(args)
+    users = get_current_users(proposal)
+
     if not users:
         return None
 
@@ -190,37 +301,64 @@ def get_current_emails(args, exclude_pi=True):
             continue
         if 'email' in u.keys() and u['email'] != None:
             emails.append(str(u['email']).lower())
-            log.info('Added {0:s} to the e-mail list.'.format(emails[-1]))
+            # print('Added {0:s} to the e-mail list.'.format(emails[-1]))
         else:            
-            log.info("    Missing e-mail for badge {0:6d}, {1:s} {2:s}, institution {3:s}"
+            print("    Missing e-mail for badge {0:6d}, {1:s} {2:s}, institution {3:s}"
                     .format(u['badge'], u['firstName'], u['lastName'], u['institution']))
     return emails
 
 
-def print_current_experiment_info(args):
+def print_current_experiment_info(args): ##
     """
-    Print the current experiment info running at beamline
+    Print the currently active proposal info running at beamline
      
     Returns
     -------
     Print experiment information        
     """
-    proposal = get_current_proposal(args)
-    if not proposal:
-        log.warning('No valid current experiment')
+    auth      = authorize()
+    run       = current_run(auth, args)
+    proposals = beamtime_requests(run, auth, args)
+    # pprint.pprint(proposals, compact=True)
+    if not proposals:
+        log.error('No valid current experiment')
         return None
-    pi = get_current_pi(args)
-    user_emails = get_current_emails(args, False)
-    log.info("\tRun Name: {0:s}".format('2023-1')) # temporary fix during the dark time
-    # log.info("\tRun Name: {0:s}".format(dm_api.getCurrentRun()['name']))
-    log.info("\tProposal Title: {0:s}".format(proposal['title']))
-    log.info("\tPI Name: {0:s} {1:s}".format(pi['firstName'], pi['lastName']))
-    log.info("\tStart time: {:s}".format(proposal['startTime']))
-    log.info("\tEnd Time: {:s}".format(proposal['endTime']))
-    # print user emails
-    log.info("\tUser email address: ")
-    for ue in user_emails:
-        log.info("\t\t{:s}".format(ue))
+    try:
+        log.error(proposals['message'])
+        return None
+    except:
+        pass
+
+    proposal = get_current_proposal(proposals, args)
+    if proposal != None:
+        proposal_pi          = get_current_pi(proposal)
+        user_name            = proposal_pi['firstName']
+        user_last_name       = proposal_pi['lastName']   
+        user_affiliation     = proposal_pi['institution']
+        user_email           = proposal_pi['email']
+        user_badge           = proposal_pi['badge']
+
+        proposal_gup         = get_current_proposal_id(proposal)
+        proposal_title       = get_current_proposal_title(proposal)
+        proposal_user_emails = get_current_emails(proposal, False)
+        proposal_start       = dt.datetime.fromisoformat(utils.fix_iso(proposal['startTime']))
+        proposal_end         = dt.datetime.fromisoformat(utils.fix_iso(proposal['endTime']))
+       
+        log.info("\tRun: {0:s}".format(run))
+        log.info("\tPI Name: {0:s} {1:s}".format(user_name, user_last_name))
+        log.info("\tPI affiliation: {0:s}".format(user_affiliation))
+        log.info("\tPI e-mail: {0:s}".format(user_email))
+        log.info("\tPI badge: {0:s}".format(user_badge))
+        log.info("\tProposal GUP: {0:d}".format(proposal_gup))
+        log.info("\tProposal Title: {0:s}".format(proposal_title))
+        log.info("\tStart time: {0:s}".format(proposal_start))
+        log.info("\tEnd Time: {0:s}".format(proposal_end))
+        log.info("\tUser email address: ")
+        for ue in proposal_user_emails:
+            log.info("\t\t{:s}".format(ue))
+    else:
+        time_now = dt.datetime.now(pytz.timezone('America/Chicago')) + dt.timedelta(args.set)
+        log.warning('No proposal run on %s during %s' % (time_now, run))
 
 
 def strip_accents(s):

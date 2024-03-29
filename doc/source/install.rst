@@ -137,8 +137,6 @@ Dependencies
 
 Install the following package::
 
-    $ pip install validate-email
-    $ pip install pyinotify
     $ pip install pyepics
     $ pip install pytz
     $ conda install decorator
