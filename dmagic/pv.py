@@ -60,9 +60,23 @@ from dmagic import scheduling
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2015-2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
+__all__ = ['init_PVs',
+           'update']
 
 
 def init_PVs(args):
+    """
+    Initialize the EPICS PVs that will hold user and experiment information
+
+    Parameters
+    ----------
+    args.tomoscan_prefix : EPICS IOC prefix, e.g. 2bma:TomoScan:
+
+    Returns
+    -------
+    user_pvs : dict
+        A dictionary of EPICS PVs
+    """
     
     user_pvs = {}
     tomoscan_prefix = args.tomoscan_prefix
@@ -79,6 +93,13 @@ def init_PVs(args):
 
 
 def update(args, date=None):
+    """
+    Update the EPICS PVs with user and experiment information associated with the current experiment
+
+    Parameters
+    ----------
+    args : parametars passed at the CLI 
+    """
 
     auth      = scheduling.authorize()
     run       = scheduling.current_run(auth, args)
