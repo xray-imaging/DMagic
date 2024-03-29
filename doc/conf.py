@@ -306,13 +306,18 @@ texinfo_documents = [
 
 # -- Options for Texinfo output -------------------------------------------
 # http://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_mock_imports
-autodoc_mock_imports = ['os', 
-                        'datetime', 
-                        'logging', 
-                        'sys', 
-                        'collections', 
-                        'numpy', 
-                        'configparser', 
-                        'unicodedata', 
-                        'string', 
-                        'argparse']
+autodoc_mock_imports = ['os',
+                        'os.path',
+                        'json',
+                        'pathlib',
+                        'sys',
+                        'unicodedata',
+                        'pytz',
+                        'requests',
+                        'requests.auth',
+                        'datetime',
+                        'pytz',
+                        'logging',
+                        'epics']
+
+
