@@ -304,55 +304,15 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #ztexinfo_no_detailmenu = False
 
-# # picked from http://read-the-docs.readthedocs.org/en/latest/faq.html
-# class Mock(object):
-
-#     __all__ = []
-
-#     def __init__(self, *args, **kwargs):
-#         pass
-
-#     def __call__(self, *args, **kwargs):
-#         return Mock()
-
-#     @classmethod
-#     def __getattr__(cls, name):
-#         return Mock()
-#     def __mul__(self, other):
-#         return Mock()
-#     def __rmul__(self, other):
-#         return Mock()
-#     def __pow__(self, other):
-#         return Mock()
-#     def __div__(self, other):
-#         return Mock()
-#     def __add__(self, other):
-#         return Mock()
-#     def __radd__(self, other):
-#         return Mock()
-
-# MOCK_MODULES = ['suds', 'os', 'os.path', 'datetime', 'logging', 'sys', 'traceback', 'urllib', 
-#     'urllib.request', 'http', 'http.client', 'xml', 'xml.sax', 'ipdb', 'collections', 'configparser', 
-#     'unicodedata', 'string', 'validate_email', 'pyinotify', 'subprocess', 're', 
-#     'argparse', 'fnmatch' 'ConfigParser']
-
-           
-# MOCK_MODULES = [
-#    'pyinotify', 'validate_email', 'subprocess', 'argparse',
-#    'fnmatch', 'suds', 'logging', 'traceback', 'urllib2',
-#    'httplib', 'xml', 'ipdb', 'collections', 'unicodedata', 'string']
-
-# MOCK_MODULES = [
-#     'numpy', 'scipy', 'scipy.misc', 'scipy.optimize', 'h5py', 'ctypes',
-#     'matplotlib', 'matplotlib.pylab', 'tifffile', 'EdfFile', 'netCDF4',  
-#     'spefile', 'scipy.ndimage', 'pywt', 'scikit-image', 'skimage',
-#     'skimage.io', 'skimage.filter', 'skimage.morphology', 'DM3lib']
-
-# for mod_name in MOCK_MODULES:
-#     sys.modules[mod_name] = Mock()
-
-# # http://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_mock_imports
-# autodoc_mock_imports = "numpy ConfigParser validate_email subprocess pyinotify suds urllib http xml ipdb".split()
-
+# -- Options for Texinfo output -------------------------------------------
 # http://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#confval-autodoc_mock_imports
-autodoc_mock_imports = "dm suds os datetime logging sys traceback ipdb collections numpy configparser unicodedata string validate_email subprocess pyinotify re urllib http xml argparse fnmatch ConfigParser".split()
+autodoc_mock_imports = ['os', 
+                        'datetime', 
+                        'logging', 
+                        'sys', 
+                        'collections', 
+                        'numpy', 
+                        'configparser', 
+                        'unicodedata', 
+                        'string', 
+                        'argparse']

@@ -12,9 +12,6 @@ requirements:
   build:
     - python
     - setuptools
-    - suds
-    - ipdb
-    - validate_email
  
   run:
     - python
