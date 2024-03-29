@@ -60,7 +60,7 @@ import argparse
 import datetime as dt
 
 from dmagic import scheduling
-from dmagic import pv_update
+from dmagic import pv
 from dmagic import log
 from dmagic import config
 
@@ -82,7 +82,7 @@ def tag(args):
     # set the experiment date 
     now = datetime.datetime.today()
     log.info("Today's date: %s" % now)
-    args = pv_update.pv_daemon(args, now)
+    args = pv.update(args, now)
 
 
 def main():
