@@ -50,9 +50,22 @@
 Module containing utils routines to access the APS scheduling system.
 """
 
+__all__ = ['fix_iso']
+
 def fix_iso(s):
     """
     This is a temporary fix until timezone is returned as -05:00 instead of -0500
+
+    Parameters
+    ----------
+    s : string
+        Like "2022-07-31T01:51:05-0400"
+
+    Returns
+    -------
+    s : string
+        Like "2022-07-31T01:51:05-04:00"
+
     """
     pos = len("2022-07-31T01:51:05-0400") - 2 # take off end "00"
     if len(s) == pos:                 # missing minutes completely

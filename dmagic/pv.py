@@ -60,6 +60,7 @@ from dmagic import scheduling
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2015-2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
+__all__ = ['init_PVs']
 
 
 def init_PVs(args):
