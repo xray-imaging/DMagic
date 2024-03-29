@@ -53,8 +53,9 @@ import datetime
 import pytz
 from epics import PV
 
-from dmagic import scheduling
 from dmagic import log
+from dmagic import utils
+from dmagic import scheduling
 
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2015-2016, UChicago Argonne, LLC."
@@ -127,6 +128,6 @@ def update(args, date=None):
     user_pvs['proposal_title'].put(scheduling.get_current_proposal_title(proposal))
     log.info('Updated EPICS PV with: %s' % scheduling.get_current_proposal_title(proposal))
     #Make the start date of the experiment into a year - month
-    start_datetime = datetime.datetime.strptime(scheduling.fix_iso(proposal['startTime']),'%Y-%m-%dT%H:%M:%S%z')
+    start_datetime = datetime.datetime.strptime(utils.fix_iso(proposal['startTime']),'%Y-%m-%dT%H:%M:%S%z')
     user_pvs['experiment_date'].put(start_datetime.strftime('%Y-%m'))
     log.info('Updated EPICS PV with: %s' % start_datetime.strftime('%Y-%m'))

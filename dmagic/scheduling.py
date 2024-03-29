@@ -69,34 +69,28 @@ from os.path import expanduser
 from requests.auth import HTTPBasicAuth
 
 from dmagic import log
+from dmagic import utils
 
 
 __author__ = "Francesco De Carlo"
 __credits__ = "John Hammonds"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['get_current_users',
-           'get_current_emails',
+__all__ = ['read_credentials',
+           'authorize',
+           'authorize',
+           'current_run',
+           'beamtime_requests',
+           'get_current_users',
            'get_current_pi',
            'get_current_proposal_id',
            'get_current_proposal_title',
+           'get_current_proposal',
+           'get_current_emails',
            'print_current_experiment_info',
            ]
 
 debug = False
-
-
-#########################################################################
-def fix_iso(s):
-    """
-    This is a temporary fix until timezone is returned as -05:00 instead of -0500
-    """
-    pos = len("2022-07-31T01:51:05-0400") - 2 # take off end "00"
-    if len(s) == pos:                 # missing minutes completely
-        s += ":00"
-    elif s[pos:pos+1] != ':':         # missing UTC offset colon
-        s = f"{s[:pos]}:{s[pos:]}"
-    return s
 
 def read_credentials(filename):
     """
@@ -148,8 +142,8 @@ def current_run(auth, args):
     
     time_now = dt.datetime.now(pytz.timezone('America/Chicago')) + dt.timedelta(args.set)
     for i in range(len(start_times)):
-        prop_start = dt.datetime.fromisoformat(fix_iso(start_times[i]))
-        prop_end   = dt.datetime.fromisoformat(fix_iso(end_times[i]))
+        prop_start = dt.datetime.fromisoformat(utils.fix_iso(start_times[i]))
+        prop_end   = dt.datetime.fromisoformat(utils.fix_iso(end_times[i]))
         if prop_start <= time_now and prop_end >= time_now:
             return runs[i]
     return None
@@ -184,10 +178,13 @@ def beamtime_requests(run, auth, args):
 
         return reply.json()
 
-#########################################################################
 def get_current_users(proposal): ##
     """
     Get users listed in the currently active proposal.
+     
+    Parameters
+    ----------
+    proposal : dictionary-like object containing proposal information
     
     Returns
     -------
@@ -202,6 +199,10 @@ def get_current_users(proposal): ##
 def get_current_pi(proposal): ##
     """
     Get information about the currently active proposal PI.
+     
+    Parameters
+    ----------
+    proposal : dictionary-like object containing proposal information
     
     Returns
     -------
@@ -219,6 +220,10 @@ def get_current_pi(proposal): ##
 def get_current_proposal_id(proposal): ##
     """
     Get the proposal id for the currently active proposal.
+     
+    Parameters
+    ----------
+    proposal : dictionary-like object containing proposal information
 
     Returns
     -------
@@ -233,6 +238,10 @@ def get_current_proposal_id(proposal): ##
 def get_current_proposal_title(proposal): ##
     """
     Get the title of the currently active proposal.
+     
+    Parameters
+    ----------
+    proposal : dictionary-like object containing proposal information
     
     Returns
     -------
@@ -248,6 +257,10 @@ def get_current_proposal(proposals, args): ##
     """
     Get a dictionary-like object with currently active proposal information.
     If no proposal is active, return None
+     
+    Parameters
+    ----------
+    proposal : dictionary-like object containing proposal information
     
     Returns
     -------
@@ -255,8 +268,8 @@ def get_current_proposal(proposals, args): ##
     """
     time_now = dt.datetime.now(pytz.timezone('America/Chicago')) + dt.timedelta(args.set)
     for prop in proposals:
-        prop_start = dt.datetime.fromisoformat(fix_iso(prop['startTime']))
-        prop_end = dt.datetime.fromisoformat(fix_iso(prop['endTime']))
+        prop_start = dt.datetime.fromisoformat(utils.fix_iso(prop['startTime']))
+        prop_end = dt.datetime.fromisoformat(utils.fix_iso(prop['endTime']))
         if prop_start <= time_now and prop_end >= time_now:
             # pprint.pprint(prop, compact=True)
             return prop
@@ -270,7 +283,7 @@ def get_current_emails(proposal, exclude_pi=True): ##
      
     Parameters
     ----------
-    users : dictionary-like object containing user information
+    proposal : dictionary-like object containing proposal information
     
     Returns
     -------
@@ -328,8 +341,8 @@ def print_current_experiment_info(args): ##
         proposal_gup         = get_current_proposal_id(proposal)
         proposal_title       = get_current_proposal_title(proposal)
         proposal_user_emails = get_current_emails(proposal, False)
-        proposal_start       = dt.datetime.fromisoformat(fix_iso(proposal['startTime']))
-        proposal_end         = dt.datetime.fromisoformat(fix_iso(proposal['endTime']))
+        proposal_start       = dt.datetime.fromisoformat(utils.fix_iso(proposal['startTime']))
+        proposal_end         = dt.datetime.fromisoformat(utils.fix_iso(proposal['endTime']))
        
         log.info("\tRun: {0:s}".format(run))
         log.info("\tPI Name: {0:s} {1:s}".format(user_name, user_last_name))
