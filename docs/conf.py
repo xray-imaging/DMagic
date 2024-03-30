@@ -321,6 +321,8 @@ autodoc_mock_imports = ['os',
                         'datetime',
                         'pytz',
                         'logging',
-                        'epics']
-
-
+                        'epics'
+                        'argparse',
+                        'configparser',
+                        'numpy',
+                        'collections',]
