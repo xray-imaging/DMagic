@@ -1,5 +1,3 @@
-decorator
-numpy
-pyepics
 pytz
-setuptools
+requests
+pyepics

@@ -36,7 +36,7 @@ SECTIONS['settings'] = {
     'beamline' : {
         'default' : '7-BM-B',
         'type': str,
-        'help': "beamline ID as stored in the APS scheduling system, e.g. 2-BM-A,B or 7-BM-B or 32-ID-B,C"},
+        'help': "beamline name as defined at https://www.aps.anl.gov/Beamlines/Directory, e.g. 2-BM-A,B or 7-BM-B or 32-ID-B,C"},
     'tomoscan-prefix':{
         'default': '7bmb1:',
         'type': str,

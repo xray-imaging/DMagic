@@ -7,96 +7,73 @@ This section covers the basics of how to download and install `DMagic <https://g
 .. contents:: Contents:
    :local:
 
-
-Pre-requisites
-==============
-
-
-Install from `Anaconda <https://www.anaconda.com/distribution/>`_ python3.x.
-
-You will also need to have the APS Data Management system installed for your beamline; contact 
-the `SDM group <https://www.aps.anl.gov/Scientific-Software-Engineering-And-Data-Management>`_ 
-for this installation. Once installed you can run dmagic in a terminal with:
-
-On a BM line::
-
-    $ source /home/dm_bm/etc/dm.setup.sh
- 
-On an ID line::
-
-    $ source /home/dm_id/etc/dm.setup.sh
-    
-then::
-
-    $ dmagic show
-
-Alternatively you can download the Data Management API via conda
-
-::
-
-    conda install -c aps-anl-tag aps-dm-api
-
-There are also several environment variables that must be set for the DM API to work properly.  They can be found in the /home/dm_bm/etc/dm.conda.setup.sh script.  Copy everything in this script except the change to the PATH to your account's ~/.bashrc file.
-
-this includes adding in your .bashrc::
-
-    DM_APS_DB_WEB_SERVICE_URL=https://xraydtn02.xray.aps.anl.gov:11236
-    export DM_APS_DB_WEB_SERVICE_URL
-    DM_BEAMLINE_NAME=20-BM-B
-    export DM_BEAMLINE_NAME
-
-Please  use the DM_BEAMLINE_NAME as defined in the `beamline directory <https://www.aps.anl.gov/Beamlines/Directory>`_
-
-To test the access to the APS scheduling system::
-
-    python -c "from dm.aps_db_web_service.api.esafApsDbApi import EsafApsDbApi; api = EsafApsDbApi();print(api.listEsafs(sector='20',     year=2021))"
-
-
-
-
 Installing from source
 ======================
 
-In a prepared virtualenv or as root for system-wide installation clone the 
-`DMagic <https://github.com/xray-imaging/DMagic>`_ from `GitHub <https://github.com>`_ repository
+Install from `Anaconda <https://www.anaconda.com/distribution/>`_ > python3.9
+
+Create and activate a dedicated conda environment::
+
+    (base) $ conda create --name dm python=3.9
+    (base) $ conda activate dm
+    (dm) $ 
+
+Clone the  `DMagic <https://github.com/xray-imaging/DMagic>`_ repository
 
 ::
 
-    $ git clone https://github.com/xray-imaging/DMagic DMagic
+    (dm) $ git clone https://github.com/xray-imaging/DMagic DMagic
 
-To install DMagic, run::
+Install DMagic::
 
-    $ cd DMagic
-    $ python setup.py install
+    (dm) $ cd DMagic
+    (dm) $ pip install .
 
-.. warning:: Make sure your python installation is in a location set by #!/usr/bin/env python, if not please edit the first line of the bin/dmagic file to match yours.
+Install all packages listed in the ``env/requirements.txt`` file::
+
+    (dm) $ conda install pytz
+    (dm) $ conda install requests
+    (dm) $ pip install pyepics
+
+Test the installation
+=====================
+
+::
+
+    (dm) $ dmagic -h
+    usage: dmagic [-h] [--config FILE]  ...
+
+    optional arguments:
+      -h, --help     show this help message and exit
+      --config FILE  File name of configuration
+
+    Commands:
+      
+        init         Create configuration file
+        show         Show user and experiment info from the APS schedule
+        tag          Update user info EPICS PVs with info from the APS schedule
+
 
 Configuration
 =============
 
-To run DMagic you need to set the beamline name (as defined in the APS scheduling system) and the user info PVs where to store the information retrieved from the scheduling system.  If you are using `tomoScan <https://tomoscan.readthedocs.io/en/latest/>`_ these are provided in the 
+To run DMagic you need to set the beamline name as defined in the `APS scheduling system <https://www.aps.anl.gov/Beamlines/Directory>`_, and the user info PVs where to store the information retrieved from the scheduling system.  If you are using `tomoScan <https://tomoscan.readthedocs.io/en/latest/>`_ these are provided in the 
 beamline specific section `user information <https://tomoscan.readthedocs.io/en/latest/tomoScanApp.html#user-information>`_ section. 
 
-Once you have this information you can edit the config.py file entering the name of your beamline and the 
-IOC prefix for the user info PVs::
+Once you have this information you can update the DMagic configuration i.e. the name of your beamline and the 
+IOC prefix where the PVs are stored at runtime using the --beamline and --tomoscan-prefix options. For more info::
 
-    $ gedit DMagic/dmagic/config.py
-
-You can also change these at runtime using the --beamline and --tomoscan-prefix options. For more info::
-
-    $ dmagic show -h
-    usage: dmagic show [-h] [--beamline BEAMLINE]
-                       [--tomoscan-prefix TOMOSCAN_PREFIX] [--config FILE]
-                       [--verbose]
-
+    (dm) $ dmagic show -h
+    usage: dmagic show [-h] [--beamline BEAMLINE] [--set SET] [--tomoscan-prefix TOMOSCAN_PREFIX] [--url URL] [--config FILE] [--verbose]
+    
     optional arguments:
       -h, --help            show this help message and exit
-      --beamline BEAMLINE   beam line (default: 7-BM-B)
+      --beamline BEAMLINE   beamline name as defined at https://www.aps.anl.gov/Beamlines/Directory, e.g. 2-BM-A,B or 7-BM-B or 32-ID-B,C (default: 7-BM-B)
+      --set SET             Number of +/- number days for the current date. Used for setting user info for past/future user groups (default: 0)
       --tomoscan-prefix TOMOSCAN_PREFIX
-                            The tomoscan prefix, i.e.'7bmb1:' or '2bma:TomoScan:'
-                            (default: 7bmb1:)
-      --config FILE         File name of configuration (default:
-                            /home/beams/USER2BMB/dmagic.conf)
+                            The tomoscan prefix, i.e.'7bmb1:' or '2bma:TomoScan:' (default: 7bmb1:)
+      --url URL             URL address of the scheduling system REST API' (default: https://mis7.aps.anl.gov:7004)
+      --config FILE         File name of configuration (default: /Users/decarlo/dmagic.conf)
       --verbose             Verbose output (default: True)
 
 If you are not running `tomoScan <https://tomoscan.readthedocs.io/en/latest/>`_ look at the EPICS tools section below.
@@ -127,9 +104,9 @@ Update
 
 **dmagic** is constantly updated to include new features. To update your locally installed version::
 
-    $ cd dmagic
-    $ git pull
-    $ python setup.py install
+    (dm) $ cd dmagic
+    (dm) $ git pull
+    (dm) $ pip install .
 
 
 Dependencies
@@ -142,6 +119,6 @@ Install the following package::
     $ conda install decorator
     $ conda install numpy
 
-.. warning:: If requiere edit your .cshrc to set PYEPICS_LIBCA: Example: setenv PYEPICS_LIBCA /APSshare/epics/extensions-base/3.14.12.2-ext1/lib/linux-x86_64/libca.so
+.. warning:: If required edit your .cshrc or .bashrc to set PYEPICS_LIBCA: Example: setenv PYEPICS_LIBCA /APSshare/epics/extensions-base/3.14.12.2-ext1/lib/linux-x86_64/libca.so
 
 
