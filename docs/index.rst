@@ -9,7 +9,7 @@ toolbox to interface with the `Advanced Photon Source <http://www.aps.anl.gov>`_
 `scheduling system  <https://scheduling.aps.anl.gov/>`_.
 
 This guide is maintained on 
-`GitHub <https://github.com/xray-imaging/DMagic/tree/master/doc>`_.
+`GitHub <https://github.com/xray-imaging/DMagic/tree/master/docs>`_.
 
 .. toctree::
    :maxdepth: 1
