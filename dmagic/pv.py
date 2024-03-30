@@ -98,7 +98,7 @@ def update(args, date=None):
 
     Parameters
     ----------
-    args : parametars passed at the CLI 
+    args : parameters passed at the CLI, see config.py for full options
     """
 
     auth      = scheduling.authorize()

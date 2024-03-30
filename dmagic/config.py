@@ -7,6 +7,15 @@ import numpy as np
 from collections import OrderedDict
 from dmagic import log
 
+__author__ = "Francesco De Carlo"
+__copyright__ = "Copyright (c) 2015-2016, UChicago Argonne, LLC."
+__docformat__ = 'restructuredtext en'
+__all__ = ['config_to_list',
+           'get_config_name',
+           'log_values',
+           'parse_known_args',
+           'write']
+
 CONFIG_FILE_NAME = os.path.join(str(pathlib.Path.home()), 'dmagic.conf')
     
 SECTIONS = OrderedDict()
