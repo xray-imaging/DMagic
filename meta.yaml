@@ -19,8 +19,7 @@ requirements:
 test:
   # Python imports
   imports:
-    - globus
-    - scheduling
+    - dmagic
 
 about:
   home: http://dmagic.readthedocs.org
