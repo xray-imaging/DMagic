@@ -54,6 +54,7 @@ system information.
 
 import os
 import sys
+import pytz
 import time
 import datetime
 import argparse
@@ -63,6 +64,8 @@ from dmagic import scheduling
 from dmagic import pv
 from dmagic import log
 from dmagic import config
+from dmagic import authorize
+from dmagic import utils
 
 
 def init(args):
@@ -73,16 +76,123 @@ def init(args):
 
 
 def show(args):
+    """
+    Show the currently active proposal info running at beamline
+     
+    Returns
+    -------
+    Show experiment information        
+    """
     now = datetime.datetime.today() + dt.timedelta(args.set)
     log.info("Today's date: %s" % now)
-    scheduling.print_current_experiment_info(args)
+
+    auth      = authorize.basic()
+    run       = scheduling.current_run(auth, args)
+    proposals = scheduling.beamtime_requests(run, auth, args)
+    # pprint.pprint(proposals, compact=True)
+    if not proposals:
+        log.error('No valid current experiment')
+        return None
+    try:
+        log.error(proposals['message'])
+        return None
+    except:
+        pass
+
+    proposal = scheduling.get_current_proposal(proposals, args)
+    if proposal != None:
+        proposal_pi          = scheduling.get_current_pi(proposal)
+        user_name            = proposal_pi['firstName']
+        user_last_name       = proposal_pi['lastName']   
+        user_affiliation     = proposal_pi['institution']
+        user_email           = proposal_pi['email']
+        user_badge           = proposal_pi['badge']
+
+        proposal_gup         = scheduling.get_current_proposal_id(proposal)
+        proposal_title       = scheduling.get_current_proposal_title(proposal)
+        proposal_user_emails = scheduling.get_current_emails(proposal, False)
+        proposal_start       = dt.datetime.fromisoformat(utils.fix_iso(proposal['startTime']))
+        proposal_end         = dt.datetime.fromisoformat(utils.fix_iso(proposal['endTime']))
+        log.info("\tRun: %s" % run)
+        log.info("\tPI Name: %s %s" % (user_name, user_last_name))
+        log.info("\tPI affiliation: %s" % (user_affiliation))
+        log.info("\tPI e-mail: %s" % (user_email))
+        log.info("\tPI badge: %s" % (user_badge))
+        log.info("\tProposal GUP: %s" % (proposal_gup))
+        log.info("\tProposal Title: %s" % (proposal_title))
+        log.info("\tStart time: %s" % (proposal_start))
+        log.info("\tEnd Time: %s" % (proposal_end))
+        log.info("\tUser email address: ")
+        for ue in proposal_user_emails:
+            log.info("\t\t %s" % (ue))
+    else:
+        time_now = dt.datetime.now(pytz.timezone('America/Chicago')) + dt.timedelta(args.set)
+        log.warning('No proposal run on %s during %s' % (time_now, run))
 
 
 def tag(args):
+    """
+    Update the EPICS PVs with user and experiment information associated with the current experiment
+
+    Parameters
+    ----------
+    args : parameters passed at the CLI, see config.py for full options
+    """
     # set the experiment date 
     now = datetime.datetime.today()
     log.info("Today's date: %s" % now)
-    args = pv.update(args, now)
+
+    auth      = authorize.basic()
+    run       = scheduling.current_run(auth, args)
+    proposals = scheduling.beamtime_requests(run, auth, args)
+
+    if not proposals:
+        log.error('No valid current experiment')
+        return None
+    try:
+        log.error(proposals['message'])
+        return None
+    except:
+        pass
+
+    proposal = scheduling.get_current_proposal(proposals, args)
+    if not proposal:
+        log.warning('No valid current proposal')
+        return
+
+    # get PI information
+    pi = scheduling.get_current_pi(proposal)
+
+    user_pvs = pv.init_PVs(args)
+
+    log.info("User/Experiment PV update")
+    user_pvs['user_name'].put(pi['firstName'])
+    log.info('Updating user_name EPICS PV with: %s' % pi['firstName'])
+    user_pvs['user_last_name'].put(pi['lastName'])    
+    log.info('Updating user_last_name EPICS PV with: %s' % pi['lastName'])    
+    user_pvs['user_affiliation'].put(pi['institution'])
+    log.info('Updating user_affiliation EPICS PV with: %s' % pi['institution'])
+    user_pvs['user_email'].put(pi['email'])
+    log.info('Updating user_email EPICS PV with: %s' % pi['email'])
+    user_pvs['user_badge'].put(pi['badge'])
+    log.info('Updating user_badge EPICS PV with: %s' % pi['badge'])
+
+    # set iso format time
+    central = pytz.timezone('US/Central')
+    local_time = central.localize(now)
+    local_time_iso = local_time.isoformat()
+    user_pvs['user_info_update_time'].put(local_time_iso)
+    log.info('Updating user_info_update_time EPICS PV with: %s' % local_time_iso)
+    
+    # get experiment information
+    user_pvs['proposal_number'].put(scheduling.get_current_proposal_id(proposal))
+    log.info('Updating proposal_number EPICS PV with: %s' % scheduling.get_current_proposal_id(proposal))
+    user_pvs['proposal_title'].put(scheduling.get_current_proposal_title(proposal))
+    log.info('Updating proposal_title EPICS PV with: %s' % scheduling.get_current_proposal_title(proposal))
+    #Make the start date of the experiment into a year - month
+    start_datetime = datetime.datetime.strptime(utils.fix_iso(proposal['startTime']),'%Y-%m-%dT%H:%M:%S%z')
+    user_pvs['experiment_date'].put(start_datetime.strftime('%Y-%m'))
+    log.info('Updating experiment_date EPICS PV with: %s' % start_datetime.strftime('%Y-%m'))
 
 
 def main():

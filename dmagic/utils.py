@@ -49,8 +49,12 @@
 """
 Module containing utils routines to access the APS scheduling system.
 """
+import string
+import unicodedata
 
-__all__ = ['fix_iso']
+__all__ = ['fix_iso',
+           'clean_entry']
+
 
 def fix_iso(s):
     """
@@ -73,3 +77,31 @@ def fix_iso(s):
     elif s[pos:pos+1] != ':':         # missing UTC offset colon
         s = f"{s[:pos]}:{s[pos:]}"
     return s
+
+
+def clean_entry(entry):
+    """
+    Remove from user last name characters that are not compatible folder names.
+     
+    Parameters
+    ----------
+    entry : str
+        user last name    
+    Returns
+    -------
+    entry : str
+        user last name compatible with directory name   
+    """
+
+    valid_folder_entry_chars = "-_%s%s" % (string.ascii_letters, string.digits)
+    utf_8_str = str(entry) 
+    norml_str = unicodedata.normalize('NFKD', utf_8_str)
+    cleaned_folder_name = norml_str.encode('ASCII', 'ignore')
+    
+    cfn = norml_str.replace(' ', '_')  
+    return ''.join(c for c in list(cfn) if c in list(valid_folder_entry_chars))
+
+
+def strip_accents(s):
+   return ''.join(c for c in unicodedata.normalize('NFD', s)
+                  if unicodedata.category(c) != 'Mn')
