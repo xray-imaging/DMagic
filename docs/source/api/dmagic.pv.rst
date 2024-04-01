@@ -11,4 +11,3 @@
    .. autosummary::
    
       init_PVs
-      update

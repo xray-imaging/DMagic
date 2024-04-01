@@ -57,16 +57,13 @@ configuration file
 
 import os
 import json
-import pathlib
 import sys
-import unicodedata
 import pytz 
 import requests
 
 import datetime as dt
 
 from os.path import expanduser
-from requests.auth import HTTPBasicAuth
 
 from dmagic import log
 from dmagic import utils
@@ -76,10 +73,7 @@ __author__ = "Francesco De Carlo"
 __credits__ = "John Hammonds"
 __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['read_credentials',
-           'authorize',
-           'authorize',
-           'current_run',
+__all__ = ['current_run',
            'beamtime_requests',
            'get_current_users',
            'get_current_pi',
@@ -87,34 +81,10 @@ __all__ = ['read_credentials',
            'get_current_proposal_title',
            'get_current_proposal',
            'get_current_emails',
-           'print_current_experiment_info',
            ]
 
 debug = False
 
-def read_credentials(filename):
-    """
-    Read username and password from filename.
-    Must create filename in the user home directory with | separated values: user|pwd
-    """
-    credentials = []
-    with open(filename, 'r') as file:
-        for line in file:
-            username, password = line.strip().split('|')  
-            credentials.append((username, password))
-    return credentials
-
-def authorize(filename='.scheduling_credentials'):
-    """
-    Get authorization using username and password contained in filename.
-    """
-    credentials = read_credentials(pathlib.PurePath(pathlib.Path.home(), filename))
-
-    username          = credentials[0][0]
-    password          = credentials[0][1]
-    auth = HTTPBasicAuth(username, password)
-
-    return auth
 
 def current_run(auth, args):
     """
@@ -178,7 +148,8 @@ def beamtime_requests(run, auth, args):
 
         return reply.json()
 
-def get_current_users(proposal): ##
+
+def get_current_users(proposal):
     """
     Get users listed in the currently active proposal.
      
@@ -196,7 +167,7 @@ def get_current_users(proposal): ##
     return proposal['beamtime']['proposal']['experimenters']
 
 
-def get_current_pi(proposal): ##
+def get_current_pi(proposal):
     """
     Get information about the currently active proposal PI.
      
@@ -217,7 +188,7 @@ def get_current_pi(proposal): ##
     return users[0]
 
 
-def get_current_proposal_id(proposal): ##
+def get_current_proposal_id(proposal):
     """
     Get the proposal id for the currently active proposal.
      
@@ -235,7 +206,7 @@ def get_current_proposal_id(proposal): ##
     return proposal['beamtime']['proposal']['gupId']
 
 
-def get_current_proposal_title(proposal): ##
+def get_current_proposal_title(proposal):
     """
     Get the title of the currently active proposal.
      
@@ -253,7 +224,7 @@ def get_current_proposal_title(proposal): ##
     return proposal['beamtime']['proposal']['proposalTitle']
      
 
-def get_current_proposal(proposals, args): ##
+def get_current_proposal(proposals, args):
     """
     Get a dictionary-like object with currently active proposal information.
     If no proposal is active, return None
@@ -276,8 +247,7 @@ def get_current_proposal(proposals, args): ##
     return None
 
 
-
-def get_current_emails(proposal, exclude_pi=True): ##
+def get_current_emails(proposal, exclude_pi=True):
     """
     Find user's emails listed in the currently active proposal
      
@@ -306,84 +276,3 @@ def get_current_emails(proposal, exclude_pi=True): ##
             print("    Missing e-mail for badge {0:6d}, {1:s} {2:s}, institution {3:s}"
                     .format(u['badge'], u['firstName'], u['lastName'], u['institution']))
     return emails
-
-
-def print_current_experiment_info(args): ##
-    """
-    Print the currently active proposal info running at beamline
-     
-    Returns
-    -------
-    Print experiment information        
-    """
-    auth      = authorize()
-    run       = current_run(auth, args)
-    proposals = beamtime_requests(run, auth, args)
-    # pprint.pprint(proposals, compact=True)
-    if not proposals:
-        log.error('No valid current experiment')
-        return None
-    try:
-        log.error(proposals['message'])
-        return None
-    except:
-        pass
-
-    proposal = get_current_proposal(proposals, args)
-    if proposal != None:
-        proposal_pi          = get_current_pi(proposal)
-        user_name            = proposal_pi['firstName']
-        user_last_name       = proposal_pi['lastName']   
-        user_affiliation     = proposal_pi['institution']
-        user_email           = proposal_pi['email']
-        user_badge           = proposal_pi['badge']
-
-        proposal_gup         = get_current_proposal_id(proposal)
-        proposal_title       = get_current_proposal_title(proposal)
-        proposal_user_emails = get_current_emails(proposal, False)
-        proposal_start       = dt.datetime.fromisoformat(utils.fix_iso(proposal['startTime']))
-        proposal_end         = dt.datetime.fromisoformat(utils.fix_iso(proposal['endTime']))
-       
-        log.info("\tRun: {0:s}".format(run))
-        log.info("\tPI Name: {0:s} {1:s}".format(user_name, user_last_name))
-        log.info("\tPI affiliation: {0:s}".format(user_affiliation))
-        log.info("\tPI e-mail: {0:s}".format(user_email))
-        log.info("\tPI badge: {0:s}".format(user_badge))
-        log.info("\tProposal GUP: {0:d}".format(proposal_gup))
-        log.info("\tProposal Title: {0:s}".format(proposal_title))
-        log.info("\tStart time: {0:s}".format(proposal_start))
-        log.info("\tEnd Time: {0:s}".format(proposal_end))
-        log.info("\tUser email address: ")
-        for ue in proposal_user_emails:
-            log.info("\t\t{:s}".format(ue))
-    else:
-        time_now = dt.datetime.now(pytz.timezone('America/Chicago')) + dt.timedelta(args.set)
-        log.warning('No proposal run on %s during %s' % (time_now, run))
-
-
-def strip_accents(s):
-   return ''.join(c for c in unicodedata.normalize('NFD', s)
-                  if unicodedata.category(c) != 'Mn')
-                  
-
-def clean_entry(entry):
-    """
-    Remove from user last name characters that are not compatible folder names.
-     
-    Parameters
-    ----------
-    entry : str
-        user last name    
-    Returns
-    -------
-    entry : str
-        user last name compatible with directory name   
-    """
-
-    valid_folder_entry_chars = "-_%s%s" % (string.ascii_letters, string.digits)
-    utf_8_str = str(entry) 
-    norml_str = unicodedata.normalize('NFKD', utf_8_str)
-    cleaned_folder_name = norml_str.encode('ASCII', 'ignore')
-    
-    cfn = norml_str.replace(' ', '_')  
-    return ''.join(c for c in list(cfn) if c in list(valid_folder_entry_chars))

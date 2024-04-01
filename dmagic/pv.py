@@ -49,19 +49,14 @@
 """
 Module generating user and proposal info PVs
 """
-import datetime
-import pytz
 from epics import PV
 
 from dmagic import log
-from dmagic import utils
-from dmagic import scheduling
 
 __author__ = "Francesco De Carlo"
 __copyright__ = "Copyright (c) 2015-2016, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
-__all__ = ['init_PVs',
-           'update']
+__all__ = ['init_PVs', ]
 
 
 def init_PVs(args):
@@ -80,6 +75,7 @@ def init_PVs(args):
     
     user_pvs = {}
     tomoscan_prefix = args.tomoscan_prefix
+    log.info("Trying to initiale EPICS PVs")
     user_pvs['user_name'] = PV(tomoscan_prefix + 'UserName')
     user_pvs['user_last_name'] = PV(tomoscan_prefix + 'UserLastName')
     user_pvs['user_affiliation'] = PV(tomoscan_prefix + 'UserInstitution')
@@ -90,65 +86,3 @@ def init_PVs(args):
     user_pvs['user_info_update_time'] = PV(tomoscan_prefix + 'UserInfoUpdate')
     user_pvs['experiment_date'] = PV(tomoscan_prefix + 'ExperimentYearMonth')
     return user_pvs
-
-
-def update(args, date=None):
-    """
-    Update the EPICS PVs with user and experiment information associated with the current experiment
-
-    Parameters
-    ----------
-    args : parameters passed at the CLI, see config.py for full options
-    """
-
-    auth      = scheduling.authorize()
-    run       = scheduling.current_run(auth, args)
-    proposals = scheduling.beamtime_requests(run, auth, args)
-
-    if not proposals:
-        log.error('No valid current experiment')
-        return None
-    try:
-        log.error(proposals['message'])
-        return None
-    except:
-        pass
-
-    proposal = scheduling.get_current_proposal(proposals, args)
-    if not proposal:
-        log.warning('No valid current proposal')
-        return
-
-    # get PI information
-    pi = scheduling.get_current_pi(proposal)
-
-    user_pvs = init_PVs(args)
-
-    log.info("User/Experiment PV update")
-    user_pvs['user_name'].put(pi['firstName'])
-    log.info('Updated EPICS PV with: %s' % pi['firstName'])
-    user_pvs['user_last_name'].put(pi['lastName'])    
-    log.info('Updated EPICS PV with: %s' % pi['lastName'])    
-    user_pvs['user_affiliation'].put(pi['institution'])
-    log.info('Updated EPICS PV with: %s' % pi['institution'])
-    user_pvs['user_email'].put(pi['email'])
-    log.info('Updated EPICS PV with: %s' % pi['email'])
-    user_pvs['user_badge'].put(pi['badge'])
-    log.info('Updated EPICS PV with: %s' % pi['badge'])
-
-    # set iso format time
-    central = pytz.timezone('US/Central')
-    local_time = central.localize(date)
-    local_time_iso = local_time.isoformat()
-    user_pvs['user_info_update_time'].put(local_time_iso)
-    log.info('Updated EPICS PV with: %s' % local_time_iso)
-    
-    # get experiment information
-    user_pvs['proposal_number'].put(scheduling.get_current_proposal_id(proposal))
-    log.info('Updated EPICS PV with: %s' % scheduling.get_current_proposal_id(proposal))
-    user_pvs['proposal_title'].put(scheduling.get_current_proposal_title(proposal))
-    log.info('Updated EPICS PV with: %s' % scheduling.get_current_proposal_title(proposal))
-    #Make the start date of the experiment into a year - month
-    start_datetime = datetime.datetime.strptime(utils.fix_iso(proposal['startTime']),'%Y-%m-%dT%H:%M:%S%z')
-    user_pvs['experiment_date'].put(start_datetime.strftime('%Y-%m'))
-    log.info('Updated EPICS PV with: %s' % start_datetime.strftime('%Y-%m'))

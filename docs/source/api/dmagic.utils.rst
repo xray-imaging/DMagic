@@ -11,3 +11,4 @@
    .. autosummary::
    
       fix_iso
+      clean_entry
