@@ -101,21 +101,25 @@ def current_run(auth, args):
     run : string
         Run name 2024-1.
     """
-    end_point         = "sched-api/run/getAllRuns"
+    end_point         = "sched-api/sched-api/run/getAllRuns"
     api_url = args.url + "/" + end_point 
 
     reply = requests.get(api_url, auth=auth)
+    print(api_url)
 
-    start_times = [item['startTime'] for item in reply.json()]
-    end_times   = [item['endTime']   for item in reply.json()]
-    runs        = [item['runName']   for item in reply.json()]
-    
-    time_now = dt.datetime.now(pytz.timezone('America/Chicago')) + dt.timedelta(args.set)
-    for i in range(len(start_times)):
-        prop_start = dt.datetime.fromisoformat(utils.fix_iso(start_times[i]))
-        prop_end   = dt.datetime.fromisoformat(utils.fix_iso(end_times[i]))
-        if prop_start <= time_now and prop_end >= time_now:
-            return runs[i]
+    if reply.status_code != 404:
+        start_times = [item['startTime'] for item in reply.json()]
+        end_times   = [item['endTime']   for item in reply.json()]
+        runs        = [item['runName']   for item in reply.json()]
+        
+        time_now = dt.datetime.now(pytz.timezone('America/Chicago')) + dt.timedelta(args.set)
+        for i in range(len(start_times)):
+            prop_start = dt.datetime.fromisoformat(utils.fix_iso(start_times[i]))
+            prop_end   = dt.datetime.fromisoformat(utils.fix_iso(end_times[i]))
+            if prop_start <= time_now and prop_end >= time_now:
+                return runs[i]
+    else:
+        log.error("No response from the restAPI. Error: %s" % reply.status_code)    
     return None
 
 
@@ -142,7 +146,7 @@ def beamtime_requests(run, auth, args):
     if not run:
         return None
     else:
-        end_point="sched-api/activity/findByRunNameAndBeamlineId"
+        end_point="sched-api/sched-api/activity/findByRunNameAndBeamlineId"
         api_url = args.url + "/" + end_point + "/" + run + "/" + args.beamline
         reply = requests.get(api_url, auth=auth)
 
@@ -276,3 +280,4 @@ def get_current_emails(proposal, exclude_pi=True):
             print("    Missing e-mail for badge {0:6d}, {1:s} {2:s}, institution {3:s}"
                     .format(u['badge'], u['firstName'], u['lastName'], u['institution']))
     return emails
+
