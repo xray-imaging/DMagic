@@ -101,11 +101,10 @@ def current_run(auth, args):
     run : string
         Run name 2024-1.
     """
-    end_point         = "sched-api/sched-api/run/getAllRuns"
+    end_point         = "beamline-scheduling/sched-api/run/getAllRuns"
     api_url = args.url + "/" + end_point 
 
     reply = requests.get(api_url, auth=auth)
-    print(api_url)
 
     if reply.status_code != 404:
         start_times = [item['startTime'] for item in reply.json()]
@@ -146,7 +145,7 @@ def beamtime_requests(run, auth, args):
     if not run:
         return None
     else:
-        end_point="sched-api/sched-api/activity/findByRunNameAndBeamlineId"
+        end_point="beamline-scheduling/sched-api/activity/findByRunNameAndBeamlineId"
         api_url = args.url + "/" + end_point + "/" + run + "/" + args.beamline
         reply = requests.get(api_url, auth=auth)
 
