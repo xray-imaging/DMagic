@@ -59,14 +59,42 @@ import time
 import datetime
 import argparse
 import datetime as dt
+from epics import PV
 
 from dmagic import scheduling
-from dmagic import pv
 from dmagic import log
 from dmagic import config
 from dmagic import authorize
 from dmagic import utils
 
+
+def init_PVs(args):
+    """
+    Initialize the EPICS PVs that will hold user and experiment information
+
+    Parameters
+    ----------
+    args.tomoscan_prefix : EPICS IOC prefix, e.g. 2bma:TomoScan:
+
+    Returns
+    -------
+    user_pvs : dict
+        A dictionary of EPICS PVs
+    """
+    
+    user_pvs = {}
+    tomoscan_prefix = args.tomoscan_prefix
+    log.info("Trying to initiale EPICS PVs")
+    user_pvs['pi_name'] = PV(tomoscan_prefix + 'UserName')
+    user_pvs['pi_last_name'] = PV(tomoscan_prefix + 'UserLastName')
+    user_pvs['pi_affiliation'] = PV(tomoscan_prefix + 'UserInstitution')
+    user_pvs['pi_badge'] = PV(tomoscan_prefix + 'UserBadge')
+    user_pvs['pi_email'] = PV(tomoscan_prefix + 'UserEmail')
+    user_pvs['proposal_number'] = PV(tomoscan_prefix + 'ProposalNumber')
+    user_pvs['proposal_title'] = PV(tomoscan_prefix + 'ProposalTitle')
+    user_pvs['user_info_update_time'] = PV(tomoscan_prefix + 'UserInfoUpdate')
+    user_pvs['experiment_date'] = PV(tomoscan_prefix + 'ExperimentYearMonth')
+    return user_pvs
 
 def init(args):
     if not os.path.exists(str(args.config)):
@@ -102,24 +130,26 @@ def show(args):
     proposal = scheduling.get_current_proposal(proposals, args)
     if proposal != None:
         proposal_pi          = scheduling.get_current_pi(proposal)
-        user_name            = proposal_pi['firstName']
-        user_last_name       = proposal_pi['lastName']   
-        user_affiliation     = proposal_pi['institution']
-        user_email           = proposal_pi['email']
-        user_badge           = proposal_pi['badge']
+        pi_name              = proposal_pi['firstName']
+        pi_last_name         = proposal_pi['lastName']   
+        pi_affiliation       = proposal_pi['institution']
+        pi_email             = proposal_pi['email']
+        pi_badge             = proposal_pi['badge']
 
-        proposal_gup         = scheduling.get_current_proposal_id(proposal)
+        proposal_id          = scheduling.get_current_proposal_id(proposal)
         proposal_title       = scheduling.get_current_proposal_title(proposal)
         proposal_user_emails = scheduling.get_current_emails(proposal, False)
+        proposal_start_date  = scheduling.get_proposal_starting_date(proposal)
         proposal_start       = dt.datetime.fromisoformat(utils.fix_iso(proposal['startTime']))
         proposal_end         = dt.datetime.fromisoformat(utils.fix_iso(proposal['endTime']))
         log.info("\tRun: %s" % run)
-        log.info("\tPI Name: %s %s" % (user_name, user_last_name))
-        log.info("\tPI affiliation: %s" % (user_affiliation))
-        log.info("\tPI e-mail: %s" % (user_email))
-        log.info("\tPI badge: %s" % (user_badge))
-        log.info("\tProposal GUP: %s" % (proposal_gup))
+        log.info("\tPI Name: %s %s" % (pi_name, pi_last_name))
+        log.info("\tPI affiliation: %s" % (pi_affiliation))
+        log.info("\tPI e-mail: %s" % (pi_email))
+        log.info("\tPI badge: %s" % (pi_badge))
+        log.info("\tProposal GUP: %s" % (proposal_id))
         log.info("\tProposal Title: %s" % (proposal_title))
+        log.info("\tStart date: %s" % (proposal_start_date))        
         log.info("\tStart time: %s" % (proposal_start))
         log.info("\tEnd Time: %s" % (proposal_end))
         log.info("\tUser email address: ")
@@ -166,16 +196,16 @@ def tag(args):
     user_pvs = pv.init_PVs(args)
 
     log.info("User/Experiment PV update")
-    user_pvs['user_name'].put(pi['firstName'])
-    log.info('Updating user_name EPICS PV with: %s' % pi['firstName'])
-    user_pvs['user_last_name'].put(pi['lastName'])    
-    log.info('Updating user_last_name EPICS PV with: %s' % pi['lastName'])    
-    user_pvs['user_affiliation'].put(pi['institution'])
-    log.info('Updating user_affiliation EPICS PV with: %s' % pi['institution'])
-    user_pvs['user_email'].put(pi['email'])
-    log.info('Updating user_email EPICS PV with: %s' % pi['email'])
-    user_pvs['user_badge'].put(pi['badge'])
-    log.info('Updating user_badge EPICS PV with: %s' % pi['badge'])
+    user_pvs['pi_name'].put(pi['firstName'])
+    log.info('Updating pi_name EPICS PV with: %s' % pi['firstName'])
+    user_pvs['pi_last_name'].put(pi['lastName'])    
+    log.info('Updating pi_last_name EPICS PV with: %s' % pi['lastName'])    
+    user_pvs['pi_affiliation'].put(pi['institution'])
+    log.info('Updating pi_affiliation EPICS PV with: %s' % pi['institution'])
+    user_pvs['pi_email'].put(pi['email'])
+    log.info('Updating pi_email EPICS PV with: %s' % pi['email'])
+    user_pvs['pi_badge'].put(pi['badge'])
+    log.info('Updating pi_badge EPICS PV with: %s' % pi['badge'])
 
     # set iso format time
     central = pytz.timezone('US/Central')
