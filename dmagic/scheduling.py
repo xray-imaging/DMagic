@@ -281,3 +281,16 @@ def get_current_emails(proposal, exclude_pi=True):
                     .format(u['badge'], u['firstName'], u['lastName'], u['institution']))
     return emails
 
+def get_proposal_starting_date(proposal):
+    """
+    Get the proposal starting date for the current proposal.
+
+    Returns
+    ---------
+    proposal starting date as a string
+    """
+    if not proposal:
+        log.error("No current valid proposal")
+        return None
+    log.info("Found valid proposal start time")
+    return str(dt.datetime.fromisoformat((proposal['startTime'])).strftime("%Y_%m_%d"))
