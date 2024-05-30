@@ -14,7 +14,7 @@ Install from `Anaconda <https://www.anaconda.com/distribution/>`_ > python3.9
 
 Create and activate a dedicated conda environment::
 
-    (base) $ conda create --name dm python=3.9
+    (base) $ conda create --name dm python=3.11
     (base) $ conda activate dm
     (dm) $ 
 
@@ -37,6 +37,10 @@ Install all packages listed in the ``env/requirements.txt`` file::
 
 Test the installation
 =====================
+
+Before using DMagic you must create a file with default name .scheduling_credentials in the user 
+home directory containing: username|pwd to access the restAPI service.
+
 
 ::
 
