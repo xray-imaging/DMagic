@@ -114,7 +114,7 @@ def show(args):
     now = datetime.datetime.today() + dt.timedelta(args.set)
     log.info("Today's date: %s" % now)
 
-    auth      = authorize.basic()
+    auth      = authorize.basic(args.credentials)
     run       = scheduling.current_run(auth, args)
     proposals = scheduling.beamtime_requests(run, auth, args)
     # pprint.pprint(proposals, compact=True)
@@ -172,7 +172,7 @@ def tag(args):
     now = datetime.datetime.today()
     log.info("Today's date: %s" % now)
 
-    auth      = authorize.basic()
+    auth      = authorize.basic(args.credentials)
     run       = scheduling.current_run(auth, args)
     proposals = scheduling.beamtime_requests(run, auth, args)
 

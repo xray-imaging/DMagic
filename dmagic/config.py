@@ -17,6 +17,7 @@ __all__ = ['config_to_list',
            'write']
 
 CONFIG_FILE_NAME = os.path.join(str(pathlib.Path.home()), 'dmagic.conf')
+CREDENTIALS_FILE_NAME = os.path.join(str(pathlib.Path.home()), '.scheduling_credentials')
     
 SECTIONS = OrderedDict()
 
@@ -49,6 +50,11 @@ SECTIONS['settings'] = {
         'default': 'https://mis7.aps.anl.gov:7004',
         'type': str,
         'help': "URL address of the scheduling system REST API' "},
+    'credentials': {
+        'default': CREDENTIALS_FILE_NAME,
+        'type': str,
+        'help': "File name containing the restAPI service credetinals in the format of user|pwd",
+        'metavar': 'FILE'},    
     }
 
 
