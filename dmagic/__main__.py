@@ -54,11 +54,12 @@ system information.
 
 import os
 import sys
-import pytz
 import time
 import datetime
+import zoneinfo
 import argparse
 import datetime as dt
+
 from epics import PV
 
 from dmagic import scheduling
@@ -111,8 +112,8 @@ def show(args):
     -------
     Show experiment information        
     """
-    now = datetime.datetime.today() + dt.timedelta(args.set)
-    log.info("Today's date: %s" % now)
+    time_now = (datetime.datetime.now() + dt.timedelta(args.set)).astimezone()
+    log.info("Today's date: %s" % time_now)
 
     auth      = authorize.basic(args.credentials)
     run       = scheduling.current_run(auth, args)
@@ -156,7 +157,7 @@ def show(args):
         for ue in proposal_user_emails:
             log.info("\t\t %s" % (ue))
     else:
-        time_now = dt.datetime.now(pytz.timezone('America/Chicago')) + dt.timedelta(args.set)
+        time_now = datetime.datetime.now().astimezone() + dt.timedelta(args.set)
         log.warning('No proposal run on %s during %s' % (time_now, run))
 
 
@@ -208,9 +209,8 @@ def tag(args):
     log.info('Updating pi_badge EPICS PV with: %s' % pi['badge'])
 
     # set iso format time
-    central = pytz.timezone('US/Central')
-    local_time = central.localize(now)
-    local_time_iso = local_time.isoformat()
+    us_central_tz = zoneinfo.ZoneInfo("America/Chicago")
+    local_time_iso = datetime.datetime.now().replace(tzinfo=us_central_tz).isoformat()
     user_pvs['user_info_update_time'].put(local_time_iso)
     log.info('Updating user_info_update_time EPICS PV with: %s' % local_time_iso)
     
