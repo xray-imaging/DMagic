@@ -187,42 +187,43 @@ def tag(args):
         pass
 
     proposal = scheduling.get_current_proposal(proposals, args)
-    if not proposal:
-        log.warning('No valid current proposal')
-        return
 
-    # get PI information
-    pi = scheduling.get_current_pi(proposal)
+    if proposal != None:
+        # get PI information
+        pi = scheduling.get_current_pi(proposal)
 
-    user_pvs = pv.init_PVs(args)
+        user_pvs = init_PVs(args)
 
-    log.info("User/Experiment PV update")
-    user_pvs['pi_name'].put(pi['firstName'])
-    log.info('Updating pi_name EPICS PV with: %s' % pi['firstName'])
-    user_pvs['pi_last_name'].put(pi['lastName'])    
-    log.info('Updating pi_last_name EPICS PV with: %s' % pi['lastName'])    
-    user_pvs['pi_affiliation'].put(pi['institution'])
-    log.info('Updating pi_affiliation EPICS PV with: %s' % pi['institution'])
-    user_pvs['pi_email'].put(pi['email'])
-    log.info('Updating pi_email EPICS PV with: %s' % pi['email'])
-    user_pvs['pi_badge'].put(pi['badge'])
-    log.info('Updating pi_badge EPICS PV with: %s' % pi['badge'])
+        log.info("User/Experiment PV update")
+        user_pvs['pi_name'].put(pi['firstName'])
+        log.info('Updating pi_name EPICS PV with: %s' % pi['firstName'])
+        user_pvs['pi_last_name'].put(pi['lastName'])    
+        log.info('Updating pi_last_name EPICS PV with: %s' % pi['lastName'])    
+        user_pvs['pi_affiliation'].put(pi['institution'])
+        log.info('Updating pi_affiliation EPICS PV with: %s' % pi['institution'])
+        user_pvs['pi_email'].put(pi['email'])
+        log.info('Updating pi_email EPICS PV with: %s' % pi['email'])
+        user_pvs['pi_badge'].put(pi['badge'])
+        log.info('Updating pi_badge EPICS PV with: %s' % pi['badge'])
 
-    # set iso format time
-    us_central_tz = zoneinfo.ZoneInfo("America/Chicago")
-    local_time_iso = datetime.datetime.now().replace(tzinfo=us_central_tz).isoformat()
-    user_pvs['user_info_update_time'].put(local_time_iso)
-    log.info('Updating user_info_update_time EPICS PV with: %s' % local_time_iso)
-    
-    # get experiment information
-    user_pvs['proposal_number'].put(scheduling.get_current_proposal_id(proposal))
-    log.info('Updating proposal_number EPICS PV with: %s' % scheduling.get_current_proposal_id(proposal))
-    user_pvs['proposal_title'].put(scheduling.get_current_proposal_title(proposal))
-    log.info('Updating proposal_title EPICS PV with: %s' % scheduling.get_current_proposal_title(proposal))
-    #Make the start date of the experiment into a year - month
-    start_datetime = datetime.datetime.strptime(utils.fix_iso(proposal['startTime']),'%Y-%m-%dT%H:%M:%S%z')
-    user_pvs['experiment_date'].put(start_datetime.strftime('%Y-%m'))
-    log.info('Updating experiment_date EPICS PV with: %s' % start_datetime.strftime('%Y-%m'))
+        # set iso format time
+        us_central_tz = zoneinfo.ZoneInfo("America/Chicago")
+        local_time_iso = datetime.datetime.now().replace(tzinfo=us_central_tz).isoformat()
+        user_pvs['user_info_update_time'].put(local_time_iso)
+        log.info('Updating user_info_update_time EPICS PV with: %s' % local_time_iso)
+        
+        # get experiment information
+        user_pvs['proposal_number'].put(str(scheduling.get_current_proposal_id(proposal)))
+        log.info('Updating proposal_number EPICS PV with: %s' % scheduling.get_current_proposal_id(proposal))
+        user_pvs['proposal_title'].put(str(scheduling.get_current_proposal_title(proposal)))
+        log.info('Updating proposal_title EPICS PV with: %s' % scheduling.get_current_proposal_title(proposal))
+        #Make the start date of the experiment into a year - month
+        start_datetime = datetime.datetime.strptime(utils.fix_iso(proposal['startTime']),'%Y-%m-%dT%H:%M:%S%z')
+        user_pvs['experiment_date'].put(start_datetime.strftime('%Y-%m'))
+        log.info('Updating experiment_date EPICS PV with: %s' % start_datetime.strftime('%Y-%m'))
+    else:
+        time_now = datetime.datetime.now().astimezone() + dt.timedelta(args.set)
+        log.warning('No proposal run on %s during %s' % (time_now, run))
 
 
 def main():
