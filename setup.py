@@ -6,6 +6,7 @@ setup(
     author_email = 'decarlo@anl.gov',
     description = 'Data Management Magic Tools.',
     packages = find_packages(),
+    entry_points={'console_scripts':['dmagic = dmagic.__main__:main'],},
     version = open('VERSION').read().strip(),
     zip_safe = False,
     url='http://dmagic.readthedocs.org',
@@ -23,6 +24,5 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         ],
-    scripts=['bin/dmagic']
 )
 
