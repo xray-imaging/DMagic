@@ -47,7 +47,7 @@ SECTIONS['settings'] = {
         'default': 0,
         'help': "Number of +/- number days for the current date. Used for setting user info for past/future user groups"},
     'url':{
-        'default': 'https://beam-api-dev.aps.anl.gov',
+        'default': 'https://beam-api.aps.anl.gov',
         'type': str,
         'help': "URL address of the scheduling system REST API' "},
     'credentials': {
