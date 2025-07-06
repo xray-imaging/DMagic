@@ -1,6 +1,6 @@
 package:
   name: dmagic
-  version: '0.0.2'
+  version: '0.0.4'
 
 source:
   path: src
@@ -12,9 +12,6 @@ requirements:
   build:
     - python
     - setuptools
-    - suds
-    - ipdb
-    - validate_email
  
   run:
     - python
@@ -22,8 +19,7 @@ requirements:
 test:
   # Python imports
   imports:
-    - globus
-    - scheduling
+    - dmagic
 
 about:
   home: http://dmagic.readthedocs.org

@@ -7,7 +7,17 @@ import numpy as np
 from collections import OrderedDict
 from dmagic import log
 
+__author__ = "Francesco De Carlo"
+__copyright__ = "Copyright (c) 2015-2016, UChicago Argonne, LLC."
+__docformat__ = 'restructuredtext en'
+__all__ = ['config_to_list',
+           'get_config_name',
+           'log_values',
+           'parse_known_args',
+           'write']
+
 CONFIG_FILE_NAME = os.path.join(str(pathlib.Path.home()), 'dmagic.conf')
+CREDENTIALS_FILE_NAME = os.path.join(str(pathlib.Path.home()), '.scheduling_credentials')
     
 SECTIONS = OrderedDict()
 
@@ -27,11 +37,24 @@ SECTIONS['settings'] = {
     'beamline' : {
         'default' : '7-BM-B',
         'type': str,
-        'help': "beam line"},
+        'help': "beamline name as defined at https://www.aps.anl.gov/Beamlines/Directory, e.g. 2-BM-A,B or 7-BM-B or 32-ID-B,C"},
     'tomoscan-prefix':{
         'default': '7bmb1:',
         'type': str,
         'help': "The tomoscan prefix, i.e.'7bmb1:' or '2bma:TomoScan:' "},
+    'set': {     
+        'type': float,
+        'default': 0,
+        'help': "Number of +/- number days for the current date. Used for setting user info for past/future user groups"},
+    'url':{
+        'default': 'https://beam-api.aps.anl.gov',
+        'type': str,
+        'help': "URL address of the scheduling system REST API' "},
+    'credentials': {
+        'default': CREDENTIALS_FILE_NAME,
+        'type': str,
+        'help': "File name containing the restAPI service credetinals in the format of user|pwd",
+        'metavar': 'FILE'},    
     }
 
 

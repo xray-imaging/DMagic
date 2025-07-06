@@ -47,3 +47,4 @@
 # #########################################################################
 
 from dmagic.scheduling import *
+from dmagic.utils import *

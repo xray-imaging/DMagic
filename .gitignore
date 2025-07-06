@@ -115,3 +115,7 @@ docs/trunk/*
 ###############
 credentials.ini
 
+# VGStudio
+.vscode/
+
+.loglogin
