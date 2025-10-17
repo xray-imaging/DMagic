@@ -114,10 +114,10 @@ def show(args):
     """
     time_now = (datetime.datetime.now() + dt.timedelta(args.set)).astimezone()
     log.info("Today's date: %s" % time_now)
-
     auth      = authorize.basic(args.credentials)
     run       = scheduling.current_run(auth, args)
-    proposals = scheduling.beamtime_requests(run, auth, args)
+    output = scheduling.beamtime_requests(run, auth, args)
+    proposals = output[0]['activities']
     # pprint.pprint(proposals, compact=True)
     if not proposals:
         log.error('No valid current experiment')
