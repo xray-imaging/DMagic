@@ -175,7 +175,10 @@ def tag(args):
 
     auth      = authorize.basic(args.credentials)
     run       = scheduling.current_run(auth, args)
-    proposals = scheduling.beamtime_requests(run, auth, args)
+    output = scheduling.beamtime_requests(run, auth, args)
+    proposals = output[0]['activities']
+    # pprint.pprint(proposals, compact=True)
+    #proposals = scheduling.beamtime_requests(run, auth, args)
 
     if not proposals:
         log.error('No valid current experiment')
