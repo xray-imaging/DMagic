@@ -106,7 +106,7 @@ def current_run(auth, args):
 
     reply = requests.get(api_url, auth=auth)
 
-    if reply.status_code != 404:
+    if reply.status_code == 200:
         start_times = [item['startTime'] for item in reply.json()]
         end_times   = [item['endTime']   for item in reply.json()]
         runs        = [item['runName']   for item in reply.json()]
