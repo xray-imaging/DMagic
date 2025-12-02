@@ -117,10 +117,12 @@ def show(args):
     auth      = authorize.basic(args.credentials)
     run       = scheduling.current_run(auth, args)
     output = scheduling.beamtime_requests(run, auth, args)
-    proposals = output[0]['activities']
-    # pprint.pprint(proposals, compact=True)
-    if not proposals:
-        log.error('No valid current experiment')
+    try:
+        proposals = output[0]['activities']
+        # pprint.pprint(proposals, compact=True)
+    except IndexError:
+    # if not proposals:
+        log.error('No valid current experimentxxx')
         return None
     try:
         log.error(proposals['message'])
