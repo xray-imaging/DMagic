@@ -145,7 +145,8 @@ def beamtime_requests(run, auth, args):
     if not run:
         return None
     else:
-        end_point="beamline-scheduling/sched-api/activity/findByRunNameAndBeamlineId"
+        #end_point="beamline-scheduling/sched-api/activity/findByRunNameAndBeamlineId"
+        end_point="beamline-scheduling/sched-api/schedule/findByRunNameAndScheduleName"
         api_url = args.url + "/" + end_point + "/" + run + "/" + args.beamline
         reply = requests.get(api_url, auth=auth)
 
