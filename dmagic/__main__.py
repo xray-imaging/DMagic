@@ -199,6 +199,25 @@ def tag(args):
 
         user_pvs = init_PVs(args)
 
+        # Verify IOC/PVs are reachable before attempting any puts
+        probe_keys = ('user_info_update_time', 'pi_name')  # pick PVs that always exist
+        conn_timeout = getattr(args, 'epics_conn_timeout', 1.0)  # optional new arg; fallback 1s
+
+        missing = []
+        for k in probe_keys:
+            pv = user_pvs.get(k)
+            if pv is None:
+                continue
+            if not pv.wait_for_connection(timeout=conn_timeout):
+                missing.append(pv.pvname)
+
+        if missing:
+            log.error("EPICS IOC %s not reachable" % (args.tomoscan_prefix))
+            log.error("Verify tomoscan_prefix=%s is running " % (args.tomoscan_prefix))
+            log.error("or select select a different IOC by using the --tomoscan-prefix option")
+            return None
+
+
         log.info("User/Experiment PV update")
         user_pvs['pi_name'].put(pi['firstName'])
         log.info('Updating pi_name EPICS PV with: %s' % pi['firstName'])
