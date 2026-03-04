@@ -42,7 +42,7 @@ SECTIONS['settings'] = {
         'default': '7bmb1:',
         'type': str,
         'help': "The tomoscan prefix, i.e.'7bmb1:' or '2bma:TomoScan:' "},
-    'set': {     
+    'set': {
         'type': float,
         'default': 0,
         'help': "Number of +/- number days for the current date. Used for setting user info for past/future user groups"},
@@ -54,12 +54,86 @@ SECTIONS['settings'] = {
         'default': CREDENTIALS_FILE_NAME,
         'type': str,
         'help': "File name containing the restAPI service credetinals in the format of user|pwd",
-        'metavar': 'FILE'},    
+        'metavar': 'FILE'},
     }
+
+SECTIONS['dm'] = {
+    'experiment-type': {
+        'type': str,
+        'default': '7BM',
+        'help': 'Experiment type in the DM system'},
+    'primary-beamline-contact-badge': {
+        'type': int,
+        'default': 56788,
+        'help': 'Badge number of primary beamline contact. Added to all DM experiments'},
+    'primary-beamline-contact-email': {
+        'type': str,
+        'default': 'user@anl.gov',
+        'help': 'Email address of primary beamline contact'},
+    'secondary-beamline-contact-badge': {
+        'type': int,
+        'default': 56788,
+        'help': 'Badge number of secondary beamline contact. Added to all DM experiments'},
+    'secondary-beamline-contact-email': {
+        'type': str,
+        'default': 'user@anl.gov',
+        'help': 'Email address of secondary beamline contact'},
+    'globus-message-file': {
+        'type': str,
+        'default': 'message-7bm.txt',
+        'help': 'File name of the notification e-mail message template sent to users'},
+    'globus-server-uuid': {
+        'type': str,
+        'default': '054a0877-97ca-4d80-947f-47ca522b173e',
+        'help': 'UUID of the Globus endpoint for the data management server (Sojourner)'},
+    'globus-server-top-dir': {
+        'type': str,
+        'default': '/gdata/dm/7BM',
+        'help': 'Path from data storage root to the beamline top directory'},
+    'manual': {
+        'default': False,
+        'help': 'Create a manual experiment (not from the scheduling system)',
+        'action': 'store_true'},
+    'badges': {
+        'type': str,
+        'default': '',
+        'help': 'Comma-separated list of badge numbers for a manual experiment'},
+    'date': {
+        'type': str,
+        'default': '',
+        'help': 'Year-month for manual experiment in yyyy-mm format (default: current month)'},
+    'name': {
+        'type': str,
+        'default': 'Staff',
+        'help': 'PI last name for manual experiment'},
+    'first-name': {
+        'type': str,
+        'default': '',
+        'help': 'PI first name for manual experiment'},
+    'institution': {
+        'type': str,
+        'default': '',
+        'help': 'PI institution for manual experiment'},
+    'email': {
+        'type': str,
+        'default': '',
+        'help': 'PI email for manual experiment'},
+    'title': {
+        'type': str,
+        'default': 'Commissioning',
+        'help': 'Title for manual experiment'},
+    }
+
+SECTIONS['email'] = {
+    'schedule': {
+        'default': False,
+        'help': 'Set to True to send an email to all users listed in the current proposal',
+        'action': 'store_true'}}
 
 
 DMAGIC_PARAMS = ('settings',)
-NICE_NAMES = ('General', 'Settings')
+DM_PARAMS = ('settings', 'dm', 'email')
+NICE_NAMES = ('General', 'Settings', 'DM', 'Email')
 
 def get_config_name():
     """Get the command line --config option."""

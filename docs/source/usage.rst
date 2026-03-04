@@ -80,6 +80,68 @@ The information associated with the current user/experiment will be updated in t
   :width: 400
   :alt: medm screen
 
+DM Experiment Management
+=========================
+
+The ``create`` and ``email`` commands integrate with the APS Data Management (DM) system
+(Sojourner) to manage experiment records and user data access via Globus.
+
+Before using these commands, configure the ``[dm]`` section of ``~/dmagic.conf`` with
+your beamline-specific values::
+
+    [dm]
+    experiment-type = 7BM
+    primary-beamline-contact-badge = 12345
+    primary-beamline-contact-email = scientist@anl.gov
+    secondary-beamline-contact-badge = 12345
+    secondary-beamline-contact-email = scientist@anl.gov
+    globus-server-uuid = 054a0877-97ca-4d80-947f-47ca522b173e
+    globus-server-top-dir = /gdata/dm/7BM
+    globus-message-file = message-7bm.txt
+
+dmagic create
+-------------
+
+Creates a DM experiment on Sojourner for the current beamtime and adds all users from
+the scheduling proposal. Lists all beamtimes in the current run and prompts for selection::
+
+    (dm) $ dmagic create
+    2025-03-04 09:00:00,000 - Found 2 beamtimes in run 2025-1:
+      [0] GUP 12345 - PI: Smith - In-situ tomography of ...
+           2025-03-03T08:00:00-06:00 to 2025-03-05T08:00:00-06:00
+      [1] GUP 67890 - PI: Jones - High-speed imaging of ...
+           2025-03-05T08:00:00-06:00 to 2025-03-07T08:00:00-06:00
+
+    Select beamtime [0-1] or 'q' to quit: 0
+    2025-03-04 09:00:01,000 - Create summary:
+    2025-03-04 09:00:01,000 -    Experiment : 2025-03/2025-03-Smith-12345
+    2025-03-04 09:00:01,000 -    Title      : In-situ tomography of ...
+       *** Confirm? Yes or No (Y/N): Y
+    2025-03-04 09:00:03,000 -    Experiment successfully created: 2025-03-Smith-12345
+    2025-03-04 09:00:03,500 -    Added user John Smith to the DM experiment
+    2025-03-04 09:00:03,600 -    Added user Jane Doe to the DM experiment
+
+For commissioning runs or staff experiments with no scheduling proposal, use ``--manual``::
+
+    (dm) $ dmagic create --manual --name Staff --title Commissioning --badges 12345,67890
+
+dmagic email
+------------
+
+Sends a data-access notification email with a Globus link to all users on the DM
+experiment. Requires that ``dmagic create`` has been run first, and that a message
+template file (``globus-message-file`` in config) exists::
+
+    (dm) $ dmagic email
+    2025-03-04 09:05:00,000 - Sending e-mail to users on the DM experiment
+    Send email to users?
+       *** Yes or No (Y/N): Y
+    2025-03-04 09:05:01,000 -    Would send email to: smith@university.edu, doe@lab.gov, scientist@anl.gov
+
+.. note::
+    SMTP sending is currently disabled by default. To enable it, uncomment the
+    ``smtplib`` block in ``dmagic/message.py``.
+
 For help::
 
     (dm) $ dmagic -h
@@ -94,6 +156,8 @@ For help::
         init         Create configuration file
         show         Show user and experiment info from the APS schedule
         tag          Update user info EPICS PVs with info from the APS schedule
+        create       Create a DM experiment on Sojourner and add users from the scheduling system
+        email        Send data-access email with Globus link to all users on the DM experiment
 
 To access all options::
 
@@ -112,16 +176,22 @@ To access all options::
 
 ::
 
-    (dm) $ dmagic tag -h
-    usage: dmagic tag [-h] [--beamline BEAMLINE] [--set SET] [--tomoscan-prefix TOMOSCAN_PREFIX] [--url URL] [--config FILE] [--verbose]
+    (dm) $ dmagic create -h
+    usage: dmagic create [-h] [--beamline BEAMLINE] [--set SET] [--credentials FILE]
+                         [--url URL] [--experiment-type TYPE]
+                         [--primary-beamline-contact-badge N]
+                         [--primary-beamline-contact-email EMAIL]
+                         [--secondary-beamline-contact-badge N]
+                         [--secondary-beamline-contact-email EMAIL]
+                         [--globus-server-uuid UUID] [--globus-server-top-dir DIR]
+                         [--globus-message-file FILE]
+                         [--manual] [--badges BADGES] [--date DATE]
+                         [--name NAME] [--title TITLE] [--config FILE] [--verbose]
 
     optional arguments:
-      -h, --help            show this help message and exit
-      --beamline BEAMLINE   beamline name as defined at https://www.aps.anl.gov/Beamlines/Directory, e.g. 2-BM-A,B or 7-BM-B or 32-ID-B,C (default: 7-BM-B)
-      --set SET             Number of +/- number days for the current date. Used for setting user info for past/future user groups (default: 0)
-      --tomoscan-prefix TOMOSCAN_PREFIX
-                            The tomoscan prefix, i.e.'7bmb1:' or '2bma:TomoScan:' (default: 7bmb1:)
-      --url URL             URL address of the scheduling system REST API' (default: https://beam-api.aps.anl.gov)
-      --config FILE         File name of configuration (default: /Users/decarlo/dmagic.conf)
-      --verbose             Verbose output (default: True)
+      --manual              Create a manual experiment (not from the scheduling system)
+      --badges BADGES       Comma-separated list of badge numbers for a manual experiment
+      --date DATE           Year-month for manual experiment in yyyy-mm format
+      --name NAME           PI last name for manual experiment (default: Staff)
+      --title TITLE         Title for manual experiment (default: Commissioning)
 

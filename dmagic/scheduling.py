@@ -75,6 +75,8 @@ __copyright__ = "Copyright (c) 2015, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 __all__ = ['current_run',
            'beamtime_requests',
+           'list_beamtimes',
+           'get_beamtime',
            'get_current_users',
            'get_current_pi',
            'get_current_proposal_id',
@@ -151,6 +153,117 @@ def beamtime_requests(run, auth, args):
         reply = requests.get(api_url, auth=auth)
 
         return reply.json()
+
+
+def list_beamtimes(auth, args):
+    """
+    List all beamtimes scheduled for the run containing today + args.set days.
+
+    Parameters
+    ----------
+    auth : HTTPBasicAuth
+        Basic http authorization.
+
+    Returns
+    -------
+    list of dict
+        Each dict contains: gup_number, gup_title, pi_last_name, pi_first_name,
+        pi_institution, pi_email, pi_badge, year_month, start_time, end_time, run_name.
+        Returns an empty list if none are found.
+    """
+    run = current_run(auth, args)
+    if run is None:
+        log.error("Could not determine run for the given --set offset")
+        return []
+
+    end_point = "beamline-scheduling/sched-api/activity/findByRunNameAndBeamlineId"
+    api_url = args.url + '/' + end_point + '/' + run + '/' + args.beamline
+    reply = requests.get(api_url, auth=auth)
+
+    if reply.status_code != 200:
+        log.error("No response from the restAPI. Error: %s" % reply.status_code)
+        return []
+
+    beamtimes = []
+    for item in reply.json():
+        proposal = item['beamtime']['proposal']
+        pi_last_name   = 'Unknown'
+        pi_first_name  = ''
+        pi_institution = ''
+        pi_email       = ''
+        pi_badge       = ''
+        for exp in proposal.get('experimenters', []):
+            if exp.get('piFlag') == 'Y':
+                pi_last_name   = exp.get('lastName', 'Unknown')
+                pi_first_name  = exp.get('firstName', '')
+                pi_institution = exp.get('institution', '')
+                pi_email       = str(exp.get('email', '')).lower()
+                pi_badge       = str(exp.get('badge', ''))
+                break
+
+        start_dt   = dt.datetime.fromisoformat(utils.fix_iso(item['startTime']))
+        year_month = start_dt.strftime('%Y-%m')
+
+        beamtimes.append({
+            'gup_number':     str(proposal['gupId']),
+            'gup_title':      proposal.get('proposalTitle', ''),
+            'pi_last_name':   pi_last_name,
+            'pi_first_name':  pi_first_name,
+            'pi_institution': pi_institution,
+            'pi_email':       pi_email,
+            'pi_badge':       pi_badge,
+            'year_month':     year_month,
+            'start_time':     item['startTime'],
+            'end_time':       item['endTime'],
+            'run_name':       run,
+        })
+
+    return beamtimes
+
+
+def get_beamtime(gup_number, auth, args):
+    """
+    Get the raw beamtime record for a specific GUP number in the current run.
+
+    Parameters
+    ----------
+    gup_number : str or int
+        The GUP number to look up.
+    auth : HTTPBasicAuth
+        Basic http authorization.
+
+    Returns
+    -------
+    dict or None
+        Raw beamtime item from the scheduling API, or None if not found.
+    """
+    run = current_run(auth, args)
+    if run is None:
+        log.error("Could not determine current run")
+        return None
+
+    end_point = "beamline-scheduling/sched-api/activity/findByRunNameAndBeamlineId"
+    api_url = args.url + '/' + end_point + '/' + run + '/' + args.beamline
+
+    if not str(gup_number).strip():
+        log.error("GUP number is empty")
+        return None
+
+    reply = requests.get(api_url, auth=auth)
+    if reply.status_code != 200:
+        log.error("No response from the restAPI. Error: %s" % reply.status_code)
+        return None
+
+    for item in reply.json():
+        gup_id = item['beamtime']['proposal'].get('gupId', '')
+        if not gup_id:
+            continue
+        if int(gup_id) == int(gup_number):
+            log.info("Beamtime for GUP %s found in run %s" % (gup_number, run))
+            return item
+
+    log.error("No beamtime from proposal %s found in run %s" % (gup_number, run))
+    return None
 
 
 def get_current_users(proposal):
