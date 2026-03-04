@@ -29,7 +29,7 @@ Install DMagic::
     (dm) $ cd DMagic
     (dm) $ pip install .
 
-Install all packages listed in the ``env/requirements.txt`` file::
+Install all packages listed in the ``envs/requirements.txt`` file::
 
     (dm) $ conda install pytz
     (dm) $ conda install requests
@@ -76,7 +76,7 @@ IOC prefix where the PVs are stored at runtime using the --beamline and --tomosc
       --set SET             Number of +/- number days for the current date. Used for setting user info for past/future user groups (default: 0)
       --tomoscan-prefix TOMOSCAN_PREFIX
                             The tomoscan prefix, i.e.'7bmb1:' or '2bma:TomoScan:' (default: 7bmb1:)
-      --url URL             URL address of the scheduling system REST API' (default: https://mis7.aps.anl.gov:7004)
+      --url URL             URL address of the scheduling system REST API' (default: https://beam-api.aps.anl.gov)
       --config FILE         File name of configuration (default: /Users/decarlo/dmagic.conf)
       --verbose             Verbose output (default: True)
 
@@ -116,13 +116,12 @@ Update
 Dependencies
 ============
 
-Install the following package::
+Install the following packages::
 
     $ pip install pyepics
     $ pip install pytz
-    $ conda install decorator
-    $ conda install numpy
+    $ pip install requests
 
-.. warning:: If required edit your .cshrc or .bashrc to set PYEPICS_LIBCA: Example: setenv PYEPICS_LIBCA /APSshare/epics/extensions-base/3.14.12.2-ext1/lib/linux-x86_64/libca.so
+.. warning:: If required, edit your .cshrc or .bashrc to set PYEPICS_LIBCA. Example: setenv PYEPICS_LIBCA /APSshare/epics/extensions-base/3.14.12.2-ext1/lib/linux-x86_64/libca.so
 
 
