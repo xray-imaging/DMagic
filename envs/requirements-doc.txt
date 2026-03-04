@@ -4,3 +4,4 @@ sphinxcontrib-bibtex >=2, <3
 nbsphinx
 pandoc
 jupyter
+pytz
