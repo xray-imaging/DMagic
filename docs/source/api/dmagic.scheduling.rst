@@ -18,3 +18,4 @@
       get_current_proposal_id
       get_current_proposal_title
       get_current_users
+      get_proposal_starting_date

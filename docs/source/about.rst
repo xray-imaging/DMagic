@@ -2,17 +2,18 @@
 About
 =====
 
-`DMagic <https://github.com/xray-imaging/DMagic>`_ aims to provide easy command-line
-interface to the `APS scheduling system <https://schedule.aps.anl.gov/>`_
+`DMagic <https://github.com/xray-imaging/DMagic>`_ provides a command-line interface to the
+`APS scheduling system <https://schedule.aps.anl.gov/>`_.
 
-Basic functionalities include the ability, for the current experiment, to retrieve the users' 
-email addresses from the APS scheduling as well as experiment information. This infomation can 
-be printed ("show" option) or used to update EPICS PVs ("tag" option)
+It bridges the APS scheduling system (which tracks who is running experiments and when) with
+the `EPICS <https://epics-controls.org/>`_ control system used to operate beamline equipment.
 
+For the current experiment, DMagic can retrieve PI and user information (name, affiliation,
+email, badge number) as well as proposal metadata (GUP ID, title, start/end times). This
+information can be printed to the terminal (``show`` command) or written directly into EPICS
+Process Variables on the beamline IOC (``tag`` command), ensuring that data files are
+automatically attributed to the correct user group without manual entry.
 
-`DMagic <https://github.com/xray-imaging/DMagic>`_ supports `Globus <https://github.com/xray-imaging/Globus>`_
-a tool to automatically create Globus shared folders with users.
-
-`DMagic <https://github.com/xray-imaging/DMagic>`_  and `Globus <https://github.com/xray-imaging/Globus>`_ are designed 
-to help managing the massive amount of data generated at the `Advanced Photon Source <http://www.aps.anl.gov>`_ by providing 
-an automatic way to tag, share, notify and distribute data to users.
+DMagic is primarily used at tomography beamlines (e.g. 2-BM, 7-BM, 32-ID) in conjunction
+with `tomoScan <https://tomoscan.readthedocs.io/>`_ to populate user information PVs at the
+start of each user run.
