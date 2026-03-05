@@ -388,22 +388,20 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', **config.SECTIONS['general']['config'])
-    show_params   = config.DMAGIC_PARAMS
-    tag_params    = config.DMAGIC_PARAMS
-    dm_params     = config.DM_PARAMS
 
+    # (sections shown in -h, sections suppressed in -h but still parsed, help text)
     cmd_parsers = [
-        ('init',        init,           (),                             "Create configuration file"),
-        ('show',        show,           show_params,                    "Show user and experiment info from the APS schedule"),
-        ('tag',         tag,            tag_params,                     "Update user info EPICS PVs with info from the APS schedule"),
-        ('create',      create,         dm_params,                      "Create a DM experiment on Sojourner and add users from the scheduling system"),
-        ('email',       email,          dm_params,                      "Send data-access email with Globus link to all users on the DM experiment"),
+        ('init',   init,   config.INIT_PARAMS,   (),                   "Create configuration file"),
+        ('show',   show,   config.SHOW_PARAMS,   config.SITE_SUPPRESS, "Show user and experiment info from the APS schedule"),
+        ('tag',    tag,    config.TAG_PARAMS,    config.SITE_SUPPRESS, "Update user info EPICS PVs with info from the APS schedule"),
+        ('create', create, config.CREATE_PARAMS, config.SITE_SUPPRESS, "Create a DM experiment on Sojourner and add users from the scheduling system"),
+        ('email',  email,  config.EMAIL_PARAMS,  config.SITE_SUPPRESS, "Send data-access email with Globus link to all users on the DM experiment"),
     ]
 
     subparsers = parser.add_subparsers(title="Commands", metavar='')
 
-    for cmd, func, sections, text in cmd_parsers:
-        cmd_params = config.Params(sections=sections)
+    for cmd, func, sections, suppress, text in cmd_parsers:
+        cmd_params = config.Params(sections=sections, suppress_sections=suppress)
         cmd_parser = subparsers.add_parser(cmd, help=text, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         cmd_parser = cmd_params.add_arguments(cmd_parser)
         cmd_parser.set_defaults(_func=func)
@@ -411,12 +409,17 @@ def main():
     args = config.parse_known_args(parser, subparser=True)
 
     try:
-        # load args from default (config.py) if not changed
         args._func(args)
         config.log_values(args)
-        # undate globus.config file
-        sections = config.DMAGIC_PARAMS
-        config.write(args.config, args=args, sections=sections)
+        # Write sections appropriate to each command
+        cmd = sys.argv[1] if len(sys.argv) > 1 else ''
+        if cmd == 'init':
+            write_sections = ('site',)
+        elif cmd == 'create':
+            write_sections = ('settings', 'create')
+        else:
+            write_sections = ('settings',)
+        config.write(args.config, args=args, sections=write_sections)
     except RuntimeError as e:
         log.error(str(e))
         sys.exit(1)

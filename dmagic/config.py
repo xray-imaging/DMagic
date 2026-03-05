@@ -18,7 +18,7 @@ __all__ = ['config_to_list',
 
 CONFIG_FILE_NAME = os.path.join(str(pathlib.Path.home()), 'dmagic.conf')
 CREDENTIALS_FILE_NAME = os.path.join(str(pathlib.Path.home()), '.scheduling_credentials')
-    
+
 SECTIONS = OrderedDict()
 
 SECTIONS['general'] = {
@@ -34,38 +34,42 @@ SECTIONS['general'] = {
 
 
 SECTIONS['settings'] = {
-    'beamline' : {
-        'default' : '2-BM-A,B',
-        'type': str,
-        'help': "beamline name as defined at https://www.aps.anl.gov/Beamlines/Directory, e.g. 2-BM-A,B or 7-BM-B or 32-ID-B,C"},
-    'tomoscan-prefix':{
-        'default': '2bmb:TomoScan:',
-        'type': str,
-        'help': "The tomoscan prefix, i.e. '2bmb:TomoScan:' "},
     'set': {
         'type': float,
         'default': 0,
-        'help': "Number of +/- number days for the current date. Used for setting user info for past/future user groups"},
-    'url':{
-        'default': 'https://beam-api.aps.anl.gov',
+        'help': "Number of +/- days offset from today for past/future user groups"},
+    }
+
+SECTIONS['site'] = {
+    'beamline': {
+        'default': '2-BM-A,B',
         'type': str,
-        'help': "URL address of the scheduling system REST API' "},
+        'help': "Beamline name, e.g. 2-BM-A,B or 7-BM-B or 32-ID-B,C"},
     'credentials': {
         'default': CREDENTIALS_FILE_NAME,
         'type': str,
-        'help': "File name containing the restAPI service credetinals in the format of user|pwd",
+        'help': "File with scheduling REST API credentials in user|pwd format",
         'metavar': 'FILE'},
-    }
-
-SECTIONS['dm'] = {
     'experiment-type': {
         'type': str,
         'default': '2BM',
         'help': 'Experiment type in the DM system'},
+    'globus-message-file': {
+        'type': str,
+        'default': 'message-2bm.txt',
+        'help': 'Email message template file name sent to users'},
+    'globus-server-top-dir': {
+        'type': str,
+        'default': '/gdata/dm/2BM',
+        'help': 'Path from data storage root to the beamline top directory'},
+    'globus-server-uuid': {
+        'type': str,
+        'default': '054a0877-97ca-4d80-947f-47ca522b173e',
+        'help': 'UUID of the Globus endpoint for the data management server (Sojourner)'},
     'primary-beamline-contact-badge': {
         'type': int,
         'default': 218262,
-        'help': 'Badge number of primary beamline contact. Added to all DM experiments'},
+        'help': 'Badge number of primary beamline contact'},
     'primary-beamline-contact-email': {
         'type': str,
         'default': 'pshevchenko@anl.gov',
@@ -73,39 +77,34 @@ SECTIONS['dm'] = {
     'secondary-beamline-contact-badge': {
         'type': int,
         'default': 49734,
-        'help': 'Badge number of secondary beamline contact. Added to all DM experiments'},
+        'help': 'Badge number of secondary beamline contact'},
     'secondary-beamline-contact-email': {
         'type': str,
         'default': 'decarlo@anl.gov',
         'help': 'Email address of secondary beamline contact'},
-    'globus-message-file': {
+    'tomoscan-prefix': {
+        'default': '2bmb:TomoScan:',
         'type': str,
-        'default': 'message-2bm.txt',
-        'help': 'File name of the notification e-mail message template sent to users'},
-    'globus-server-uuid': {
+        'help': "TomoScan EPICS IOC prefix, e.g. '2bmb:TomoScan:'"},
+    'url': {
+        'default': 'https://beam-api.aps.anl.gov',
         'type': str,
-        'default': '054a0877-97ca-4d80-947f-47ca522b173e',
-        'help': 'UUID of the Globus endpoint for the data management server (Sojourner)'},
-    'globus-server-top-dir': {
-        'type': str,
-        'default': '/gdata/dm/2BM',
-        'help': 'Path from data storage root to the beamline top directory'},
-    'manual': {
-        'default': False,
-        'help': 'Create a manual experiment (not from the scheduling system)',
-        'action': 'store_true'},
+        'help': "URL of the scheduling system REST API"},
+    }
+
+SECTIONS['create'] = {
     'badges': {
         'type': str,
         'default': '',
-        'help': 'Comma-separated list of badge numbers for a manual experiment'},
+        'help': 'Comma-separated badge numbers for a manual experiment'},
     'date': {
         'type': str,
         'default': '',
         'help': 'Year-month for manual experiment in yyyy-mm format (default: current month)'},
-    'name': {
+    'email': {
         'type': str,
-        'default': 'Staff',
-        'help': 'PI last name for manual experiment'},
+        'default': '',
+        'help': 'PI email for manual experiment'},
     'first-name': {
         'type': str,
         'default': '',
@@ -114,19 +113,28 @@ SECTIONS['dm'] = {
         'type': str,
         'default': '',
         'help': 'PI institution for manual experiment'},
-    'email': {
+    'manual': {
+        'default': False,
+        'help': 'Create a manual experiment (not from the scheduling system)',
+        'action': 'store_true'},
+    'name': {
         'type': str,
-        'default': '',
-        'help': 'PI email for manual experiment'},
+        'default': 'Staff',
+        'help': 'PI last name for manual experiment'},
     'title': {
         'type': str,
         'default': 'Commissioning',
         'help': 'Title for manual experiment'},
     }
 
-DMAGIC_PARAMS = ('settings',)
-DM_PARAMS = ('settings', 'dm')
-NICE_NAMES = ('General', 'Settings', 'DM')
+INIT_PARAMS   = ('site',)
+SHOW_PARAMS   = ('settings',)
+TAG_PARAMS    = ('settings',)
+CREATE_PARAMS = ('settings', 'create')
+EMAIL_PARAMS  = ()
+SITE_SUPPRESS = ('site',)
+NICE_NAMES    = ('General', 'Settings', 'Site', 'Create')
+
 
 def get_config_name():
     """Get the command line --config option."""
@@ -195,13 +203,19 @@ def config_to_list(config_name=CONFIG_FILE_NAME):
 
 
 class Params(object):
-    def __init__(self, sections=()):
+    def __init__(self, sections=(), suppress_sections=()):
         self.sections = sections + ('general',)
+        self.suppress_sections = suppress_sections
 
     def add_parser_args(self, parser):
         for section in self.sections:
             for name in sorted(SECTIONS[section]):
                 opts = SECTIONS[section][name]
+                parser.add_argument('--{}'.format(name), **opts)
+        for section in self.suppress_sections:
+            for name in sorted(SECTIONS[section]):
+                opts = dict(SECTIONS[section][name])
+                opts['help'] = argparse.SUPPRESS
                 parser.add_argument('--{}'.format(name), **opts)
 
     def add_arguments(self, parser):
@@ -259,4 +273,3 @@ def log_values(args):
             for entry in entries:
                 value = args[entry] if args[entry] is not None else "-"
                 log.info("  {:<16} {}".format(entry, value))
-
