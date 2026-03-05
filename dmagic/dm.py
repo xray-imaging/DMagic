@@ -164,7 +164,7 @@ def add_users(exp_obj, username_list):
 def list_users_this_dm_exp(args):
     """Return the list of DM usernames on the current experiment, or None if not found."""
     log.info('Listing the users on the DM experiment')
-    exp_name = make_experiment_name(args)
+    exp_name = getattr(args, '_exp_name', None) or make_experiment_name(args)
     try:
         exp_obj = exp_api.getExperimentByName(exp_name)
     except Exception as e:
@@ -240,8 +240,9 @@ def delete_experiment(exp_name):
 
 def make_data_link(args):
     """Build the Globus file-manager URL for the experiment data directory."""
-    exp_name = make_experiment_name(args)
-    target_dir = '/{:s}/{:s}/'.format(args.year_month, exp_name)
+    exp_name   = getattr(args, '_exp_name',   None) or make_experiment_name(args)
+    year_month = getattr(args, '_year_month',  None) or args.year_month
+    target_dir = '/{:s}/{:s}/'.format(year_month, exp_name)
     link = ('https://app.globus.org/file-manager?origin_id='
             + args.globus_server_uuid
             + '&origin_path='

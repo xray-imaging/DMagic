@@ -350,9 +350,37 @@ def delete(args):
 
 def email(args):
     """
-    Send a data-access email with Globus link to all users on the DM experiment.
+    Send a data-access email with Globus link to all users on a DM experiment.
+    Lists all station experiments so the operator can select one.
     """
-    log.info('Sending e-mail to users on the DM experiment')
+    exps = dm.list_experiments_by_station(args.experiment_type)
+    if not exps:
+        log.error('No DM experiments found for station %s.' % args.experiment_type)
+        return
+    log.info('Found %d DM experiment(s) for station %s:' % (len(exps), args.experiment_type))
+    for i, e in enumerate(exps):
+        start = e.get('startDate', '?')[:10]
+        end   = e.get('endDate',   '?')[:10]
+        desc  = e.get('description', '')[:60]
+        print("  [%2d] %-35s  %s to %s  %s" % (i, e['name'], start, end, desc))
+    while True:
+        try:
+            choice = input("\nSelect experiment to email [0-%d] or 'q' to quit: " % (
+                           len(exps) - 1)).strip()
+            if choice.lower() == 'q':
+                log.info('No experiment selected. Exiting.')
+                return
+            choice = int(choice)
+            if 0 <= choice < len(exps):
+                break
+            print("Please enter a number between 0 and %d" % (len(exps) - 1))
+        except (ValueError, EOFError):
+            print("Invalid input. Please enter a number or 'q' to quit.")
+
+    args._exp_name   = exps[choice]['name']
+    args._year_month = exps[choice].get('rootPath', '')
+
+    log.info('Sending e-mail to users on the DM experiment: %s' % args._exp_name)
     args.msg = message.message(args)
     log.info('   Message to users:')
     log.info('   *** %s' % args.msg.get_content())
