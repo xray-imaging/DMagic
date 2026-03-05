@@ -414,6 +414,33 @@ def _select_experiment(args, prompt_verb):
             print("Invalid input. Please enter a number or 'q' to quit.")
 
 
+def add_user(args):
+    """
+    Add one or more users to an existing DM experiment by badge number.
+    Lists all station experiments so the operator can select one.
+    """
+    exp_name = _select_experiment(args, 'add users to')
+    if exp_name is None:
+        return
+
+    if not args.badges:
+        log.error('No badge numbers provided. Use --badges <badge1,badge2,...>')
+        return
+
+    exp_obj = dm.get_experiment(exp_name)
+    if exp_obj is None:
+        log.error('DM experiment not found: %s' % exp_name)
+        return
+
+    username_list = set()
+    for badge in args.badges.split(','):
+        badge = badge.strip()
+        if badge:
+            username_list.add('d' + badge)
+
+    dm.add_users(exp_obj, username_list)
+
+
 def start_daq(args):
     """
     Select a DM experiment and start automated real-time file transfer (DAQ) to Sojourner.
@@ -547,6 +574,7 @@ def main():
         ('email',         email,         config.EMAIL_PARAMS,  config.SITE_SUPPRESS, "Send data-access email with Globus link to all users on the DM experiment"),
         ('daq-start',     start_daq,     config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Start automated real-time file transfer (DAQ) to Sojourner"),
         ('daq-stop',      stop_daq,      config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Stop all running file transfers for the current experiment"),
+        ('add-user',      add_user,      config.CREATE_PARAMS, config.SITE_SUPPRESS, "Add users to an existing DM experiment by badge number"),
     ]
 
     subparsers = parser.add_subparsers(title="Commands", metavar='')
@@ -562,6 +590,10 @@ def main():
                      'experiments created with "dmagic create-manual" that are not in the '
                      'APS scheduling system (e.g. 2026-03-Staff-0). Leave blank to select '
                      'from the list of all station experiments.')
+        if cmd == 'add-user':
+            cmd_parser.add_argument(
+                '--badges', default='', type=str, metavar='BADGES',
+                help='Comma-separated badge number(s) to add to the experiment (e.g. 12345 or 12345,67890)')
         cmd_parser.set_defaults(_func=func)
 
     args = config.parse_known_args(parser, subparser=True)
