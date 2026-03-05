@@ -206,7 +206,7 @@ def create(args):
         log.info("Found %d beamtimes in run %s:" % (
                   len(beamtimes), beamtimes[0]['run_name']))
         for i, bt in enumerate(beamtimes):
-            print("  [%d] GUP %s - PI: %s - %s" % (
+            print("  [%2d] GUP %s - PI: %s - %s" % (
                   i, bt['gup_number'], bt['pi_last_name'], bt['gup_title'][:70]))
             print("       %s to %s" % (bt['start_time'], bt['end_time']))
         while True:
@@ -307,7 +307,7 @@ def delete(args):
             start = e.get('startDate', '?')[:10]
             end   = e.get('endDate',   '?')[:10]
             desc  = e.get('description', '')[:60]
-            print("  [%d] %-35s  %s to %s  %s" % (i, e['name'], start, end, desc))
+            print("  [%2d] %-35s  %s to %s  %s" % (i, e['name'], start, end, desc))
         while True:
             try:
                 choice = input("\nSelect experiment to delete [0-%d] or 'q' to quit: " % (
