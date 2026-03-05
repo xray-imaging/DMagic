@@ -272,6 +272,10 @@ def create(args):
 
     dm.add_users(new_exp, user_list)
 
+    data_link = dm.make_data_link(args)
+    log.info('Experiment name : %s' % exp_name)
+    log.info('Globus data link: %s' % data_link)
+
 
 def email(args):
     """
