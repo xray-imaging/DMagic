@@ -197,12 +197,37 @@ def get_experiment(exp_name):
         return None
 
 
-def delete_experiment(args):
+def list_experiments_by_station(station, years=2):
+    """Return DM experiment objects for the station from the last `years` calendar years.
+
+    Uses getExperimentsByStation(stationName=station). Sorted newest first.
+    Returns [] on error or no results.
+    """
+    try:
+        result = exp_api.getExperimentsByStation(stationName=station)
+        if not result:
+            return []
+        exps = list(result) if isinstance(result, list) else list(result.values())
+        cutoff_year = datetime.datetime.now().year - years + 1
+        filtered = []
+        for e in exps:
+            try:
+                year = int(e.get('rootPath', '0').split('-')[0])
+                if year >= cutoff_year:
+                    filtered.append(e)
+            except (ValueError, IndexError):
+                pass
+        return sorted(filtered, key=lambda e: e.get('rootPath', ''), reverse=True)
+    except Exception as e:
+        log.error('Could not list DM experiments for station %s: %s' % (station, str(e)))
+        return []
+
+
+def delete_experiment(exp_name):
     """Delete a DM experiment from Sojourner by name.
 
     Returns True on success, False on error.
     """
-    exp_name = make_experiment_name(args)
     log.info('Deleting DM experiment: %s' % exp_name)
     try:
         exp_api.deleteExperiment(exp_name)

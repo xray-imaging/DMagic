@@ -289,51 +289,41 @@ def create_manual(args):
 def delete(args):
     """
     Delete a DM experiment from Sojourner.
-    Lists all beamtimes in the current run, lets the operator select one,
-    then deletes the corresponding DM experiment after confirmation.
+    Lists all DM experiments for this station (last 2 years) so the operator
+    can select one, then deletes it after double confirmation.
+    Use --name to bypass the list and delete a known experiment directly.
     """
-    auth = authorize.basic(args.credentials)
-    if auth is None:
-        return
-    beamtimes = scheduling.list_beamtimes(auth, args)
-    if not beamtimes:
-        log.error("No beamtimes found for the current run")
-        return
-    elif len(beamtimes) == 1:
-        bt = beamtimes[0]
-        log.info("Found 1 beamtime in run %s: GUP %s (PI: %s, %s)" % (
-                  bt['run_name'], bt['gup_number'], bt['pi_last_name'],
-                  bt['gup_title'][:60]))
+    if getattr(args, 'name', None):
+        # Direct lookup by name (useful for manually created experiments)
+        exp_name = args.name
     else:
-        log.info("Found %d beamtimes in run %s:" % (
-                  len(beamtimes), beamtimes[0]['run_name']))
-        for i, bt in enumerate(beamtimes):
-            print("  [%d] GUP %s - PI: %s - %s" % (
-                  i, bt['gup_number'], bt['pi_last_name'], bt['gup_title'][:70]))
-            print("       %s to %s" % (bt['start_time'], bt['end_time']))
+        exps = dm.list_experiments_by_station(args.experiment_type)
+        if not exps:
+            log.error('No DM experiments found for station %s (last 2 years).' % args.experiment_type)
+            log.error('Use --name EXP_NAME to specify an experiment name directly.')
+            return
+        log.info('Found %d DM experiment(s) for station %s:' % (len(exps), args.experiment_type))
+        for i, e in enumerate(exps):
+            start = e.get('startDate', '?')[:10]
+            end   = e.get('endDate',   '?')[:10]
+            desc  = e.get('description', '')[:60]
+            print("  [%d] %-35s  %s to %s  %s" % (i, e['name'], start, end, desc))
         while True:
             try:
-                choice = input("\nSelect beamtime [0-%d] or 'q' to quit: " % (
-                               len(beamtimes) - 1)).strip()
+                choice = input("\nSelect experiment to delete [0-%d] or 'q' to quit: " % (
+                               len(exps) - 1)).strip()
                 if choice.lower() == 'q':
-                    log.info("No beamtime selected. Exiting.")
+                    log.info('No experiment selected. Exiting.')
                     return
                 choice = int(choice)
-                if 0 <= choice < len(beamtimes):
-                    bt = beamtimes[choice]
+                if 0 <= choice < len(exps):
+                    exp_name = exps[choice]['name']
                     break
-                print("Please enter a number between 0 and %d" % (len(beamtimes) - 1))
+                print("Please enter a number between 0 and %d" % (len(exps) - 1))
             except (ValueError, EOFError):
                 print("Invalid input. Please enter a number or 'q' to quit.")
 
-    args.year_month  = bt['year_month']
-    args.pi_last_name = bt['pi_last_name']
-    args.gup_number  = bt['gup_number']
-    args.gup_title   = bt['gup_title']
-
-    exp_name = dm.make_experiment_name(args)
-
-    # Fetch experiment details to show storage info before confirming
+    # Fetch full experiment object for storage path details
     exp_obj = dm.get_experiment(exp_name)
     if exp_obj is None:
         log.error('DM experiment not found: %s' % exp_name)
@@ -355,7 +345,7 @@ def delete(args):
         log.info('   Aborted.')
         return
 
-    dm.delete_experiment(args)
+    dm.delete_experiment(exp_name)
 
 
 def email(args):
@@ -487,6 +477,13 @@ def main():
         cmd_params = config.Params(sections=sections, suppress_sections=suppress)
         cmd_parser = subparsers.add_parser(cmd, help=text, description=text, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         cmd_parser = cmd_params.add_arguments(cmd_parser)
+        if cmd == 'delete':
+            cmd_parser.add_argument(
+                '--name', default=None, type=str, metavar='EXP_NAME',
+                help='[Optional] Full DM experiment name, used only to delete commissioning '
+                     'experiments created with "dmagic create-manual" that are not in the '
+                     'APS scheduling system (e.g. 2026-03-Staff-0). Leave blank to select '
+                     'from the list of all station experiments.')
         cmd_parser.set_defaults(_func=func)
 
     args = config.parse_known_args(parser, subparser=True)
