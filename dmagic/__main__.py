@@ -181,8 +181,7 @@ def _finish_create(args, exp_name):
     dm.add_users(new_exp, args._user_list)
 
     data_link = dm.make_data_link(args)
-    log.info('Experiment name : %s' % exp_name)
-    log.info('Globus data link: %s' % data_link)
+    args._final_summary = (exp_name, data_link)
 
 
 def create(args):
@@ -422,6 +421,13 @@ def main():
     try:
         args._func(args)
         config.log_values(args)
+        if hasattr(args, '_final_summary'):
+            exp_name, data_link = args._final_summary
+            sep = '=' * 60
+            log.info(sep)
+            log.info('Experiment name : %s' % exp_name)
+            log.info('Globus data link: %s' % data_link)
+            log.info(sep)
         # Write sections appropriate to each command
         cmd = sys.argv[1] if len(sys.argv) > 1 else ''
         if cmd == 'init':
