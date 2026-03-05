@@ -424,7 +424,12 @@ def add_user(args):
         return
 
     if not args.badges:
-        log.error('No badge numbers provided. Use --badges <badge1,badge2,...>')
+        try:
+            args.badges = input('Enter badge number(s) to add (comma-separated): ').strip()
+        except EOFError:
+            args.badges = ''
+    if not args.badges:
+        log.error('No badge numbers provided.')
         return
 
     exp_obj = dm.get_experiment(exp_name)
