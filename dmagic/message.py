@@ -75,14 +75,14 @@ def send_email(args):
     log.info('   Would send email to: %s' % ', '.join(emails))
 
     # Uncomment the block below to enable actual email sending:
-    # s = smtplib.SMTP('mailhost.anl.gov')
-    # for em in emails:
-    #     if args.msg['To'] is None:
-    #         args.msg['To'] = em
-    #     else:
-    #         args.msg.replace_header('To', em)
-    #     log.info('   Sending informational message to {:s}'.format(em))
-    #     s.send_message(args.msg)
-    # s.quit()
+    s = smtplib.SMTP('mailhost.anl.gov')
+    for em in emails:
+        if args.msg['To'] is None:
+            args.msg['To'] = em
+        else:
+            args.msg.replace_header('To', em)
+        log.info('   Sending informational message to {:s}'.format(em))
+        s.send_message(args.msg)
+    s.quit()
 
     return True

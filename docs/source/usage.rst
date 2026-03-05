@@ -255,11 +255,6 @@ experiment. Lists all station experiments and prompts for selection. Requires th
        *** Yes or No (Y/N): Y
     2026-03-04 09:05:06,000 -    Would send email to: user1@university.edu, ..., pshevchenko@anl.gov
 
-.. note::
-    SMTP sending via ``mailhost.anl.gov`` is available on ANL network machines but is
-    currently disabled by default. To enable it, uncomment the ``smtplib`` block in
-    ``dmagic/message.py``.
-
 ::
 
     (dm) $ dmagic email -h

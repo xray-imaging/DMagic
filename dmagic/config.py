@@ -126,11 +126,11 @@ SECTIONS['manual'] = {
 SECTIONS['local'] = {
     'analysis': {
         'type': str,
-        'default': 'localhost',
+        'default': 'tomodata3',
         'help': 'Hostname of the data analysis computer'},
     'analysis-top-dir': {
         'type': str,
-        'default': '/local/data/',
+        'default': '/data3/2BM/',
         'help': 'Top-level data directory on the analysis computer'},
     }
 
