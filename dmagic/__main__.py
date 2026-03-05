@@ -332,9 +332,26 @@ def delete(args):
     args.gup_title   = bt['gup_title']
 
     exp_name = dm.make_experiment_name(args)
-    log.warning('*** This will permanently delete the DM experiment and its data! ***')
-    log.info('   Experiment : %s' % exp_name)
-    if not message.yes_or_no('   *** Confirm deletion? Yes or No'):
+
+    # Fetch experiment details to show storage info before confirming
+    exp_obj = dm.get_experiment(exp_name)
+    if exp_obj is None:
+        log.error('DM experiment not found: %s' % exp_name)
+        log.error('Has dmagic create been run for this proposal?')
+        return
+
+    log.warning('=' * 60)
+    log.warning('*** PERMANENT DELETION — THIS CANNOT BE UNDONE ***')
+    log.info('   Experiment     : %s' % exp_name)
+    log.info('   Storage dir    : %s' % exp_obj.get('storageDirectory', 'N/A'))
+    log.info('   Data dir       : %s' % exp_obj.get('dataDirectory', 'N/A'))
+    log.info('   Analysis dir   : %s' % exp_obj.get('analysisDirectory', 'N/A'))
+    log.warning('=' * 60)
+
+    if not message.yes_or_no('   *** Are you sure? Yes or No'):
+        log.info('   Aborted.')
+        return
+    if not message.yes_or_no('   *** Confirm AGAIN to permanently delete all data'):
         log.info('   Aborted.')
         return
 

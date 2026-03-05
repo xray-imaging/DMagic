@@ -186,6 +186,17 @@ def make_pretty_user_name(user_obj):
     return ' '.join(parts)
 
 
+def get_experiment(exp_name):
+    """Return the DM experiment object for exp_name, or None if not found."""
+    try:
+        return exp_api.getExperimentByName(exp_name)
+    except Exception as e:
+        if 'does not exist' in str(e):
+            return None
+        log.error('Could not query DM experiment %s: %s' % (exp_name, str(e)))
+        return None
+
+
 def delete_experiment(args):
     """Delete a DM experiment from Sojourner by name.
 
