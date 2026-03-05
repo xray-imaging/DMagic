@@ -35,13 +35,13 @@ SECTIONS['general'] = {
 
 SECTIONS['settings'] = {
     'beamline' : {
-        'default' : '7-BM-B',
+        'default' : '2-BM-A,B',
         'type': str,
         'help': "beamline name as defined at https://www.aps.anl.gov/Beamlines/Directory, e.g. 2-BM-A,B or 7-BM-B or 32-ID-B,C"},
     'tomoscan-prefix':{
-        'default': '7bmb1:',
+        'default': '2bmb:TomoScan:',
         'type': str,
-        'help': "The tomoscan prefix, i.e.'7bmb1:' or '2bma:TomoScan:' "},
+        'help': "The tomoscan prefix, i.e. '2bmb:TomoScan:' "},
     'set': {
         'type': float,
         'default': 0,
@@ -60,27 +60,27 @@ SECTIONS['settings'] = {
 SECTIONS['dm'] = {
     'experiment-type': {
         'type': str,
-        'default': '7BM',
+        'default': '2BM',
         'help': 'Experiment type in the DM system'},
     'primary-beamline-contact-badge': {
         'type': int,
-        'default': 56788,
+        'default': 218262,
         'help': 'Badge number of primary beamline contact. Added to all DM experiments'},
     'primary-beamline-contact-email': {
         'type': str,
-        'default': 'user@anl.gov',
+        'default': 'pshevchenko@anl.gov',
         'help': 'Email address of primary beamline contact'},
     'secondary-beamline-contact-badge': {
         'type': int,
-        'default': 56788,
+        'default': 49734,
         'help': 'Badge number of secondary beamline contact. Added to all DM experiments'},
     'secondary-beamline-contact-email': {
         'type': str,
-        'default': 'user@anl.gov',
+        'default': 'decarlo@anl.gov',
         'help': 'Email address of secondary beamline contact'},
     'globus-message-file': {
         'type': str,
-        'default': 'message-7bm.txt',
+        'default': 'message-2bm.txt',
         'help': 'File name of the notification e-mail message template sent to users'},
     'globus-server-uuid': {
         'type': str,
@@ -88,7 +88,7 @@ SECTIONS['dm'] = {
         'help': 'UUID of the Globus endpoint for the data management server (Sojourner)'},
     'globus-server-top-dir': {
         'type': str,
-        'default': '/gdata/dm/7BM',
+        'default': '/gdata/dm/2BM',
         'help': 'Path from data storage root to the beamline top directory'},
     'manual': {
         'default': False,
