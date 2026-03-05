@@ -413,7 +413,7 @@ def main():
 
     for cmd, func, sections, suppress, text in cmd_parsers:
         cmd_params = config.Params(sections=sections, suppress_sections=suppress)
-        cmd_parser = subparsers.add_parser(cmd, help=text, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        cmd_parser = subparsers.add_parser(cmd, help=text, description=text, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         cmd_parser = cmd_params.add_arguments(cmd_parser)
         cmd_parser.set_defaults(_func=func)
 
