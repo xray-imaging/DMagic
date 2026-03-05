@@ -92,48 +92,45 @@ SECTIONS['site'] = {
         'action': 'store_true'},
     }
 
-SECTIONS['create'] = {
+SECTIONS['manual'] = {
     'badges': {
         'type': str,
         'default': '',
-        'help': 'Comma-separated badge numbers for a manual experiment'},
+        'help': 'Comma-separated badge numbers to add to the experiment'},
     'date': {
         'type': str,
         'default': '',
-        'help': 'Year-month for manual experiment in yyyy-mm format (default: current month)'},
+        'help': 'Year-month in yyyy-mm format (default: current month)'},
     'email': {
         'type': str,
         'default': '',
-        'help': 'PI email for manual experiment'},
+        'help': 'PI email address'},
     'first-name': {
         'type': str,
         'default': '',
-        'help': 'PI first name for manual experiment'},
+        'help': 'PI first name'},
     'institution': {
         'type': str,
         'default': '',
-        'help': 'PI institution for manual experiment'},
-    'manual': {
-        'default': False,
-        'help': 'Create a manual experiment (not from the scheduling system)',
-        'action': 'store_true'},
+        'help': 'PI institution'},
     'name': {
         'type': str,
         'default': 'Staff',
-        'help': 'PI last name for manual experiment'},
+        'help': 'PI last name'},
     'title': {
         'type': str,
         'default': 'Commissioning',
-        'help': 'Title for manual experiment'},
+        'help': 'Experiment title'},
     }
 
 INIT_PARAMS   = ('site',)
 SHOW_PARAMS   = ('settings',)
 TAG_PARAMS    = ('settings',)
-CREATE_PARAMS = ('settings', 'create')
+CREATE_PARAMS = ('settings',)
+MANUAL_PARAMS = ('manual',)
 EMAIL_PARAMS  = ()
 SITE_SUPPRESS = ('site',)
-NICE_NAMES    = ('General', 'Settings', 'Site', 'Create')
+NICE_NAMES    = ('General', 'Settings', 'Site', 'Manual')
 # Note: 'General' section only contains --config which is not logged
 
 

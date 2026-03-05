@@ -165,82 +165,8 @@ def show(args):
         log.warning('No proposal run on %s during %s' % (time_now, run))
 
 
-def create(args):
-    """
-    Create a DM experiment on Sojourner and add users from the scheduling system.
-
-    In normal mode, lists all beamtimes in the current run, lets the operator
-    select one interactively, then creates the DM experiment and adds all users
-    from the proposal. In --manual mode, uses the badge list and metadata
-    supplied on the command line / config file.
-    """
-    if args.manual:
-        now = datetime.datetime.now()
-        if args.date:
-            try:
-                ref_date = datetime.datetime.strptime(args.date, '%Y-%m')
-            except ValueError:
-                log.error("Invalid --date '%s': expected format is yyyy-mm (e.g. 2025-12)" % args.date)
-                return
-        else:
-            ref_date = now
-        args.year_month     = ref_date.strftime('%Y-%m')
-        args.pi_last_name   = args.name
-        args.pi_first_name  = args.first_name
-        args.pi_institution = args.institution
-        args.pi_email       = args.email
-        args.pi_badge       = ''
-        args.gup_number     = '0'
-        args.gup_title      = args.title
-        args.manual_start   = ref_date.strftime('%d-%b-%y')
-        args.manual_end     = (ref_date + dt.timedelta(days=14)).strftime('%d-%b-%y')
-        log.info("Manual experiment: %s-%s, title: %s" % (
-                  args.year_month, args.pi_last_name, args.gup_title))
-    else:
-        auth = authorize.basic(args.credentials)
-        if auth is None:
-            return
-        beamtimes = scheduling.list_beamtimes(auth, args)
-        if not beamtimes:
-            log.error("No beamtimes found for the current run")
-            return
-        elif len(beamtimes) == 1:
-            bt = beamtimes[0]
-            log.info("Found 1 beamtime in run %s: GUP %s (PI: %s, %s)" % (
-                      bt['run_name'], bt['gup_number'], bt['pi_last_name'],
-                      bt['gup_title'][:60]))
-        else:
-            log.info("Found %d beamtimes in run %s:" % (
-                      len(beamtimes), beamtimes[0]['run_name']))
-            for i, bt in enumerate(beamtimes):
-                print("  [%d] GUP %s - PI: %s - %s" % (
-                      i, bt['gup_number'], bt['pi_last_name'], bt['gup_title'][:70]))
-                print("       %s to %s" % (bt['start_time'], bt['end_time']))
-            while True:
-                try:
-                    choice = input("\nSelect beamtime [0-%d] or 'q' to quit: " % (
-                                   len(beamtimes) - 1)).strip()
-                    if choice.lower() == 'q':
-                        log.info("No beamtime selected. Exiting.")
-                        return
-                    choice = int(choice)
-                    if 0 <= choice < len(beamtimes):
-                        bt = beamtimes[choice]
-                        break
-                    print("Please enter a number between 0 and %d" % (len(beamtimes) - 1))
-                except (ValueError, EOFError):
-                    print("Invalid input. Please enter a number or 'q' to quit.")
-
-        args.year_month     = bt['year_month']
-        args.pi_last_name   = bt['pi_last_name']
-        args.pi_first_name  = bt['pi_first_name']
-        args.pi_institution = bt['pi_institution']
-        args.pi_email       = bt['pi_email']
-        args.pi_badge       = bt['pi_badge']
-        args.gup_number     = bt['gup_number']
-        args.gup_title      = bt['gup_title']
-
-    exp_name = dm.make_experiment_name(args)
+def _finish_create(args, exp_name):
+    """Shared tail for create and create-manual: confirm, create experiment, add users, print summary."""
     log.info('Create summary:')
     log.info('   Experiment : %s/%s' % (args.year_month, exp_name))
     log.info('   Title      : %s' % args.gup_title)
@@ -252,29 +178,113 @@ def create(args):
     if new_exp is None:
         return
 
-    if args.manual:
-        user_list = {'d' + str(args.primary_beamline_contact_badge),
-                     'd' + str(args.secondary_beamline_contact_badge)}
-        if args.badges:
-            for badge in args.badges.split(','):
-                badge = badge.strip()
-                if badge:
-                    user_list.add('d' + badge)
-        log.info('Adding manual users to the DM experiment.')
-    else:
-        user_list = dm.make_dm_username_list(args)
-        if user_list is None:
-            log.warning("   GUP %s not found in the scheduling system." % args.gup_number)
-            log.warning("   DM experiment '%s' was created but no users were added." % exp_name)
-            log.info("   To add a user run: dmagic add-user --badge <badge#>")
-            return
-        log.info('Adding users from the current proposal to the DM experiment.')
-
-    dm.add_users(new_exp, user_list)
+    dm.add_users(new_exp, args._user_list)
 
     data_link = dm.make_data_link(args)
     log.info('Experiment name : %s' % exp_name)
     log.info('Globus data link: %s' % data_link)
+
+
+def create(args):
+    """
+    Create a DM experiment on Sojourner from the APS scheduling system.
+    Lists all beamtimes in the current run, lets the operator select one
+    interactively, then creates the DM experiment and adds all proposal users.
+    """
+    auth = authorize.basic(args.credentials)
+    if auth is None:
+        return
+    beamtimes = scheduling.list_beamtimes(auth, args)
+    if not beamtimes:
+        log.error("No beamtimes found for the current run")
+        return
+    elif len(beamtimes) == 1:
+        bt = beamtimes[0]
+        log.info("Found 1 beamtime in run %s: GUP %s (PI: %s, %s)" % (
+                  bt['run_name'], bt['gup_number'], bt['pi_last_name'],
+                  bt['gup_title'][:60]))
+    else:
+        log.info("Found %d beamtimes in run %s:" % (
+                  len(beamtimes), beamtimes[0]['run_name']))
+        for i, bt in enumerate(beamtimes):
+            print("  [%d] GUP %s - PI: %s - %s" % (
+                  i, bt['gup_number'], bt['pi_last_name'], bt['gup_title'][:70]))
+            print("       %s to %s" % (bt['start_time'], bt['end_time']))
+        while True:
+            try:
+                choice = input("\nSelect beamtime [0-%d] or 'q' to quit: " % (
+                               len(beamtimes) - 1)).strip()
+                if choice.lower() == 'q':
+                    log.info("No beamtime selected. Exiting.")
+                    return
+                choice = int(choice)
+                if 0 <= choice < len(beamtimes):
+                    bt = beamtimes[choice]
+                    break
+                print("Please enter a number between 0 and %d" % (len(beamtimes) - 1))
+            except (ValueError, EOFError):
+                print("Invalid input. Please enter a number or 'q' to quit.")
+
+    args.year_month     = bt['year_month']
+    args.pi_last_name   = bt['pi_last_name']
+    args.pi_first_name  = bt['pi_first_name']
+    args.pi_institution = bt['pi_institution']
+    args.pi_email       = bt['pi_email']
+    args.pi_badge       = bt['pi_badge']
+    args.gup_number     = bt['gup_number']
+    args.gup_title      = bt['gup_title']
+
+    user_list = dm.make_dm_username_list(args)
+    exp_name  = dm.make_experiment_name(args)
+    if user_list is None:
+        log.warning("GUP %s not found in the scheduling system." % args.gup_number)
+        log.warning("Experiment '%s' will be created but no users will be added." % exp_name)
+        log.info("To add a user afterwards run: dmagic add-user --badge <badge#>")
+        user_list = set()
+    else:
+        log.info('Adding users from the current proposal to the DM experiment.')
+    args._user_list = user_list
+    _finish_create(args, exp_name)
+
+
+def create_manual(args):
+    """
+    Create a DM experiment manually for commissioning runs without a proposal.
+    Uses PI metadata and badge numbers supplied on the command line.
+    """
+    now = datetime.datetime.now()
+    if args.date:
+        try:
+            ref_date = datetime.datetime.strptime(args.date, '%Y-%m')
+        except ValueError:
+            log.error("Invalid --date '%s': expected format is yyyy-mm (e.g. 2025-12)" % args.date)
+            return
+    else:
+        ref_date = now
+    args.year_month     = ref_date.strftime('%Y-%m')
+    args.pi_last_name   = args.name
+    args.pi_first_name  = args.first_name
+    args.pi_institution = args.institution
+    args.pi_email       = args.email
+    args.pi_badge       = ''
+    args.gup_number     = '0'
+    args.gup_title      = args.title
+    args.manual         = True
+    args.manual_start   = ref_date.strftime('%d-%b-%y')
+    args.manual_end     = (ref_date + dt.timedelta(days=14)).strftime('%d-%b-%y')
+    log.info("Manual experiment: %s-%s, title: %s" % (
+              args.year_month, args.pi_last_name, args.gup_title))
+
+    user_list = {'d' + str(args.primary_beamline_contact_badge),
+                 'd' + str(args.secondary_beamline_contact_badge)}
+    if args.badges:
+        for badge in args.badges.split(','):
+            badge = badge.strip()
+            if badge:
+                user_list.add('d' + badge)
+    log.info('Adding manual users to the DM experiment.')
+    args._user_list = user_list
+    _finish_create(args, dm.make_experiment_name(args))
 
 
 def email(args):
@@ -391,11 +401,12 @@ def main():
 
     # (sections shown in -h, sections suppressed in -h but still parsed, help text)
     cmd_parsers = [
-        ('init',   init,   config.INIT_PARAMS,   (),                   "Create configuration file"),
-        ('show',   show,   config.SHOW_PARAMS,   config.SITE_SUPPRESS, "Show user and experiment info from the APS schedule"),
-        ('tag',    tag,    config.TAG_PARAMS,    config.SITE_SUPPRESS, "Update user info EPICS PVs with info from the APS schedule"),
-        ('create', create, config.CREATE_PARAMS, config.SITE_SUPPRESS, "Create a DM experiment on Sojourner and add users from the scheduling system"),
-        ('email',  email,  config.EMAIL_PARAMS,  config.SITE_SUPPRESS, "Send data-access email with Globus link to all users on the DM experiment"),
+        ('init',          init,          config.INIT_PARAMS,   (),                   "Create configuration file"),
+        ('show',          show,          config.SHOW_PARAMS,   config.SITE_SUPPRESS, "Show user and experiment info from the APS schedule"),
+        ('tag',           tag,           config.TAG_PARAMS,    config.SITE_SUPPRESS, "Update user info EPICS PVs with info from the APS schedule"),
+        ('create',        create,        config.CREATE_PARAMS, config.SITE_SUPPRESS, "Create a DM experiment from the APS scheduling system"),
+        ('create-manual', create_manual, config.MANUAL_PARAMS, config.SITE_SUPPRESS, "Create a DM experiment manually for commissioning runs"),
+        ('email',         email,         config.EMAIL_PARAMS,  config.SITE_SUPPRESS, "Send data-access email with Globus link to all users on the DM experiment"),
     ]
 
     subparsers = parser.add_subparsers(title="Commands", metavar='')
@@ -415,8 +426,8 @@ def main():
         cmd = sys.argv[1] if len(sys.argv) > 1 else ''
         if cmd == 'init':
             write_sections = ('site',)
-        elif cmd == 'create':
-            write_sections = ('settings', 'create')
+        elif cmd == 'create-manual':
+            write_sections = ('manual',)
         else:
             write_sections = ('settings',)
         config.write(args.config, args=args, sections=write_sections)
