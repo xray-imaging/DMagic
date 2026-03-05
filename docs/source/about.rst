@@ -34,9 +34,14 @@ For commissioning runs or staff experiments without a scheduling proposal, ``dma
 creates a DM experiment using badge numbers and metadata provided directly on the command line
 (e.g. ``2026-03-Staff-0``).
 
-Once an experiment is created, ``dmagic email`` sends a data-access notification email to all
-users on the experiment, including the Globus URL to their data directory. Both proposal-based
-and manually created experiments can be listed and removed using ``dmagic delete``.
+Once an experiment is created, ``dmagic daq-start`` starts automated real-time file transfer:
+the DM system monitors the experiment directory on the analysis machine (e.g.
+``tomodata3:/data3/2BM/2026-03-Li-1012039``) and continuously transfers new files to Sojourner
+as data is collected. ``dmagic daq-stop`` stops the transfer at the end of the run.
+
+``dmagic email`` sends a data-access notification email to all users on the experiment,
+including the Globus URL to their data directory. Both proposal-based and manually created
+experiments can be listed and removed using ``dmagic delete``.
 
 DMagic is primarily used at tomography beamlines (e.g. 2-BM, 7-BM, 32-ID) in conjunction
 with `tomoScan <https://tomoscan.readthedocs.io/>`_ to populate user information PVs and

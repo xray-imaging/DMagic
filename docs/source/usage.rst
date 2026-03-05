@@ -40,9 +40,13 @@ beamline before using any other commands::
     name = Staff
     title = Commissioning
 
+    [local]
+    analysis = tomodata3
+    analysis-top-dir = /data3/2BM/
+
 .. note::
-    The ``[site]`` section only needs to be configured once per beamline installation.
-    The ``[manual]`` section provides defaults for ``dmagic create-manual``.
+    The ``[site]`` and ``[local]`` sections only need to be configured once per beamline
+    installation. The ``[manual]`` section provides defaults for ``dmagic create-manual``.
 
 Scheduling System Commands
 ==========================
@@ -99,10 +103,13 @@ The information will be updated in the medm screen:
 DM Experiment Management
 =========================
 
-The ``create``, ``create-manual``, ``delete``, and ``email`` commands integrate with
-the APS Data Management (DM) system (Sojourner) to manage experiment records and user
-data access via Globus. These commands require the ``[site]`` section of ``~/dmagic.conf``
-to be correctly configured (see `Initialization`_ above).
+The ``create``, ``create-manual``, ``delete``, ``email``, ``daq-start``, and ``daq-stop``
+commands integrate with the APS Data Management (DM) system (Sojourner) to manage
+experiment records, user data access via Globus, and automated file transfer. These
+commands require the ``[site]`` section of ``~/dmagic.conf`` to be correctly configured
+(see `Initialization`_ above). The ``daq-start`` and ``daq-stop`` commands additionally
+require the ``[local]`` section to be configured with the correct analysis hostname and
+data directory.
 
 dmagic create
 -------------
@@ -264,6 +271,78 @@ experiment. Lists all station experiments and prompts for selection. Requires th
       -h, --help     show this help message and exit
       --config FILE  File name of configuration (default: /home/beams/2BMB/dmagic.conf)
 
+dmagic daq-start
+----------------
+
+Starts automated real-time file transfer (DAQ) to Sojourner. The DM system monitors
+the configured directory on the analysis machine for new files and transfers them
+continuously. Lists all station experiments and prompts for selection::
+
+    (dm) $ dmagic daq-start
+    2026-03-04 09:10:00,000 - Found 11 DM experiment(s) for station 2BM:
+      [ 0] 2026-03-Li-1018528                   2026-03-11 to 2026-03-14  Investigation of ...
+      [ 1] 2026-03-Li-1012039                   2026-03-03 to 2026-03-05  Investigation of ...
+      ...
+
+    Select experiment to start DAQ for [0-10] or 'q' to quit: 1
+    2026-03-04 09:10:05,000 - Checking for already running DAQ for experiment 2026-03-Li-1012039
+    2026-03-04 09:10:05,100 - Starting DAQ for experiment 2026-03-Li-1012039
+    2026-03-04 09:10:05,101 -    Watching directory: @tomodata3:/data3/2BM/2026-03-Li-1012039
+    2026-03-04 09:10:06,000 -    DAQ started successfully
+
+The ``analysis`` and ``analysis-top-dir`` settings in ``~/dmagic.conf`` control which
+host and directory the DM agent monitors. The monitored path is
+``{analysis-top-dir}/{experiment-name}`` on the ``analysis`` host. For best performance,
+point ``analysis`` at the storage node (e.g. ``tomodata3``) that physically hosts the
+data, rather than a compute node that accesses it via NFS.
+
+::
+
+    (dm) $ dmagic daq-start -h
+    usage: dmagic daq-start [-h] [--analysis ANALYSIS] [--analysis-top-dir ANALYSIS_TOP_DIR]
+                            [--config FILE]
+
+    Start automated real-time file transfer (DAQ) to Sojourner
+
+    options:
+      -h, --help            show this help message and exit
+      --analysis ANALYSIS   Hostname of the data analysis computer (default: tomodata3)
+      --analysis-top-dir ANALYSIS_TOP_DIR
+                            Top-level data directory on the analysis computer (default: /data3/2BM/)
+      --config FILE         File name of configuration (default: /home/beams/2BMB/dmagic.conf)
+
+dmagic daq-stop
+---------------
+
+Stops all running DAQs for the selected experiment. Lists all station experiments and
+prompts for selection::
+
+    (dm) $ dmagic daq-stop
+    2026-03-04 18:00:00,000 - Found 11 DM experiment(s) for station 2BM:
+      [ 0] 2026-03-Li-1018528                   2026-03-11 to 2026-03-14  Investigation of ...
+      [ 1] 2026-03-Li-1012039                   2026-03-03 to 2026-03-05  Investigation of ...
+      ...
+
+    Select experiment to stop DAQ for [0-10] or 'q' to quit: 1
+    2026-03-04 18:00:05,000 - Stopping all DM DAQs for experiment 2026-03-Li-1012039
+    2026-03-04 18:00:05,100 -    Found running DAQ. Stopping now.
+    2026-03-04 18:00:06,000 -    Stopped 1 DAQ(s) for experiment 2026-03-Li-1012039
+
+::
+
+    (dm) $ dmagic daq-stop -h
+    usage: dmagic daq-stop [-h] [--analysis ANALYSIS] [--analysis-top-dir ANALYSIS_TOP_DIR]
+                           [--config FILE]
+
+    Stop all running file transfers for the current experiment
+
+    options:
+      -h, --help            show this help message and exit
+      --analysis ANALYSIS   Hostname of the data analysis computer (default: tomodata3)
+      --analysis-top-dir ANALYSIS_TOP_DIR
+                            Top-level data directory on the analysis computer (default: /data3/2BM/)
+      --config FILE         File name of configuration (default: /home/beams/2BMB/dmagic.conf)
+
 Command Reference
 =================
 
@@ -286,3 +365,5 @@ Command Reference
                      Create a DM experiment manually for commissioning runs
         delete       Delete a DM experiment from Sojourner
         email        Send data-access email with Globus link to all users on the DM experiment
+        daq-start    Start automated real-time file transfer (DAQ) to Sojourner
+        daq-stop     Stop all running file transfers for the current experiment
