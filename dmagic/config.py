@@ -123,14 +123,26 @@ SECTIONS['manual'] = {
         'help': 'Experiment title'},
     }
 
+SECTIONS['local'] = {
+    'analysis': {
+        'type': str,
+        'default': 'localhost',
+        'help': 'Hostname of the data analysis computer'},
+    'analysis-top-dir': {
+        'type': str,
+        'default': '/local/data/',
+        'help': 'Top-level data directory on the analysis computer'},
+    }
+
 INIT_PARAMS   = ('site',)
 SHOW_PARAMS   = ('settings',)
 TAG_PARAMS    = ('settings',)
 CREATE_PARAMS = ('settings',)
 MANUAL_PARAMS = ('manual',)
 EMAIL_PARAMS  = ()
+DAQ_PARAMS    = ('local',)
 SITE_SUPPRESS = ('site',)
-NICE_NAMES    = ('General', 'Settings', 'Site', 'Manual')
+NICE_NAMES    = ('General', 'Settings', 'Site', 'Manual', 'Local')
 # Note: 'General' section only contains --config which is not logged
 
 
@@ -160,7 +172,6 @@ def parse_known_args(parser, subparser=False):
         subparser_value = [sys.argv[1]] if subparser else []
         config_values = config_to_list(config_name=get_config_name())
         values = subparser_value + config_values + sys.argv[1:]
-        #print(subparser_value, config_values, values)
     else:
         values = ""
 

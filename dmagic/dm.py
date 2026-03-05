@@ -1,6 +1,7 @@
 import datetime
+import os
 
-from dm import ExperimentDsApi, UserDsApi
+from dm import ExperimentDsApi, UserDsApi, ExperimentDaqApi
 from dm.common.exceptions.objectAlreadyExists import ObjectAlreadyExists
 
 from dmagic import log
@@ -14,6 +15,7 @@ __docformat__ = 'restructuredtext en'
 
 exp_api  = ExperimentDsApi()
 user_api = UserDsApi()
+daq_api  = ExperimentDaqApi()
 oee      = ObjectAlreadyExists
 
 
@@ -248,3 +250,65 @@ def make_data_link(args):
             + '&origin_path='
             + target_dir.replace('/', '%2F'))
     return link
+
+
+def start_daq(exp_name, analysis, analysis_top_dir):
+    """Start a DM DAQ for exp_name, watching analysis_top_dir/exp_name on the analysis machine.
+
+    The DM system will monitor the directory for incoming files and transfer them automatically.
+    Returns True on success, False on error.
+    """
+    analysis_dir = os.path.join(analysis_top_dir.rstrip('/'), exp_name)
+    dm_dir_name  = '@{:s}:{:s}'.format(analysis, analysis_dir)
+
+    log.info('Checking for already running DAQ for experiment %s' % exp_name)
+    try:
+        current_daqs = daq_api.listDaqs()
+    except Exception as e:
+        log.error('   Could not list DAQs: %s' % str(e))
+        return False
+
+    for d in current_daqs:
+        if (d['experimentName'] == exp_name and d['status'] == 'running'
+                and d['dataDirectory'] == dm_dir_name):
+            log.warning('   DAQ is already running for %s. Returning.' % exp_name)
+            return True
+
+    log.info('Starting DAQ for experiment %s' % exp_name)
+    log.info('   Watching directory: %s' % dm_dir_name)
+    try:
+        daq_api.startDaq(exp_name, dm_dir_name)
+        log.info('   DAQ started successfully')
+        return True
+    except Exception as e:
+        log.error('   Could not start DAQ: %s' % str(e))
+        return False
+
+
+def stop_daq(exp_name):
+    """Stop all running DM DAQs for exp_name.
+
+    Returns True on success (including no DAQs found), False on error.
+    """
+    log.info('Stopping all DM DAQs for experiment %s' % exp_name)
+    try:
+        daqs = daq_api.listDaqs()
+    except Exception as e:
+        log.error('   Could not list DAQs: %s' % str(e))
+        return False
+
+    count = 0
+    for d in daqs:
+        if d['experimentName'] == exp_name and d['status'] == 'running':
+            log.info('   Found running DAQ. Stopping now.')
+            try:
+                daq_api.stopDaq(d['experimentName'], d['dataDirectory'])
+                count += 1
+            except Exception as e:
+                log.error('   Could not stop DAQ: %s' % str(e))
+
+    if count == 0:
+        log.info('   No active DAQs found for experiment %s' % exp_name)
+    else:
+        log.info('   Stopped %d DAQ(s) for experiment %s' % (count, exp_name))
+    return True

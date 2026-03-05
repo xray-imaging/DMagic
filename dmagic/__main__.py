@@ -387,6 +387,54 @@ def email(args):
     message.send_email(args)
 
 
+def _select_experiment(args, prompt_verb):
+    """Show the DM experiment list and return the selected experiment name, or None."""
+    exps = dm.list_experiments_by_station(args.experiment_type)
+    if not exps:
+        log.error('No DM experiments found for station %s.' % args.experiment_type)
+        return None
+    log.info('Found %d DM experiment(s) for station %s:' % (len(exps), args.experiment_type))
+    for i, e in enumerate(exps):
+        start = e.get('startDate', '?')[:10]
+        end   = e.get('endDate',   '?')[:10]
+        desc  = e.get('description', '')[:60]
+        print("  [%2d] %-35s  %s to %s  %s" % (i, e['name'], start, end, desc))
+    while True:
+        try:
+            choice = input("\nSelect experiment to %s [0-%d] or 'q' to quit: " % (
+                           prompt_verb, len(exps) - 1)).strip()
+            if choice.lower() == 'q':
+                log.info('No experiment selected. Exiting.')
+                return None
+            choice = int(choice)
+            if 0 <= choice < len(exps):
+                return exps[choice]['name']
+            print("Please enter a number between 0 and %d" % (len(exps) - 1))
+        except (ValueError, EOFError):
+            print("Invalid input. Please enter a number or 'q' to quit.")
+
+
+def start_daq(args):
+    """
+    Select a DM experiment and start automated real-time file transfer (DAQ) to Sojourner.
+    The DM system will monitor the analysis machine directory for new files and transfer them.
+    """
+    exp_name = _select_experiment(args, 'start DAQ for')
+    if exp_name is None:
+        return
+    dm.start_daq(exp_name, args.analysis, args.analysis_top_dir)
+
+
+def stop_daq(args):
+    """
+    Select a DM experiment and stop all running DAQs for it.
+    """
+    exp_name = _select_experiment(args, 'stop DAQ for')
+    if exp_name is None:
+        return
+    dm.stop_daq(exp_name)
+
+
 def tag(args):
     """
     Update the EPICS PVs with user and experiment information associated with the current experiment
@@ -497,6 +545,8 @@ def main():
         ('create-manual', create_manual, config.MANUAL_PARAMS, config.SITE_SUPPRESS, "Create a DM experiment manually for commissioning runs"),
         ('delete',        delete,        config.CREATE_PARAMS, config.SITE_SUPPRESS, "Delete a DM experiment from Sojourner"),
         ('email',         email,         config.EMAIL_PARAMS,  config.SITE_SUPPRESS, "Send data-access email with Globus link to all users on the DM experiment"),
+        ('daq-start',     start_daq,     config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Start automated real-time file transfer (DAQ) to Sojourner"),
+        ('daq-stop',      stop_daq,      config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Stop all running file transfers for the current experiment"),
     ]
 
     subparsers = parser.add_subparsers(title="Commands", metavar='')
@@ -516,6 +566,10 @@ def main():
 
     args = config.parse_known_args(parser, subparser=True)
 
+    if not hasattr(args, '_func'):
+        parser.print_help()
+        sys.exit(0)
+
     try:
         args._func(args)
         config.log_values(args)
@@ -532,6 +586,8 @@ def main():
             write_sections = ('site',)
         elif cmd == 'create-manual':
             write_sections = ('manual',)
+        elif cmd in ('daq-start', 'daq-stop'):
+            write_sections = ('local',)
         else:
             write_sections = ('settings',)
         config.write(args.config, args=args, sections=write_sections)
