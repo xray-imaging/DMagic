@@ -124,16 +124,9 @@ SECTIONS['dm'] = {
         'help': 'Title for manual experiment'},
     }
 
-SECTIONS['email'] = {
-    'schedule': {
-        'default': False,
-        'help': 'Set to True to send an email to all users listed in the current proposal',
-        'action': 'store_true'}}
-
-
 DMAGIC_PARAMS = ('settings',)
-DM_PARAMS = ('settings', 'dm', 'email')
-NICE_NAMES = ('General', 'Settings', 'DM', 'Email')
+DM_PARAMS = ('settings', 'dm')
+NICE_NAMES = ('General', 'Settings', 'DM')
 
 def get_config_name():
     """Get the command line --config option."""
