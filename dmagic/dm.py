@@ -186,6 +186,22 @@ def make_pretty_user_name(user_obj):
     return ' '.join(parts)
 
 
+def delete_experiment(args):
+    """Delete a DM experiment from Sojourner by name.
+
+    Returns True on success, False on error.
+    """
+    exp_name = make_experiment_name(args)
+    log.info('Deleting DM experiment: %s' % exp_name)
+    try:
+        exp_api.deleteExperiment(exp_name)
+        log.info('   Experiment %s successfully deleted' % exp_name)
+        return True
+    except Exception as e:
+        log.error('   Could not delete experiment %s: %s' % (exp_name, str(e)))
+        return False
+
+
 def make_data_link(args):
     """Build the Globus file-manager URL for the experiment data directory."""
     exp_name = make_experiment_name(args)

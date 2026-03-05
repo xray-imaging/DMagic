@@ -286,6 +286,61 @@ def create_manual(args):
     _finish_create(args, dm.make_experiment_name(args))
 
 
+def delete(args):
+    """
+    Delete a DM experiment from Sojourner.
+    Lists all beamtimes in the current run, lets the operator select one,
+    then deletes the corresponding DM experiment after confirmation.
+    """
+    auth = authorize.basic(args.credentials)
+    if auth is None:
+        return
+    beamtimes = scheduling.list_beamtimes(auth, args)
+    if not beamtimes:
+        log.error("No beamtimes found for the current run")
+        return
+    elif len(beamtimes) == 1:
+        bt = beamtimes[0]
+        log.info("Found 1 beamtime in run %s: GUP %s (PI: %s, %s)" % (
+                  bt['run_name'], bt['gup_number'], bt['pi_last_name'],
+                  bt['gup_title'][:60]))
+    else:
+        log.info("Found %d beamtimes in run %s:" % (
+                  len(beamtimes), beamtimes[0]['run_name']))
+        for i, bt in enumerate(beamtimes):
+            print("  [%d] GUP %s - PI: %s - %s" % (
+                  i, bt['gup_number'], bt['pi_last_name'], bt['gup_title'][:70]))
+            print("       %s to %s" % (bt['start_time'], bt['end_time']))
+        while True:
+            try:
+                choice = input("\nSelect beamtime [0-%d] or 'q' to quit: " % (
+                               len(beamtimes) - 1)).strip()
+                if choice.lower() == 'q':
+                    log.info("No beamtime selected. Exiting.")
+                    return
+                choice = int(choice)
+                if 0 <= choice < len(beamtimes):
+                    bt = beamtimes[choice]
+                    break
+                print("Please enter a number between 0 and %d" % (len(beamtimes) - 1))
+            except (ValueError, EOFError):
+                print("Invalid input. Please enter a number or 'q' to quit.")
+
+    args.year_month  = bt['year_month']
+    args.pi_last_name = bt['pi_last_name']
+    args.gup_number  = bt['gup_number']
+    args.gup_title   = bt['gup_title']
+
+    exp_name = dm.make_experiment_name(args)
+    log.warning('*** This will permanently delete the DM experiment and its data! ***')
+    log.info('   Experiment : %s' % exp_name)
+    if not message.yes_or_no('   *** Confirm deletion? Yes or No'):
+        log.info('   Aborted.')
+        return
+
+    dm.delete_experiment(args)
+
+
 def email(args):
     """
     Send a data-access email with Globus link to all users on the DM experiment.
@@ -405,6 +460,7 @@ def main():
         ('tag',           tag,           config.TAG_PARAMS,    config.SITE_SUPPRESS, "Update user info EPICS PVs with info from the APS schedule"),
         ('create',        create,        config.CREATE_PARAMS, config.SITE_SUPPRESS, "Create a DM experiment from the APS scheduling system"),
         ('create-manual', create_manual, config.MANUAL_PARAMS, config.SITE_SUPPRESS, "Create a DM experiment manually for commissioning runs"),
+        ('delete',        delete,        config.CREATE_PARAMS, config.SITE_SUPPRESS, "Delete a DM experiment from Sojourner"),
         ('email',         email,         config.EMAIL_PARAMS,  config.SITE_SUPPRESS, "Send data-access email with Globus link to all users on the DM experiment"),
     ]
 
