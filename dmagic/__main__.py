@@ -293,9 +293,9 @@ def delete(args):
     can select one, then deletes it after double confirmation.
     Use --name to bypass the list and delete a known experiment directly.
     """
-    if getattr(args, 'name', None):
+    if getattr(args, 'exp_name', None):
         # Direct lookup by name (useful for manually created experiments)
-        exp_name = args.name
+        exp_name = args.exp_name
     else:
         exps = dm.list_experiments_by_station(args.experiment_type)
         if not exps:
@@ -479,7 +479,7 @@ def main():
         cmd_parser = cmd_params.add_arguments(cmd_parser)
         if cmd == 'delete':
             cmd_parser.add_argument(
-                '--name', default=None, type=str, metavar='EXP_NAME',
+                '--exp-name', default=None, type=str, metavar='EXP_NAME',
                 help='[Optional] Full DM experiment name, used only to delete commissioning '
                      'experiments created with "dmagic create-manual" that are not in the '
                      'APS scheduling system (e.g. 2026-03-Staff-0). Leave blank to select '
