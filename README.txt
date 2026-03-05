@@ -9,28 +9,37 @@ system (Sojourner) for experiment and user access management.
 Key Commands
 ------------
 
-- dmagic show   : Queries the APS scheduling REST API to display the currently active
-                  experiment's information: PI name, affiliation, email, badge number,
-                  proposal ID/title, and start/end times.
+- dmagic init          : Creates ~/dmagic.conf with default values for the beamline.
 
-- dmagic tag    : Fetches the same scheduling data and writes it into EPICS Process
-                  Variables (PVs) on the beamline's TomoScan IOC. This populates fields
-                  like UserName, UserEmail, ProposalNumber, ProposalTitle, etc. in real-time.
+- dmagic show          : Queries the APS scheduling REST API to display the currently
+                         active experiment's information: PI name, affiliation, email,
+                         badge number, proposal ID/title, and start/end times.
 
-- dmagic create : Creates a DM experiment on Sojourner and adds all users listed in the
-                  APS scheduling proposal. Lists all beamtimes in the current run and
-                  prompts for selection. Supports --manual mode for commissioning runs.
+- dmagic tag           : Fetches the same scheduling data and writes it into EPICS
+                         Process Variables (PVs) on the beamline's TomoScan IOC.
+                         Populates UserName, UserEmail, ProposalNumber, ProposalTitle, etc.
 
-- dmagic email  : Sends a data-access notification email to all users on the DM experiment,
-                  including a Globus link to the experiment data directory.
+- dmagic create        : Creates a DM experiment on Sojourner for a proposal-based
+                         beamtime. Lists all beamtimes in the current run, prompts for
+                         selection, then creates the experiment and adds all proposal users.
 
-- dmagic init   : Creates a configuration file.
+- dmagic create-manual : Creates a DM experiment manually for commissioning runs or
+                         staff experiments that have no scheduling proposal. Badge numbers,
+                         PI name, and title are provided on the command line.
+
+- dmagic delete        : Deletes a DM experiment from Sojourner. Lists all experiments
+                         for the station (last 2 years, including manually created ones)
+                         and requires double confirmation before deleting.
+
+- dmagic email         : Sends a data-access notification email with a Globus link to
+                         all users on a DM experiment. Lists station experiments and
+                         prompts for selection.
 
 How It Works
 ------------
 
 1. Authenticates against the APS scheduling REST API using stored credentials.
-2. Determines the current APS run (e.g., "2024-1") based on the current date.
+2. Determines the current APS run (e.g., "2026-1") based on the current date.
 3. Finds the proposal(s) scheduled for the current beamline in that run.
 4. Extracts PI and experiment metadata from the proposal.
 5. Optionally writes that metadata to EPICS PVs so downstream data acquisition software
@@ -44,6 +53,5 @@ Use Case
 Primarily used at tomography beamlines (e.g., 2-BM, 7-BM, 32-ID) so that when a new
 user group arrives to run their approved experiment, the beamline control system is
 automatically updated with their identity and proposal information, ensuring data files
-are properly attributed without manual entry. The DM integration further automates
-creation of data management experiments and notifies users of how to access their data
-via Globus.
+are properly attributed without manual entry. The DM integration automates creation of
+data management experiments and notifies users of how to access their data via Globus.
