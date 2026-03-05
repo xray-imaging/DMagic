@@ -26,11 +26,7 @@ SECTIONS['general'] = {
         'default': CONFIG_FILE_NAME,
         'type': str,
         'help': "File name of configuration",
-        'metavar': 'FILE'},
-    'verbose': {
-        'default': True,
-        'help': 'Verbose output',
-        'action': 'store_true'}}
+        'metavar': 'FILE'}}
 
 
 SECTIONS['settings'] = {
@@ -90,6 +86,10 @@ SECTIONS['site'] = {
         'default': 'https://beam-api.aps.anl.gov',
         'type': str,
         'help': "URL of the scheduling system REST API"},
+    'verbose': {
+        'default': True,
+        'help': 'Verbose output',
+        'action': 'store_true'},
     }
 
 SECTIONS['create'] = {
@@ -134,6 +134,7 @@ CREATE_PARAMS = ('settings', 'create')
 EMAIL_PARAMS  = ()
 SITE_SUPPRESS = ('site',)
 NICE_NAMES    = ('General', 'Settings', 'Site', 'Create')
+# Note: 'General' section only contains --config which is not logged
 
 
 def get_config_name():
