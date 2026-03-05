@@ -230,7 +230,7 @@ def delete_experiment(exp_name):
     """
     log.info('Deleting DM experiment: %s' % exp_name)
     try:
-        exp_api.deleteExperiment(exp_name)
+        exp_api.deleteExperimentByName(exp_name)
         log.info('   Experiment %s successfully deleted' % exp_name)
         return True
     except Exception as e:
