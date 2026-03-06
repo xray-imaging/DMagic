@@ -253,7 +253,8 @@ experiment. Lists all station experiments and prompts for selection. Requires th
     2026-03-04 09:05:05,200 -    *** All, ...
     Send email to users?
        *** Yes or No (Y/N): Y
-    2026-03-04 09:05:06,000 -    Would send email to: user1@university.edu, ..., pshevchenko@anl.gov
+    2026-03-04 09:05:06,000 -    Sending informational message to user1@university.edu
+    2026-03-04 09:05:06,100 -    Sending informational message to pshevchenko@anl.gov
 
 ::
 

@@ -35,6 +35,16 @@ Key Commands
                          all users on a DM experiment. Lists station experiments and
                          prompts for selection.
 
+- dmagic daq-start     : Starts automated real-time file transfer (DAQ) to Sojourner.
+                         The DM system monitors the configured directory on the analysis
+                         machine for new files and transfers them continuously.
+
+- dmagic daq-stop      : Stops all running DAQs for a selected experiment.
+
+- dmagic add-user      : Adds one or more users to an existing DM experiment by badge
+                         number. Prompts interactively if no badges are provided on the
+                         command line.
+
 How It Works
 ------------
 
@@ -44,8 +54,9 @@ How It Works
 4. Extracts PI and experiment metadata from the proposal.
 5. Optionally writes that metadata to EPICS PVs so downstream data acquisition software
    (like TomoScan) can tag collected data with the correct experiment/user info.
-6. Optionally creates a DM experiment on Sojourner and populates it with the users
-   from the scheduling proposal, enabling Globus data access.
+6. Optionally creates a DM experiment on Sojourner, populates it with users from the
+   scheduling proposal, starts automated file transfer (DAQ), and notifies users of
+   their Globus data access link.
 
 Use Case
 --------
