@@ -163,6 +163,22 @@ def add_users(exp_obj, username_list):
             log.error('   Could not add user {:s}: {:s}'.format(uname, str(e)))
 
 
+def remove_users(exp_name, username_list):
+    """Remove a list of DM usernames from an experiment."""
+    for uname in username_list:
+        try:
+            user_obj = user_api.getUserByUsername(uname)
+        except Exception as e:
+            log.error('   Could not find user {:s}: {:s}'.format(uname, str(e)))
+            continue
+        try:
+            user_api.deleteUserExperimentRole(uname, 'User', exp_name)
+            log.info('   Removed user {:s} from the DM experiment'.format(
+                        make_pretty_user_name(user_obj)))
+        except Exception as e:
+            log.error('   Could not remove user {:s}: {:s}'.format(uname, str(e)))
+
+
 def list_users_this_dm_exp(args):
     """Return the list of DM usernames on the current experiment, or None if not found."""
     log.info('Listing the users on the DM experiment')

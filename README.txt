@@ -45,6 +45,9 @@ Key Commands
                          number. Prompts interactively if no badges are provided on the
                          command line.
 
+- dmagic remove-user   : Removes one or more users from an existing DM experiment by
+                         badge number. Shows the current user list before prompting.
+
 How It Works
 ------------
 

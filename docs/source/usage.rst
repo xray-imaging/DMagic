@@ -104,7 +104,7 @@ DM Experiment Management
 =========================
 
 The ``create``, ``create-manual``, ``delete``, ``email``, ``daq-start``, ``daq-stop``,
-and ``add-user`` commands integrate with the APS Data Management (DM) system (Sojourner)
+``add-user``, and ``remove-user`` commands integrate with the APS Data Management (DM) system (Sojourner)
 to manage experiment records, user data access via Globus, and automated file transfer. These
 commands require the ``[site]`` section of ``~/dmagic.conf`` to be correctly configured
 (see `Initialization`_ above). The ``daq-start`` and ``daq-stop`` commands additionally
@@ -375,6 +375,45 @@ Badge numbers can also be passed directly on the command line::
       --config FILE    File name of configuration (default: /home/beams/2BMB/dmagic.conf)
       --badges BADGES  Comma-separated badge number(s) to add to the experiment (e.g. 12345 or 12345,67890) (default: )
 
+dmagic remove-user
+------------------
+
+Removes one or more users from an existing DM experiment by badge number. Lists all
+station experiments and prompts for selection, then shows the current user list before
+prompting for badge number(s) to remove::
+
+    (dm) $ dmagic remove-user
+    2026-03-06 09:00:00,000 - Found 10 DM experiment(s) for station 2BM:
+      [ 0] 2026-03-Li-1018528                   2026-03-11 to 2026-03-14  Investigation of ...
+      [ 1] 2026-03-Socha-1019623                2026-03-07 to 2026-03-09  Biomechanical ...
+      [ 2] 2026-03-Li-1012039                   2026-03-03 to 2026-03-05  Investigation of ...
+      ...
+
+    Select experiment to remove users from [0-9] or 'q' to quit: 2
+    2026-03-06 09:00:05,000 - Current users on 2026-03-Li-1012039:
+    2026-03-06 09:00:05,001 -    d12345
+    2026-03-06 09:00:05,002 -    d49734
+    2026-03-06 09:00:05,003 -    d218262
+    Enter badge number(s) to remove (comma-separated): 12345
+    2026-03-06 09:00:10,000 -    Removed user Jane Smith from the DM experiment
+
+Badge numbers can also be passed directly on the command line::
+
+    (dm) $ dmagic remove-user --badges 12345
+
+::
+
+    (dm) $ dmagic remove-user -h
+    usage: dmagic remove-user [-h] [--set SET] [--config FILE] [--badges BADGES]
+
+    Remove users from an existing DM experiment by badge number
+
+    options:
+      -h, --help       show this help message and exit
+      --set SET        Number of +/- days offset from today for past/future user groups (default: 0)
+      --config FILE    File name of configuration (default: /home/beams/2BMB/dmagic.conf)
+      --badges BADGES  Comma-separated badge number(s) to add/remove (e.g. 12345 or 12345,67890) (default: )
+
 Command Reference
 =================
 
@@ -400,3 +439,4 @@ Command Reference
         daq-start    Start automated real-time file transfer (DAQ) to Sojourner
         daq-stop     Stop all running file transfers for the current experiment
         add-user     Add users to an existing DM experiment by badge number
+        remove-user  Remove users from an existing DM experiment by badge number

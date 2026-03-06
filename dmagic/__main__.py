@@ -414,6 +414,47 @@ def _select_experiment(args, prompt_verb):
             print("Invalid input. Please enter a number or 'q' to quit.")
 
 
+def remove_user(args):
+    """
+    Remove one or more users from an existing DM experiment by badge number.
+    Lists all station experiments so the operator can select one, then shows
+    the current user list before prompting for badge number(s) to remove.
+    """
+    exp_name = _select_experiment(args, 'remove users from')
+    if exp_name is None:
+        return
+
+    exp_obj = dm.get_experiment(exp_name)
+    if exp_obj is None:
+        log.error('DM experiment not found: %s' % exp_name)
+        return
+
+    existing = exp_obj.get('experimentUsernameList', [])
+    if existing:
+        log.info('Current users on %s:' % exp_name)
+        for u in sorted(existing):
+            log.info('   %s' % u)
+    else:
+        log.info('No users currently on %s' % exp_name)
+
+    if not args.badges:
+        try:
+            args.badges = input('Enter badge number(s) to remove (comma-separated): ').strip()
+        except EOFError:
+            args.badges = ''
+    if not args.badges:
+        log.error('No badge numbers provided.')
+        return
+
+    username_list = set()
+    for badge in args.badges.split(','):
+        badge = badge.strip()
+        if badge:
+            username_list.add('d' + badge)
+
+    dm.remove_users(exp_name, username_list)
+
+
 def add_user(args):
     """
     Add one or more users to an existing DM experiment by badge number.
@@ -580,6 +621,7 @@ def main():
         ('daq-start',     start_daq,     config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Start automated real-time file transfer (DAQ) to Sojourner"),
         ('daq-stop',      stop_daq,      config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Stop all running file transfers for the current experiment"),
         ('add-user',      add_user,      config.CREATE_PARAMS, config.SITE_SUPPRESS, "Add users to an existing DM experiment by badge number"),
+        ('remove-user',   remove_user,   config.CREATE_PARAMS, config.SITE_SUPPRESS, "Remove users from an existing DM experiment by badge number"),
     ]
 
     subparsers = parser.add_subparsers(title="Commands", metavar='')
@@ -595,10 +637,10 @@ def main():
                      'experiments created with "dmagic create-manual" that are not in the '
                      'APS scheduling system (e.g. 2026-03-Staff-0). Leave blank to select '
                      'from the list of all station experiments.')
-        if cmd == 'add-user':
+        if cmd in ('add-user', 'remove-user'):
             cmd_parser.add_argument(
                 '--badges', default='', type=str, metavar='BADGES',
-                help='Comma-separated badge number(s) to add to the experiment (e.g. 12345 or 12345,67890)')
+                help='Comma-separated badge number(s) to add/remove (e.g. 12345 or 12345,67890)')
         cmd_parser.set_defaults(_func=func)
 
     args = config.parse_known_args(parser, subparser=True)

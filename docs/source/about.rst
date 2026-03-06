@@ -40,7 +40,8 @@ the DM system monitors the experiment directory on the analysis machine (e.g.
 as data is collected. ``dmagic daq-stop`` stops the transfer at the end of the run.
 
 ``dmagic add-user`` adds one or more users to an existing experiment by badge number,
-prompting interactively if no badges are provided on the command line.
+and ``dmagic remove-user`` removes them, both prompting interactively if no badges are
+provided on the command line.
 
 ``dmagic email`` sends a data-access notification email to all users on the experiment,
 including the Globus URL to their data directory. Both proposal-based and manually created
