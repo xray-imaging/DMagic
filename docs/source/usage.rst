@@ -103,9 +103,9 @@ The information will be updated in the medm screen:
 DM Experiment Management
 =========================
 
-The ``create``, ``create-manual``, ``delete``, ``email``, ``daq-start``, and ``daq-stop``
-commands integrate with the APS Data Management (DM) system (Sojourner) to manage
-experiment records, user data access via Globus, and automated file transfer. These
+The ``create``, ``create-manual``, ``delete``, ``email``, ``daq-start``, ``daq-stop``,
+and ``add-user`` commands integrate with the APS Data Management (DM) system (Sojourner)
+to manage experiment records, user data access via Globus, and automated file transfer. These
 commands require the ``[site]`` section of ``~/dmagic.conf`` to be correctly configured
 (see `Initialization`_ above). The ``daq-start`` and ``daq-stop`` commands additionally
 require the ``[local]`` section to be configured with the correct analysis hostname and
@@ -338,6 +338,42 @@ prompts for selection::
                             Top-level data directory on the analysis computer (default: /data3/2BM/)
       --config FILE         File name of configuration (default: /home/beams/2BMB/dmagic.conf)
 
+dmagic add-user
+---------------
+
+Adds one or more users to an existing DM experiment by badge number. Lists all station
+experiments and prompts for selection, then prompts for badge number(s) if not provided
+on the command line::
+
+    (dm) $ dmagic add-user
+    2026-03-05 14:32:00,000 - Found 10 DM experiment(s) for station 2BM:
+      [ 0] 2026-03-Li-1018528                   2026-03-11 to 2026-03-14  Investigation of ...
+      [ 1] 2026-03-Socha-1019623                2026-03-07 to 2026-03-09  Biomechanical ...
+      [ 2] 2026-03-Li-1012039                   2026-03-03 to 2026-03-05  Investigation of ...
+      ...
+
+    Select experiment to add users to [0-9] or 'q' to quit: 2
+    Enter badge number(s) to add (comma-separated): 12345,67890
+    2026-03-05 14:32:10,000 -    Added user Jane Smith to the DM experiment
+    2026-03-05 14:32:10,100 -    Added user John Doe to the DM experiment
+
+Badge numbers can also be passed directly on the command line::
+
+    (dm) $ dmagic add-user --badges 12345,67890
+
+::
+
+    (dm) $ dmagic add-user -h
+    usage: dmagic add-user [-h] [--set SET] [--config FILE] [--badges BADGES]
+
+    Add users to an existing DM experiment by badge number
+
+    options:
+      -h, --help       show this help message and exit
+      --set SET        Number of +/- days offset from today for past/future user groups (default: 0)
+      --config FILE    File name of configuration (default: /home/beams/2BMB/dmagic.conf)
+      --badges BADGES  Comma-separated badge number(s) to add to the experiment (e.g. 12345 or 12345,67890) (default: )
+
 Command Reference
 =================
 
@@ -362,3 +398,4 @@ Command Reference
         email        Send data-access email with Globus link to all users on the DM experiment
         daq-start    Start automated real-time file transfer (DAQ) to Sojourner
         daq-stop     Stop all running file transfers for the current experiment
+        add-user     Add users to an existing DM experiment by badge number

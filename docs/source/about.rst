@@ -39,6 +39,9 @@ the DM system monitors the experiment directory on the analysis machine (e.g.
 ``tomodata3:/data3/2BM/2026-03-Li-1012039``) and continuously transfers new files to Sojourner
 as data is collected. ``dmagic daq-stop`` stops the transfer at the end of the run.
 
+``dmagic add-user`` adds one or more users to an existing experiment by badge number,
+prompting interactively if no badges are provided on the command line.
+
 ``dmagic email`` sends a data-access notification email to all users on the experiment,
 including the Globus URL to their data directory. Both proposal-based and manually created
 experiments can be listed and removed using ``dmagic delete``.
