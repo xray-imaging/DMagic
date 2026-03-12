@@ -21,7 +21,7 @@ below. Both raw and reconstructed files are in the same folder, plus a try_cente
       that you use to access the APS proposal system, but put a &ldquo;d&rdquo; in front of the badge number</li>
   <li>If you forgot your password you can reset it
       <a href="https://www.aps.anl.gov/Users-Information/About-Badges-Identification/Passwords">here</a></li>
-  <li>Go to <code>/gdata/dm/2BM/</code> and search for your data by year-month/PI last name</li>
+  <li>Go to <code>/gdata/dm/32ID/</code> and search for your data by year-month/PI last name</li>
   <li>Set an endpoint on your computer (see
       <a href="https://docs2bm.readthedocs.io/en/latest/source/manual/item_007.html">Globus EndPoint</a>)</li>
   <li>Download the data!</li>
@@ -36,7 +36,7 @@ Our storage capabilities are limited. It will be deleted permanently after that 
 
 <ul>
   <li>Beamline documentation and support:
-      <a href="https://docs2bm.readthedocs.io/">https://docs2bm.readthedocs.io/</a></li>
+      <a href="https://docs32id.readthedocs.io/">https://docs32id.readthedocs.io/</a></li>
   <li>Raw data viewers:
       <a href="https://imagej.net/Fiji">Fiji</a> with the
       <a href="https://github.com/paulscherrerinstitute/ch.psi.imagej.hdf5">HDF plugin</a>,
@@ -50,9 +50,8 @@ Our storage capabilities are limited. It will be deleted permanently after that 
 </ul>
 
 <p>
-Pavel D. Shevchenko<br>
-630-252-1702<br>
-<a href="mailto:pshevchenko@anl.gov">pshevchenko@anl.gov</a><br>
+Viktor Nikitin<br>
+<a href="mailto:vnikitin@anl.gov">vnikitin@anl.gov</a><br>
 Advanced Photon Source
 </p>
 
