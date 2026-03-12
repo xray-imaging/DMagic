@@ -1,0 +1,31 @@
+All,
+
+we are ready to start data collection, at the end of this message you will find the URL to access the raw and reconstructed data.
+We ask you to download and make a copy of the data (raw with a backup) within 4 weeks. After that time the data will be deleted from our systems, if you need more time please send an email to Francesco at decarlo@anl.gov or Pavel at pshevchenko@anl.gov
+
+To download data from the APS you need to create a globus account at https://www.globus.org/ using the very same email address listed here.
+Please read https://docs2bm.readthedocs.io/en/latest/source/manual/item_007.html
+for more information
+
+Data link:
+
+Below are other useful links:
+
+- beamline documentation and support request:
+https://docs2bm.readthedocs.io/
+
+- raw data viewers:
+fiji: https://imagej.net/Fiji and the hdf plugin from https://github.com/paulscherrerinstitute/ch.psi.imagej.hdf5
+hdfview https://support.hdfgroup.org/products/java/hdfview/
+argos (https://github.com/titusjan/argos)
+
+- reconstruction scripts find_center and recon are available at:
+https://github.com/tomography/tomopy-cli
+
+To run the reconstruction script you need to install tomopy:
+https://tomopy.readthedocs.io/
+
+If you have some interesting/challenging data set that you would like to share with the community submit a pull request at:
+https://tomobank.readthedocs.io
+
+The 2-BM Team

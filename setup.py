@@ -6,6 +6,7 @@ setup(
     author_email = 'decarlo@anl.gov',
     description = 'Data Management Magic Tools.',
     packages = find_packages(),
+    package_data={'dmagic': ['*.txt']},
     entry_points={'console_scripts':['dmagic = dmagic.__main__:main'],},
     version = open('VERSION').read().strip(),
     zip_safe = False,

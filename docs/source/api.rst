@@ -10,6 +10,8 @@ for `DMagic <https://github.com/decarlof/DMagic>`_.
 
    api/dmagic.authorize
    api/dmagic.scheduling
+   api/dmagic.dm
+   api/dmagic.message
    api/dmagic.utils
 
 .. automodule:: dmagic
