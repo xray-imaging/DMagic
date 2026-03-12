@@ -67,6 +67,8 @@ from dmagic import log
 from dmagic import config
 from dmagic import authorize
 from dmagic import utils
+from dmagic import dm
+from dmagic import message
 
 
 def init_PVs(args):
@@ -161,6 +163,349 @@ def show(args):
     else:
         time_now = datetime.datetime.now().astimezone() + dt.timedelta(args.set)
         log.warning('No proposal run on %s during %s' % (time_now, run))
+
+
+def _finish_create(args, exp_name):
+    """Shared tail for create and create-manual: confirm, create experiment, add users, print summary."""
+    log.info('Create summary:')
+    log.info('   Experiment : %s/%s' % (args.year_month, exp_name))
+    log.info('   Title      : %s' % args.gup_title)
+    if not message.yes_or_no('   *** Confirm? Yes or No'):
+        log.info('   Aborted.')
+        return
+
+    new_exp = dm.create_experiment(args)
+    if new_exp is None:
+        return
+
+    dm.add_users(new_exp, args._user_list)
+
+    data_link = dm.make_data_link(args)
+    args._final_summary = (exp_name, data_link)
+
+
+def create(args):
+    """
+    Create a DM experiment on Sojourner from the APS scheduling system.
+    Lists all beamtimes in the current run, lets the operator select one
+    interactively, then creates the DM experiment and adds all proposal users.
+    """
+    auth = authorize.basic(args.credentials)
+    if auth is None:
+        return
+    beamtimes = scheduling.list_beamtimes(auth, args)
+    if not beamtimes:
+        log.error("No beamtimes found for the current run")
+        return
+    elif len(beamtimes) == 1:
+        bt = beamtimes[0]
+        log.info("Found 1 beamtime in run %s: GUP %s (PI: %s, %s)" % (
+                  bt['run_name'], bt['gup_number'], bt['pi_last_name'],
+                  bt['gup_title'][:60]))
+    else:
+        log.info("Found %d beamtimes in run %s:" % (
+                  len(beamtimes), beamtimes[0]['run_name']))
+        for i, bt in enumerate(beamtimes):
+            print("  [%2d] GUP %s - PI: %s - %s" % (
+                  i, bt['gup_number'], bt['pi_last_name'], bt['gup_title'][:70]))
+            print("       %s to %s" % (bt['start_time'], bt['end_time']))
+        while True:
+            try:
+                choice = input("\nSelect beamtime [0-%d] or 'q' to quit: " % (
+                               len(beamtimes) - 1)).strip()
+                if choice.lower() == 'q':
+                    log.info("No beamtime selected. Exiting.")
+                    return
+                choice = int(choice)
+                if 0 <= choice < len(beamtimes):
+                    bt = beamtimes[choice]
+                    break
+                print("Please enter a number between 0 and %d" % (len(beamtimes) - 1))
+            except (ValueError, EOFError):
+                print("Invalid input. Please enter a number or 'q' to quit.")
+
+    args.year_month     = bt['year_month']
+    args.pi_last_name   = bt['pi_last_name']
+    args.pi_first_name  = bt['pi_first_name']
+    args.pi_institution = bt['pi_institution']
+    args.pi_email       = bt['pi_email']
+    args.pi_badge       = bt['pi_badge']
+    args.gup_number     = bt['gup_number']
+    args.gup_title      = bt['gup_title']
+
+    user_list = dm.make_dm_username_list(args)
+    exp_name  = dm.make_experiment_name(args)
+    if user_list is None:
+        log.warning("GUP %s not found in the scheduling system." % args.gup_number)
+        log.warning("Experiment '%s' will be created but no users will be added." % exp_name)
+        log.info("To add a user afterwards run: dmagic add-user --badge <badge#>")
+        user_list = set()
+    else:
+        log.info('Adding users from the current proposal to the DM experiment.')
+    args._user_list = user_list
+    _finish_create(args, exp_name)
+
+
+def create_manual(args):
+    """
+    Create a DM experiment manually for commissioning runs without a proposal.
+    Uses PI metadata and badge numbers supplied on the command line.
+    """
+    now = datetime.datetime.now()
+    if args.date:
+        try:
+            ref_date = datetime.datetime.strptime(args.date, '%Y-%m')
+        except ValueError:
+            log.error("Invalid --date '%s': expected format is yyyy-mm (e.g. 2025-12)" % args.date)
+            return
+    else:
+        ref_date = now
+    args.year_month     = ref_date.strftime('%Y-%m')
+    args.pi_last_name   = args.name
+    args.pi_first_name  = args.first_name
+    args.pi_institution = args.institution
+    args.pi_email       = args.email
+    args.pi_badge       = ''
+    args.gup_number     = '0'
+    args.gup_title      = args.title
+    args.manual         = True
+    args.manual_start   = ref_date.strftime('%d-%b-%y')
+    args.manual_end     = (ref_date + dt.timedelta(days=14)).strftime('%d-%b-%y')
+    log.info("Manual experiment: %s-%s, title: %s" % (
+              args.year_month, args.pi_last_name, args.gup_title))
+
+    user_list = {'d' + str(args.primary_beamline_contact_badge),
+                 'd' + str(args.secondary_beamline_contact_badge)}
+    if args.badges:
+        for badge in args.badges.split(','):
+            badge = badge.strip()
+            if badge:
+                user_list.add('d' + badge)
+    log.info('Adding manual users to the DM experiment.')
+    args._user_list = user_list
+    _finish_create(args, dm.make_experiment_name(args))
+
+
+def delete(args):
+    """
+    Delete a DM experiment from Sojourner.
+    Lists all DM experiments for this station (last 2 years) so the operator
+    can select one, then deletes it after double confirmation.
+    Use --name to bypass the list and delete a known experiment directly.
+    """
+    if getattr(args, 'exp_name', None):
+        # Direct lookup by name (useful for manually created experiments)
+        exp_name = args.exp_name
+    else:
+        exps = dm.list_experiments_by_station(args.experiment_type)
+        if not exps:
+            log.error('No DM experiments found for station %s (last 2 years).' % args.experiment_type)
+            log.error('Use --name EXP_NAME to specify an experiment name directly.')
+            return
+        log.info('Found %d DM experiment(s) for station %s:' % (len(exps), args.experiment_type))
+        for i, e in enumerate(exps):
+            start = e.get('startDate', '?')[:10]
+            end   = e.get('endDate',   '?')[:10]
+            desc  = e.get('description', '')[:60]
+            print("  [%2d] %-35s  %s to %s  %s" % (i, e['name'], start, end, desc))
+        while True:
+            try:
+                choice = input("\nSelect experiment to delete [0-%d] or 'q' to quit: " % (
+                               len(exps) - 1)).strip()
+                if choice.lower() == 'q':
+                    log.info('No experiment selected. Exiting.')
+                    return
+                choice = int(choice)
+                if 0 <= choice < len(exps):
+                    exp_name = exps[choice]['name']
+                    break
+                print("Please enter a number between 0 and %d" % (len(exps) - 1))
+            except (ValueError, EOFError):
+                print("Invalid input. Please enter a number or 'q' to quit.")
+
+    # Fetch full experiment object for storage path details
+    exp_obj = dm.get_experiment(exp_name)
+    if exp_obj is None:
+        log.error('DM experiment not found: %s' % exp_name)
+        log.error('Has dmagic create been run for this proposal?')
+        return
+
+    log.warning('=' * 60)
+    log.warning('*** PERMANENT DELETION — THIS CANNOT BE UNDONE ***')
+    log.info('   Experiment     : %s' % exp_name)
+    log.info('   Storage dir    : %s' % exp_obj.get('storageDirectory', 'N/A'))
+    log.info('   Data dir       : %s' % exp_obj.get('dataDirectory', 'N/A'))
+    log.info('   Analysis dir   : %s' % exp_obj.get('analysisDirectory', 'N/A'))
+    log.warning('=' * 60)
+
+    if not message.yes_or_no('   *** Are you sure? Yes or No'):
+        log.info('   Aborted.')
+        return
+    if not message.yes_or_no('   *** Confirm AGAIN to permanently delete all data'):
+        log.info('   Aborted.')
+        return
+
+    dm.delete_experiment(exp_name)
+
+
+def email(args):
+    """
+    Send a data-access email with Globus link to all users on a DM experiment.
+    Lists all station experiments so the operator can select one.
+    """
+    exps = dm.list_experiments_by_station(args.experiment_type)
+    if not exps:
+        log.error('No DM experiments found for station %s.' % args.experiment_type)
+        return
+    log.info('Found %d DM experiment(s) for station %s:' % (len(exps), args.experiment_type))
+    for i, e in enumerate(exps):
+        start = e.get('startDate', '?')[:10]
+        end   = e.get('endDate',   '?')[:10]
+        desc  = e.get('description', '')[:60]
+        print("  [%2d] %-35s  %s to %s  %s" % (i, e['name'], start, end, desc))
+    while True:
+        try:
+            choice = input("\nSelect experiment to email [0-%d] or 'q' to quit: " % (
+                           len(exps) - 1)).strip()
+            if choice.lower() == 'q':
+                log.info('No experiment selected. Exiting.')
+                return
+            choice = int(choice)
+            if 0 <= choice < len(exps):
+                break
+            print("Please enter a number between 0 and %d" % (len(exps) - 1))
+        except (ValueError, EOFError):
+            print("Invalid input. Please enter a number or 'q' to quit.")
+
+    args._exp_name   = exps[choice]['name']
+    args._year_month = exps[choice].get('rootPath', '')
+
+    log.info('Sending e-mail to users on the DM experiment: %s' % args._exp_name)
+    args.msg = message.message(args)
+    log.info('   Message to users:')
+    log.info('   *** %s' % args.msg.get_content())
+    message.send_email(args)
+
+
+def _select_experiment(args, prompt_verb):
+    """Show the DM experiment list and return the selected experiment name, or None."""
+    exps = dm.list_experiments_by_station(args.experiment_type)
+    if not exps:
+        log.error('No DM experiments found for station %s.' % args.experiment_type)
+        return None
+    log.info('Found %d DM experiment(s) for station %s:' % (len(exps), args.experiment_type))
+    for i, e in enumerate(exps):
+        start = e.get('startDate', '?')[:10]
+        end   = e.get('endDate',   '?')[:10]
+        desc  = e.get('description', '')[:60]
+        print("  [%2d] %-35s  %s to %s  %s" % (i, e['name'], start, end, desc))
+    while True:
+        try:
+            choice = input("\nSelect experiment to %s [0-%d] or 'q' to quit: " % (
+                           prompt_verb, len(exps) - 1)).strip()
+            if choice.lower() == 'q':
+                log.info('No experiment selected. Exiting.')
+                return None
+            choice = int(choice)
+            if 0 <= choice < len(exps):
+                return exps[choice]['name']
+            print("Please enter a number between 0 and %d" % (len(exps) - 1))
+        except (ValueError, EOFError):
+            print("Invalid input. Please enter a number or 'q' to quit.")
+
+
+def remove_user(args):
+    """
+    Remove one or more users from an existing DM experiment by badge number.
+    Lists all station experiments so the operator can select one, then shows
+    the current user list before prompting for badge number(s) to remove.
+    """
+    exp_name = _select_experiment(args, 'remove users from')
+    if exp_name is None:
+        return
+
+    exp_obj = dm.get_experiment(exp_name)
+    if exp_obj is None:
+        log.error('DM experiment not found: %s' % exp_name)
+        return
+
+    existing = exp_obj.get('experimentUsernameList', [])
+    if existing:
+        log.info('Current users on %s:' % exp_name)
+        for u in sorted(existing):
+            log.info('   %s' % u)
+    else:
+        log.info('No users currently on %s' % exp_name)
+
+    if not args.badges:
+        try:
+            args.badges = input('Enter badge number(s) to remove (comma-separated): ').strip()
+        except EOFError:
+            args.badges = ''
+    if not args.badges:
+        log.error('No badge numbers provided.')
+        return
+
+    username_list = set()
+    for badge in args.badges.split(','):
+        badge = badge.strip()
+        if badge:
+            username_list.add('d' + badge)
+
+    dm.remove_users(exp_name, username_list)
+
+
+def add_user(args):
+    """
+    Add one or more users to an existing DM experiment by badge number.
+    Lists all station experiments so the operator can select one.
+    """
+    exp_name = _select_experiment(args, 'add users to')
+    if exp_name is None:
+        return
+
+    if not args.badges:
+        try:
+            args.badges = input('Enter badge number(s) to add (comma-separated): ').strip()
+        except EOFError:
+            args.badges = ''
+    if not args.badges:
+        log.error('No badge numbers provided.')
+        return
+
+    exp_obj = dm.get_experiment(exp_name)
+    if exp_obj is None:
+        log.error('DM experiment not found: %s' % exp_name)
+        return
+
+    username_list = set()
+    for badge in args.badges.split(','):
+        badge = badge.strip()
+        if badge:
+            username_list.add('d' + badge)
+
+    dm.add_users(exp_obj, username_list)
+
+
+def start_daq(args):
+    """
+    Select a DM experiment and start automated real-time file transfer (DAQ) to Sojourner.
+    The DM system will monitor the analysis machine directory for new files and transfer them.
+    """
+    exp_name = _select_experiment(args, 'start DAQ for')
+    if exp_name is None:
+        return
+    dm.start_daq(exp_name, args.analysis, args.analysis_top_dir)
+
+
+def stop_daq(args):
+    """
+    Select a DM experiment and stop all running DAQs for it.
+    """
+    exp_name = _select_experiment(args, 'stop DAQ for')
+    if exp_name is None:
+        return
+    dm.stop_daq(exp_name)
 
 
 def tag(args):
@@ -263,32 +608,68 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', **config.SECTIONS['general']['config'])
-    show_params = config.DMAGIC_PARAMS
-    tag_params = config.DMAGIC_PARAMS
 
+    # (sections shown in -h, sections suppressed in -h but still parsed, help text)
     cmd_parsers = [
-        ('init',        init,           (),                             "Create configuration file"),
-        ('show',        show,           show_params,                    "Show user and experiment info from the APS schedule"),
-        ('tag',         tag,            tag_params,                     "Update user info EPICS PVs with info from the APS schedule"),
+        ('init',          init,          config.INIT_PARAMS,   (),                   "Create configuration file"),
+        ('show',          show,          config.SHOW_PARAMS,   config.SITE_SUPPRESS, "Show user and experiment info from the APS schedule"),
+        ('tag',           tag,           config.TAG_PARAMS,    config.SITE_SUPPRESS, "Update user info EPICS PVs with info from the APS schedule"),
+        ('create',        create,        config.CREATE_PARAMS, config.SITE_SUPPRESS, "Create a DM experiment from the APS scheduling system"),
+        ('create-manual', create_manual, config.MANUAL_PARAMS, config.SITE_SUPPRESS, "Create a DM experiment manually for commissioning runs"),
+        ('delete',        delete,        config.CREATE_PARAMS, config.SITE_SUPPRESS, "Delete a DM experiment from Sojourner"),
+        ('email',         email,         config.EMAIL_PARAMS,  config.SITE_SUPPRESS, "Send data-access email with Globus link to all users on the DM experiment"),
+        ('daq-start',     start_daq,     config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Start automated real-time file transfer (DAQ) to Sojourner"),
+        ('daq-stop',      stop_daq,      config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Stop all running file transfers for the current experiment"),
+        ('add-user',      add_user,      config.CREATE_PARAMS, config.SITE_SUPPRESS, "Add users to an existing DM experiment by badge number"),
+        ('remove-user',   remove_user,   config.CREATE_PARAMS, config.SITE_SUPPRESS, "Remove users from an existing DM experiment by badge number"),
     ]
 
     subparsers = parser.add_subparsers(title="Commands", metavar='')
 
-    for cmd, func, sections, text in cmd_parsers:
-        cmd_params = config.Params(sections=sections)
-        cmd_parser = subparsers.add_parser(cmd, help=text, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    for cmd, func, sections, suppress, text in cmd_parsers:
+        cmd_params = config.Params(sections=sections, suppress_sections=suppress)
+        cmd_parser = subparsers.add_parser(cmd, help=text, description=text, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         cmd_parser = cmd_params.add_arguments(cmd_parser)
+        if cmd == 'delete':
+            cmd_parser.add_argument(
+                '--exp-name', default=None, type=str, metavar='EXP_NAME',
+                help='[Optional] Full DM experiment name, used only to delete commissioning '
+                     'experiments created with "dmagic create-manual" that are not in the '
+                     'APS scheduling system (e.g. 2026-03-Staff-0). Leave blank to select '
+                     'from the list of all station experiments.')
+        if cmd in ('add-user', 'remove-user'):
+            cmd_parser.add_argument(
+                '--badges', default='', type=str, metavar='BADGES',
+                help='Comma-separated badge number(s) to add/remove (e.g. 12345 or 12345,67890)')
         cmd_parser.set_defaults(_func=func)
 
     args = config.parse_known_args(parser, subparser=True)
 
+    if not hasattr(args, '_func'):
+        parser.print_help()
+        sys.exit(0)
+
     try:
-        # load args from default (config.py) if not changed
         args._func(args)
         config.log_values(args)
-        # undate globus.config file
-        sections = config.DMAGIC_PARAMS
-        config.write(args.config, args=args, sections=sections)
+        if hasattr(args, '_final_summary'):
+            exp_name, data_link = args._final_summary
+            sep = '=' * 60
+            log.info(sep)
+            log.info('Experiment name : %s' % exp_name)
+            log.info('Globus data link: %s' % data_link)
+            log.info(sep)
+        # Write sections appropriate to each command
+        cmd = sys.argv[1] if len(sys.argv) > 1 else ''
+        if cmd == 'init':
+            write_sections = ('site',)
+        elif cmd == 'create-manual':
+            write_sections = ('manual',)
+        elif cmd in ('daq-start', 'daq-stop'):
+            write_sections = ('local',)
+        else:
+            write_sections = ('settings',)
+        config.write(args.config, args=args, sections=write_sections)
     except RuntimeError as e:
         log.error(str(e))
         sys.exit(1)

@@ -1,0 +1,14 @@
+This is an automated message with important information about your experiment.  Your data will be automatically transferred to Sojourner, one of the main APS data storage systems.  The transfer will occur from the data analysis computer (mach), so any test reconstructions you do at the beamline should also be backed up to Sojourner.  Please note that this message was automatically sent to all users on the proposal.  If other users not on the proposal (for example, students or collaborators) should have this information, please forward it to them.
+
+Your data on Sojourner can be accessed through Globus Online, a grid FTP system.  Please go to the link below, or to https://www.globus.org and log in using your Globus credentials.  Sojourner is accessed through the aps#data endpoint.  Your credentials for Sojourner are your badge number prepended with a 'd' (for example, for badge number 123456, it would be d123456), with the same password as you use for the GUP and ESAF systems.  If you wish to have other APS users given access to these data (for example, students that were involved in an experiment who weren't on the original proposal), please let Alan know so he can add them as authorized users.
+
+Data link: 
+
+Please download and make a copy of the data (raw with a backup) within 4 weeks. After that time the data will be subject to deletion from our systems.  If you need more time please send an email to Alan at akastengren@anl.gov.
+
+For beamline documentation and support requests:
+https://docs7bm.readthedocs.io/
+
+Remember to send references to any papers written using data from APS to Alan at akastengren@anl.gov for inclusion in the APS Publications database.  Information on the database and the required acknowledgement statement for the use of APS can be found at https://www.aps.anl.gov/Science/Publications .
+=======
+The 7-BM Team
