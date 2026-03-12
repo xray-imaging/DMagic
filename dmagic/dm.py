@@ -1,9 +1,6 @@
 import datetime
 import os
 
-from dm import ExperimentDsApi, UserDsApi, ExperimentDaqApi
-from dm.common.exceptions.objectAlreadyExists import ObjectAlreadyExists
-
 from dmagic import log
 from dmagic import authorize
 from dmagic import scheduling
@@ -13,10 +10,18 @@ __author__ = "Alan L Kastengren, Francesco De Carlo"
 __copyright__ = "Copyright (c) 2020, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 
-exp_api  = ExperimentDsApi()
-user_api = UserDsApi()
-daq_api  = ExperimentDaqApi()
-oee      = ObjectAlreadyExists
+try:
+    from dm import ExperimentDsApi, UserDsApi, ExperimentDaqApi
+    from dm.common.exceptions.objectAlreadyExists import ObjectAlreadyExists
+    exp_api  = ExperimentDsApi()
+    user_api = UserDsApi()
+    daq_api  = ExperimentDaqApi()
+    oee      = ObjectAlreadyExists
+    _DM_AVAILABLE = True
+except ImportError:
+    exp_api = user_api = daq_api = oee = None
+    _DM_AVAILABLE = False
+    log.warning('DM SDK not available: create, delete, email, add-user, remove-user, daq-start, daq-stop commands will not work')
 
 
 def make_experiment_name(args):
