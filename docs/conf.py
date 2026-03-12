@@ -207,7 +207,7 @@ html_context = {
     'github_user': 'xray-imaging',
     'github_repo': 'DMagic',
     'github_version': 'master',
-    'conf_py_path': '/docs/source/',
+    'conf_py_path': '/docs/',
 }
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
