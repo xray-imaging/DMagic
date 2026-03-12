@@ -101,7 +101,7 @@ def create_experiment(args):
 
     log.info('Creating new DM experiment: {0:s}/{1:s}'.format(args.year_month, exp_name))
 
-    if args.manual:
+    if getattr(args, 'manual', False):
         start_date = args.manual_start
         end_date   = args.manual_end
     else:
