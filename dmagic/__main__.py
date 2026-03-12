@@ -383,7 +383,10 @@ def email(args):
     log.info('Sending e-mail to users on the DM experiment: %s' % args._exp_name)
     args.msg = message.message(args)
     log.info('   Message to users:')
-    log.info('   *** %s' % args.msg.get_content())
+    if args.msg.get_content_maintype() == 'multipart':
+        log.info('   *** (HTML email — open in a mail client to preview)')
+    else:
+        log.info('   *** %s' % args.msg.get_content())
     message.send_email(args)
 
 
@@ -659,16 +662,18 @@ def main():
             log.info('Experiment name : %s' % exp_name)
             log.info('Globus data link: %s' % data_link)
             log.info(sep)
-        # Write sections appropriate to each command
+        # Write sections appropriate to each command.
+        # Always include 'site' so beamline-specific settings are preserved
+        # rather than being reset to code defaults.
         cmd = sys.argv[1] if len(sys.argv) > 1 else ''
         if cmd == 'init':
             write_sections = ('site',)
         elif cmd == 'create-manual':
-            write_sections = ('manual',)
+            write_sections = ('manual', 'settings', 'site')
         elif cmd in ('daq-start', 'daq-stop'):
-            write_sections = ('local',)
+            write_sections = ('local', 'settings', 'site')
         else:
-            write_sections = ('settings',)
+            write_sections = ('settings', 'site')
         config.write(args.config, args=args, sections=write_sections)
     except RuntimeError as e:
         log.error(str(e))

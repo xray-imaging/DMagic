@@ -26,23 +26,35 @@ def message(args):
     """Read the email template, inject the current Globus data link, and return
     an EmailMessage object ready to send.
 
-    The template file must contain a line starting with 'Data link:' which will
-    be replaced with the actual Globus URL for the experiment.
+    Supports two template formats:
+    - HTML templates (file starts with '<html'): use %%DATA_LINK%% as placeholder;
+      sent as a multipart/alternative HTML email.
+    - Plain-text templates: must contain a line starting with 'Data link:';
+      sent as plain text.
     """
     msg_file = _message_file_path(args)
     with open(msg_file, 'r') as f:
-        lines = f.readlines()
+        content = f.read()
 
     data_link = dm.make_data_link(args)
-    with open(msg_file, 'w') as f:
-        for line in lines:
-            if line.startswith('Data link:'):
-                line = 'Data link: {:s}\n'.format(data_link)
-            f.write(line)
+    is_html = content.lstrip().startswith('<')
 
-    with open(msg_file, 'r') as f:
-        msg = EmailMessage()
-        msg.set_content(f.read())
+    if is_html:
+        content = content.replace(
+            '%%DATA_LINK%%',
+            '<a href="{0}">{0}</a>'.format(data_link))
+    else:
+        lines = content.splitlines(keepends=True)
+        content = ''.join(
+            'Data link: {:s}\n'.format(data_link) if line.startswith('Data link:') else line
+            for line in lines)
+
+    msg = EmailMessage()
+    if is_html:
+        msg.set_content('Please enable HTML to view this email.')
+        msg.add_alternative(content, subtype='html')
+    else:
+        msg.set_content(content)
 
     msg['From']    = args.primary_beamline_contact_email
     msg['Subject'] = 'Important information on APS experiment'
@@ -52,8 +64,7 @@ def message(args):
 def send_email(args):
     """Send the experiment data-access email to all users on the DM experiment.
 
-    Prompts for confirmation before sending. SMTP sending is currently stubbed
-    out — uncomment the smtplib block below when ready to enable.
+    Prompts for confirmation before sending.
     """
     log.info("Send email to users?")
     if not yes_or_no('   *** Yes or No'):
@@ -72,9 +83,6 @@ def send_email(args):
     emails.append(args.primary_beamline_contact_email)
     emails.append(args.secondary_beamline_contact_email)
 
-    log.info('   Would send email to: %s' % ', '.join(emails))
-
-    # Uncomment the block below to enable actual email sending:
     s = smtplib.SMTP('mailhost.anl.gov')
     for em in emails:
         if args.msg['To'] is None:
