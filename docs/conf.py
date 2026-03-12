@@ -200,8 +200,15 @@ html_favicon = 'source/img/dmagic-logo.png'
 # If true, the index is split into individual pages for each letter.
 #html_split_index = False
 
-# If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = False
+
+html_context = {
+    'display_github': True,
+    'github_user': 'xray-imaging',
+    'github_repo': 'DMagic',
+    'github_version': 'master',
+    'conf_py_path': '/docs/source/',
+}
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 #html_show_sphinx = True
