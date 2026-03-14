@@ -19,10 +19,10 @@ It will be deleted permanently after that time.</strong></p>
   <li>Login into Globus with your personal Globus credential</li>
   <li>Login to the APS data management system using the same badge number/password combination
       that you use to access the APS proposal system, but put a &ldquo;d&rdquo; in front of the badge number</li>
-  <li>If you forgot your password you can reset it
-      <a href="https://www.aps.anl.gov/Users-Information/About-Badges-Identification/Passwords">here</a></li>
+  <li>If you forgot your password please contact the user office at
+      <a href="mailto:apsuser@anl.gov">apsuser@anl.gov</a></li>
   <li>Set an endpoint on your computer (see
-      <a href="https://docs2bm.readthedocs.io/en/latest/source/manual/item_007.html">Globus EndPoint</a>)</li>
+      <a href="https://www.globus.org/globus-connect-personal">Globus EndPoint</a>)</li>
   <li>Raw files are in the <strong>data</strong> folder and reconstructed files in the <strong>analysis</strong> folder,
       together with the try_center folder</li>
   <li>Download the data!</li>
