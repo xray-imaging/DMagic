@@ -69,6 +69,7 @@ from dmagic import authorize
 from dmagic import utils
 from dmagic import dm
 from dmagic import message
+from dmagic import tomolog as tomolog_utils
 
 
 def init_PVs(args):
@@ -380,13 +381,33 @@ def email(args):
     args._exp_name   = exps[choice]['name']
     args._year_month = exps[choice].get('rootPath', '')
 
+    gup = args._exp_name.rsplit('-', 1)[-1]
+    args.presentation_url = tomolog_utils.get_presentation_url(gup, args.tomolog_home)
+
     log.info('Sending e-mail to users on the DM experiment: %s' % args._exp_name)
     args.msg = message.message(args)
-    log.info('   Message to users:')
+    log.info('   Message preview:')
+    log.info('   ' + '=' * 60)
     if args.msg.get_content_maintype() == 'multipart':
-        log.info('   *** (HTML email — open in a mail client to preview)')
+        html_content = args.msg.get_payload()[1].get_payload(decode=True).decode()
+        for line in message.html_to_text(html_content).splitlines():
+            log.info('   %s' % line)
     else:
-        log.info('   *** %s' % args.msg.get_content())
+        for line in args.msg.get_content().splitlines():
+            log.info('   %s' % line)
+    log.info('   ' + '=' * 60)
+
+    users = dm.list_users_this_dm_exp(args)
+    if users:
+        emails = dm.make_user_email_list(users)
+        for contact in (args.primary_beamline_contact_email,
+                        args.secondary_beamline_contact_email):
+            if contact not in emails:
+                emails.append(contact)
+        log.info('   Recipients:')
+        for em in emails:
+            log.info('      %s' % em)
+
     message.send_email(args)
 
 

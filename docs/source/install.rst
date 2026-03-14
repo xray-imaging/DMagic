@@ -22,7 +22,7 @@ Clone and install DMagic::
     (dm) $ git clone https://github.com/xray-imaging/DMagic DMagic
     (dm) $ cd DMagic
     (dm) $ pip install .
-    (dm) $ pip install pytz requests pyepics
+    (dm) $ pip install pytz pyyaml requests pyepics
 
 Install the APS Data Management SDK::
 

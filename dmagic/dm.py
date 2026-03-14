@@ -242,7 +242,16 @@ def list_experiments_by_station(station, years=2):
                 pass
         return sorted(filtered, key=lambda e: e.get('rootPath', ''), reverse=True)
     except Exception as e:
-        log.error('Could not list DM experiments for station %s: %s' % (station, str(e)))
+        error_msg = str(e)
+        log.error('Could not list DM experiments for station %s: %s' % (station, error_msg))
+        if 'incorrect username or password' in error_msg.lower():
+            import os
+            login_file = os.environ.get('DM_LOGIN_FILE', 'not set')
+            log.error('   DM authentication failed. Check that DM_LOGIN_FILE is accessible.')
+            log.error('   DM_LOGIN_FILE = %s' % login_file)
+            if login_file != 'not set' and not os.path.isfile(login_file):
+                log.error('   File not found — this machine may not have the required NFS mount.')
+                log.error('   Run DM commands from a beamline control machine (e.g. arcturus).')
         return []
 
 
