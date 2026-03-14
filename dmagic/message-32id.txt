@@ -11,23 +11,22 @@
 The number of presentations under a single account is limited.
 It will be deleted permanently after that time.</strong></p>
 
-<p>Your experiment data has been uploaded to our Globus server. Download it using the instructions
-below. Both raw and reconstructed files are in the same folder, plus a try_center folder.</p>
+<p>Your experiment data has been uploaded to our Globus server. Download it using the instructions below.</p>
+
+<p>Data link: %%DATA_LINK%%</p>
 
 <ol>
   <li>Login into Globus with your personal Globus credential</li>
-  <li>Go to &ldquo;Collection/Search&rdquo; and search for the APS data; select <strong>aps#data</strong></li>
   <li>Login to the APS data management system using the same badge number/password combination
       that you use to access the APS proposal system, but put a &ldquo;d&rdquo; in front of the badge number</li>
   <li>If you forgot your password you can reset it
       <a href="https://www.aps.anl.gov/Users-Information/About-Badges-Identification/Passwords">here</a></li>
-  <li>Go to <code>/gdata/dm/32ID/</code> and search for your data by year-month/PI last name</li>
   <li>Set an endpoint on your computer (see
       <a href="https://docs2bm.readthedocs.io/en/latest/source/manual/item_007.html">Globus EndPoint</a>)</li>
+  <li>Raw files are in the <strong>data</strong> folder and reconstructed files in the <strong>analysis</strong> folder,
+      together with the try_center folder</li>
   <li>Download the data!</li>
 </ol>
-
-<p>Data link: %%DATA_LINK%%</p>
 
 <p style="color: red;"><strong>Please make sure all your data is downloaded 3 months from today.
 Our storage capabilities are limited. It will be deleted permanently after that time.</strong></p>
