@@ -117,11 +117,8 @@ def message(args):
         msg.set_content(content)
 
     exp_name = getattr(args, '_exp_name', '')
-    parts = exp_name.split('-')
-    if len(parts) >= 4:
-        pi_last = parts[2]
-        gup     = parts[-1]
-        subject = 'Important information for APS experiment GUP-{} {}'.format(gup, pi_last)
+    if exp_name:
+        subject = 'Important information for APS experiment {}'.format(exp_name)
     else:
         subject = 'Important information for APS experiment'
 
