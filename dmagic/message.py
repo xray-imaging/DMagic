@@ -155,8 +155,10 @@ def send_email(args):
         if not emails:
             log.warning('   No user emails found on the DM experiment')
 
-        emails.append(args.primary_beamline_contact_email)
-        emails.append(args.secondary_beamline_contact_email)
+        for contact in (args.primary_beamline_contact_email,
+                        args.secondary_beamline_contact_email):
+            if contact not in emails:
+                emails.append(contact)
 
     s = smtplib.SMTP('mailhost.anl.gov')
     for em in emails:

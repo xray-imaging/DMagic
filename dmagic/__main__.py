@@ -400,8 +400,10 @@ def email(args):
     users = dm.list_users_this_dm_exp(args)
     if users:
         emails = dm.make_user_email_list(users)
-        emails.append(args.primary_beamline_contact_email)
-        emails.append(args.secondary_beamline_contact_email)
+        for contact in (args.primary_beamline_contact_email,
+                        args.secondary_beamline_contact_email):
+            if contact not in emails:
+                emails.append(contact)
         log.info('   Recipients:')
         for em in emails:
             log.info('      %s' % em)
