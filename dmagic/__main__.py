@@ -69,6 +69,7 @@ from dmagic import authorize
 from dmagic import utils
 from dmagic import dm
 from dmagic import message
+from dmagic import tomolog as tomolog_utils
 
 
 def init_PVs(args):
@@ -379,6 +380,9 @@ def email(args):
 
     args._exp_name   = exps[choice]['name']
     args._year_month = exps[choice].get('rootPath', '')
+
+    gup = args._exp_name.rsplit('-', 1)[-1]
+    args.presentation_url = tomolog_utils.get_presentation_url(gup, args.tomolog_home)
 
     log.info('Sending e-mail to users on the DM experiment: %s' % args._exp_name)
     args.msg = message.message(args)

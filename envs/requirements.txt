@@ -1,3 +1,4 @@
 pytz
+pyyaml
 requests
 pyepics

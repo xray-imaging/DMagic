@@ -78,6 +78,10 @@ SECTIONS['site'] = {
         'type': str,
         'default': 'decarlo@anl.gov',
         'help': 'Email address of secondary beamline contact'},
+    'tomolog-home': {
+        'default': '/home/beams/TOMO',
+        'type': str,
+        'help': "Home directory of the account running tomolog; .tomolog history file is read from here"},
     'tomoscan-prefix': {
         'default': '2bmb:TomoScan:',
         'type': str,

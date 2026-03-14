@@ -43,6 +43,12 @@ def message(args):
         content = content.replace(
             '%%DATA_LINK%%',
             '<a href="{0}">{0}</a>'.format(data_link))
+        slides_url = getattr(args, 'presentation_url', None)
+        if slides_url:
+            slides_html = '<a href="{0}">{0}</a>'.format(slides_url)
+        else:
+            slides_html = '(no beamtime log slides found for this proposal)'
+        content = content.replace('%%SLIDES_LINK%%', slides_html)
     else:
         lines = content.splitlines(keepends=True)
         content = ''.join(

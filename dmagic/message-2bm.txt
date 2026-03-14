@@ -5,7 +5,7 @@
 
 <p>Please use this link to access your beamtime log slides:</p>
 
-<p><a href="https://docs.google.com/presentation/u/0/">https://docs.google.com/presentation/u/0/</a></p>
+<p>%%SLIDES_LINK%%</p>
 
 <p style="color: red;"><strong>Please make sure it is copied from our account 3 months from today.
 The number of presentations under a single account is limited.
