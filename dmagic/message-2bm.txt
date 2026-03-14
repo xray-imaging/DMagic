@@ -41,9 +41,11 @@ Our storage capabilities are limited. It will be deleted permanently after that 
       <a href="https://github.com/paulscherrerinstitute/ch.psi.imagej.hdf5">HDF plugin</a>,
       <a href="https://support.hdfgroup.org/products/java/hdfview/">HDFView</a>,
       <a href="https://github.com/titusjan/argos">Argos</a></li>
-  <li>Reconstruction scripts:
-      <a href="https://github.com/tomography/tomopy-cli">tomopy-cli</a>
-      (<a href="https://tomopy.readthedocs.io/">tomopy docs</a>)</li>
+  <li>CPU based reconstruction software:
+      <a href="https://github.com/tomography/tomopy-cli">tomopy-cli</a> and
+      <a href="https://tomopy.readthedocs.io/en/stable/">tomopy</a></li>
+  <li>GPU based reconstruction software:
+      <a href="https://tomocupy.readthedocs.io/en/latest/">tomocupy</a></li>
   <li>Interesting dataset? Submit a pull request at
       <a href="https://tomobank.readthedocs.io">tomobank.readthedocs.io</a></li>
 </ul>
