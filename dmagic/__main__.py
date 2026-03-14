@@ -386,11 +386,26 @@ def email(args):
 
     log.info('Sending e-mail to users on the DM experiment: %s' % args._exp_name)
     args.msg = message.message(args)
-    log.info('   Message to users:')
+    log.info('   Message preview:')
+    log.info('   ' + '=' * 60)
     if args.msg.get_content_maintype() == 'multipart':
-        log.info('   *** (HTML email — open in a mail client to preview)')
+        html_content = args.msg.get_payload()[1].get_payload(decode=True).decode()
+        for line in message.html_to_text(html_content).splitlines():
+            log.info('   %s' % line)
     else:
-        log.info('   *** %s' % args.msg.get_content())
+        for line in args.msg.get_content().splitlines():
+            log.info('   %s' % line)
+    log.info('   ' + '=' * 60)
+
+    users = dm.list_users_this_dm_exp(args)
+    if users:
+        emails = dm.make_user_email_list(users)
+        emails.append(args.primary_beamline_contact_email)
+        emails.append(args.secondary_beamline_contact_email)
+        log.info('   Recipients:')
+        for em in emails:
+            log.info('      %s' % em)
+
     message.send_email(args)
 
 
