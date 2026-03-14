@@ -116,8 +116,17 @@ def message(args):
     else:
         msg.set_content(content)
 
+    exp_name = getattr(args, '_exp_name', '')
+    parts = exp_name.split('-')
+    if len(parts) >= 4:
+        pi_last = parts[2]
+        gup     = parts[-1]
+        subject = 'Important information for APS experiment GUP-{} {}'.format(gup, pi_last)
+    else:
+        subject = 'Important information for APS experiment'
+
     msg['From']    = args.primary_beamline_contact_email
-    msg['Subject'] = 'Important information on APS experiment'
+    msg['Subject'] = subject
     return msg
 
 
