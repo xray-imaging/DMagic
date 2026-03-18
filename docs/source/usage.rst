@@ -104,8 +104,9 @@ If no proposal is found in the scheduling system for the current run, ``dmagic t
 exits cleanly with a message::
 
     2026-03-18 13:36:07,890 - No proposal found in the scheduling system for this run
-    2026-03-18 13:36:07,891 - Create one with 'dmagic create' (or 'dmagic create-manual' for commissioning)
-    2026-03-18 13:36:07,892 - then run 'dmagic tag-manual' to pick it and update the EPICS PVs
+    2026-03-18 13:36:07,891 - If you have a scheduled proposal: run 'dmagic create' to create the DM experiment
+    2026-03-18 13:36:07,892 - For commissioning or manual runs: run 'dmagic create-manual' instead
+    2026-03-18 13:36:07,893 - Then run 'dmagic tag-manual' to select the experiment and update the EPICS PVs
 
 dmagic tag-manual
 -----------------

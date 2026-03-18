@@ -612,8 +612,9 @@ def tag(args):
 
     if not proposals:
         log.error('No proposal found in the scheduling system for this run')
-        log.error("Create one with 'dmagic create' (or 'dmagic create-manual' for commissioning)")
-        log.error("then run 'dmagic tag-manual' to pick it and update the EPICS PVs")
+        log.error("If you have a scheduled proposal: run 'dmagic create' to create the DM experiment")
+        log.error("For commissioning or manual runs: run 'dmagic create-manual' instead")
+        log.error("Then run 'dmagic tag-manual' to select the experiment and update the EPICS PVs")
         return None
     try:
         log.error(proposals['message'])

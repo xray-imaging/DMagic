@@ -7,6 +7,7 @@ setup(
     description = 'Data Management Magic Tools.',
     packages = find_packages(),
     package_data={'dmagic': ['*.txt']},
+    install_requires=['pyyaml'],
     entry_points={'console_scripts':['dmagic = dmagic.__main__:main'],},
     version = open('VERSION').read().strip(),
     zip_safe = False,
