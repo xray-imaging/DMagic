@@ -532,6 +532,63 @@ def stop_daq(args):
     dm.stop_daq(exp_name)
 
 
+def _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date):
+    """Initialize EPICS PVs, verify connectivity, and write user/experiment fields.
+
+    Parameters
+    ----------
+    args         : CLI args (needs tomoscan_prefix, epics_conn_timeout)
+    pi           : dict with keys firstName, lastName, institution, email, badge
+    proposal_num : str — GUP number or manual identifier
+    proposal_title : str
+    exp_date     : str — 'YYYY-MM'
+
+    Returns True on success, False if the IOC is unreachable.
+    """
+    user_pvs     = init_PVs(args)
+    probe_keys   = ('user_info_update_time', 'pi_name')
+    conn_timeout = getattr(args, 'epics_conn_timeout', 1.0)
+
+    missing = []
+    for k in probe_keys:
+        pv = user_pvs.get(k)
+        if pv is None:
+            continue
+        if not pv.wait_for_connection(timeout=conn_timeout):
+            missing.append(pv.pvname)
+
+    if missing:
+        log.error("EPICS IOC %s not reachable" % args.tomoscan_prefix)
+        log.error("Verify tomoscan_prefix=%s is running" % args.tomoscan_prefix)
+        log.error("or select a different IOC by using the --tomoscan-prefix option")
+        return False
+
+    log.info("User/Experiment PV update")
+    user_pvs['pi_name'].put(pi['firstName'])
+    log.info('Updating pi_name EPICS PV with: %s' % pi['firstName'])
+    user_pvs['pi_last_name'].put(pi['lastName'])
+    log.info('Updating pi_last_name EPICS PV with: %s' % pi['lastName'])
+    user_pvs['pi_affiliation'].put(pi['institution'])
+    log.info('Updating pi_affiliation EPICS PV with: %s' % pi['institution'])
+    user_pvs['pi_email'].put(pi['email'])
+    log.info('Updating pi_email EPICS PV with: %s' % pi['email'])
+    user_pvs['pi_badge'].put(pi['badge'])
+    log.info('Updating pi_badge EPICS PV with: %s' % pi['badge'])
+
+    us_central_tz  = zoneinfo.ZoneInfo("America/Chicago")
+    local_time_iso = datetime.datetime.now().replace(tzinfo=us_central_tz).isoformat()
+    user_pvs['user_info_update_time'].put(local_time_iso)
+    log.info('Updating user_info_update_time EPICS PV with: %s' % local_time_iso)
+
+    user_pvs['proposal_number'].put(proposal_num)
+    log.info('Updating proposal_number EPICS PV with: %s' % proposal_num)
+    user_pvs['proposal_title'].put(proposal_title)
+    log.info('Updating proposal_title EPICS PV with: %s' % proposal_title)
+    user_pvs['experiment_date'].put(exp_date)
+    log.info('Updating experiment_date EPICS PV with: %s' % exp_date)
+    return True
+
+
 def tag(args):
     """
     Update the EPICS PVs with user and experiment information associated with the current experiment
@@ -540,83 +597,115 @@ def tag(args):
     ----------
     args : parameters passed at the CLI, see config.py for full options
     """
-    # set the experiment date 
     now = datetime.datetime.today()
     log.info("Today's date: %s" % now)
 
-    auth      = authorize.basic(args.credentials)
-    run       = scheduling.current_run(auth, args)
+    auth   = authorize.basic(args.credentials)
+    run    = scheduling.current_run(auth, args)
     output = scheduling.beamtime_requests(run, auth, args)
-    proposals = output[0]['activities']
-    # pprint.pprint(proposals, compact=True)
-    #proposals = scheduling.beamtime_requests(run, auth, args)
+
+    proposals = None
+    try:
+        proposals = output[0]['activities']
+    except (IndexError, TypeError):
+        pass
 
     if not proposals:
-        log.error('No valid current experiment')
+        log.error('No proposal found in the scheduling system for this run')
+        log.error("Create one with 'dmagic create' (or 'dmagic create-manual' for commissioning)")
+        log.error("then run 'dmagic tag-manual' to pick it and update the EPICS PVs")
         return None
     try:
         log.error(proposals['message'])
         return None
-    except:
+    except Exception:
         pass
 
     proposal = scheduling.get_current_proposal(proposals, args)
-
-    if proposal != None:
-        # get PI information
-        pi = scheduling.get_current_pi(proposal)
-
-        user_pvs = init_PVs(args)
-
-        # Verify IOC/PVs are reachable before attempting any puts
-        probe_keys = ('user_info_update_time', 'pi_name')  # pick PVs that always exist
-        conn_timeout = getattr(args, 'epics_conn_timeout', 1.0)  # optional new arg; fallback 1s
-
-        missing = []
-        for k in probe_keys:
-            pv = user_pvs.get(k)
-            if pv is None:
-                continue
-            if not pv.wait_for_connection(timeout=conn_timeout):
-                missing.append(pv.pvname)
-
-        if missing:
-            log.error("EPICS IOC %s not reachable" % (args.tomoscan_prefix))
-            log.error("Verify tomoscan_prefix=%s is running " % (args.tomoscan_prefix))
-            log.error("or select select a different IOC by using the --tomoscan-prefix option")
-            return None
-
-
-        log.info("User/Experiment PV update")
-        user_pvs['pi_name'].put(pi['firstName'])
-        log.info('Updating pi_name EPICS PV with: %s' % pi['firstName'])
-        user_pvs['pi_last_name'].put(pi['lastName'])    
-        log.info('Updating pi_last_name EPICS PV with: %s' % pi['lastName'])    
-        user_pvs['pi_affiliation'].put(pi['institution'])
-        log.info('Updating pi_affiliation EPICS PV with: %s' % pi['institution'])
-        user_pvs['pi_email'].put(pi['email'])
-        log.info('Updating pi_email EPICS PV with: %s' % pi['email'])
-        user_pvs['pi_badge'].put(pi['badge'])
-        log.info('Updating pi_badge EPICS PV with: %s' % pi['badge'])
-
-        # set iso format time
-        us_central_tz = zoneinfo.ZoneInfo("America/Chicago")
-        local_time_iso = datetime.datetime.now().replace(tzinfo=us_central_tz).isoformat()
-        user_pvs['user_info_update_time'].put(local_time_iso)
-        log.info('Updating user_info_update_time EPICS PV with: %s' % local_time_iso)
-        
-        # get experiment information
-        user_pvs['proposal_number'].put(str(scheduling.get_current_proposal_id(proposal)))
-        log.info('Updating proposal_number EPICS PV with: %s' % scheduling.get_current_proposal_id(proposal))
-        user_pvs['proposal_title'].put(str(scheduling.get_current_proposal_title(proposal)))
-        log.info('Updating proposal_title EPICS PV with: %s' % scheduling.get_current_proposal_title(proposal))
-        #Make the start date of the experiment into a year - month
-        start_datetime = datetime.datetime.strptime(utils.fix_iso(proposal['startTime']),'%Y-%m-%dT%H:%M:%S%z')
-        user_pvs['experiment_date'].put(start_datetime.strftime('%Y-%m'))
-        log.info('Updating experiment_date EPICS PV with: %s' % start_datetime.strftime('%Y-%m'))
-    else:
+    if proposal is None:
         time_now = datetime.datetime.now().astimezone() + dt.timedelta(args.set)
-        log.warning('No proposal run on %s during %s' % (time_now, run))
+        log.warning('No proposal active on %s during run %s' % (time_now, run))
+        log.warning("Use 'dmagic tag-manual' to select an experiment manually")
+        return None
+
+    pi             = scheduling.get_current_pi(proposal)
+    proposal_num   = str(scheduling.get_current_proposal_id(proposal))
+    proposal_title = str(scheduling.get_current_proposal_title(proposal))
+    start_datetime = datetime.datetime.strptime(utils.fix_iso(proposal['startTime']), '%Y-%m-%dT%H:%M:%S%z')
+    exp_date       = start_datetime.strftime('%Y-%m')
+
+    _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date)
+
+
+def tag_manual(args):
+    """
+    Interactively select a DM experiment and update EPICS PVs with its information.
+
+    Lists all DM experiments for the station (scheduling-based and manually created)
+    sorted newest first, then lets the operator choose which one to activate.
+    Useful when sneaking in a sample from a different user group, or when running
+    commissioning with no proposal in the scheduling system.
+
+    Parameters
+    ----------
+    args : parameters passed at the CLI, see config.py for full options
+    """
+    now = datetime.datetime.today()
+    log.info("Today's date: %s" % now)
+
+    exps = dm.list_experiments_by_station(args.experiment_type)
+    if not exps:
+        log.error('No DM experiments found for station %s' % args.experiment_type)
+        return
+
+    log.info('Found %d DM experiment(s) for station %s:' % (len(exps), args.experiment_type))
+    for i, e in enumerate(exps):
+        start = e.get('startDate', '?')[:10]
+        end   = e.get('endDate',   '?')[:10]
+        desc  = e.get('description', '')[:60]
+        print("  [%2d] %-35s  %s to %s  %s" % (i, e['name'], start, end, desc))
+
+    while True:
+        try:
+            choice = input("\nSelect experiment to tag [0-%d] or 'q' to quit: " % (
+                           len(exps) - 1)).strip()
+            if choice.lower() == 'q':
+                log.info('No experiment selected. Exiting.')
+                return
+            choice = int(choice)
+            if 0 <= choice < len(exps):
+                break
+            print("Please enter a number between 0 and %d" % (len(exps) - 1))
+        except (ValueError, EOFError):
+            print("Invalid input. Please enter a number or 'q' to quit.")
+
+    exp = exps[choice]
+    log.info('Selected DM experiment: %s' % exp['name'])
+
+    # Experiment name format: YYYY-MM-LastName-GUP
+    name_parts     = exp['name'].split('-')
+    pi_last        = name_parts[2] if len(name_parts) >= 4 else ''
+    gup_str        = name_parts[-1] if len(name_parts) >= 4 else '0'
+    proposal_title = exp.get('description', exp['name'])
+    exp_date       = exp.get('rootPath', '')
+
+    # For non-zero GUP numbers try to pull full PI info from the scheduling system
+    pi = None
+    if gup_str.isdigit() and int(gup_str) != 0:
+        try:
+            auth     = authorize.basic(args.credentials)
+            beamtime = scheduling.get_beamtime(gup_str, auth, args)
+            if beamtime is not None:
+                pi = scheduling.get_current_pi(beamtime)
+                log.info('Retrieved full PI info from scheduling system for GUP %s' % gup_str)
+        except Exception as e:
+            log.warning('Could not retrieve PI info from scheduling system: %s' % str(e))
+
+    if pi is None:
+        log.warning('Using PI info parsed from DM experiment name (first name, institution, email, badge will be empty)')
+        pi = {'firstName': '', 'lastName': pi_last, 'institution': '', 'email': '', 'badge': ''}
+
+    _update_tag_pvs(args, pi, gup_str, proposal_title, exp_date)
 
 
 def main():
@@ -638,6 +727,7 @@ def main():
         ('init',          init,          config.INIT_PARAMS,   (),                   "Create configuration file"),
         ('show',          show,          config.SHOW_PARAMS,   config.SITE_SUPPRESS, "Show user and experiment info from the APS schedule"),
         ('tag',           tag,           config.TAG_PARAMS,    config.SITE_SUPPRESS, "Update user info EPICS PVs with info from the APS schedule"),
+        ('tag-manual',    tag_manual,    config.TAG_PARAMS,    config.SITE_SUPPRESS, "Interactively pick a DM experiment and update user info EPICS PVs"),
         ('create',        create,        config.CREATE_PARAMS, config.SITE_SUPPRESS, "Create a DM experiment from the APS scheduling system"),
         ('create-manual', create_manual, config.MANUAL_PARAMS, config.SITE_SUPPRESS, "Create a DM experiment manually for commissioning runs"),
         ('delete',        delete,        config.CREATE_PARAMS, config.SITE_SUPPRESS, "Delete a DM experiment from Sojourner"),

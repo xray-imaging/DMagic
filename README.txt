@@ -18,6 +18,18 @@ Key Commands
 - dmagic tag           : Fetches the same scheduling data and writes it into EPICS
                          Process Variables (PVs) on the beamline's TomoScan IOC.
                          Populates UserName, UserEmail, ProposalNumber, ProposalTitle, etc.
+                         If no proposal is found in the scheduling system, logs a clear
+                         message and suggests running 'dmagic create-manual' followed by
+                         'dmagic tag-manual'.
+
+- dmagic tag-manual    : Interactively lists all DM experiments for the station (both
+                         scheduling-based and manually created, sorted newest first) and
+                         lets the operator choose which one to write to the EPICS PVs.
+                         Useful for commissioning runs with no scheduling proposal, or
+                         when sneaking in a sample from a different user group. For
+                         non-zero GUP experiments it fetches full PI info from the
+                         scheduling system; for manually created ones (GUP=0) it derives
+                         the PI last name from the experiment name.
 
 - dmagic create        : Creates a DM experiment on Sojourner for a proposal-based
                          beamtime. Lists all beamtimes in the current run, prompts for

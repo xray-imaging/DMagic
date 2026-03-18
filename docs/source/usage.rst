@@ -100,6 +100,65 @@ The information will be updated in the medm screen:
   :width: 400
   :alt: medm screen
 
+If no proposal is found in the scheduling system for the current run, ``dmagic tag``
+exits cleanly with a message::
+
+    2026-03-18 13:36:07,890 - No proposal found in the scheduling system for this run
+    2026-03-18 13:36:07,891 - Create one with 'dmagic create' (or 'dmagic create-manual' for commissioning)
+    2026-03-18 13:36:07,892 - then run 'dmagic tag-manual' to pick it and update the EPICS PVs
+
+dmagic tag-manual
+-----------------
+
+Interactively lists all DM experiments for the station — both scheduling-based and
+manually created, sorted newest first — and lets the operator choose which one to write
+to the EPICS PVs::
+
+    (dm) $ dmagic tag-manual
+    2026-03-18 13:34:52,000 - Today's date: 2026-03-18 13:34:52.000000
+    2026-03-18 13:34:52,500 - Found 3 DM experiment(s) for station 32ID:
+      [ 0] 2026-03-Nikitin-0                    2026-03-01 to 2026-03-15  Commissioning
+      [ 1] 32ID-TXM-CommissioningI              2025-03-04 to 2025-05-01  32-ID Operations Commissioning
+      [ 2] 2025-TXM-CommissioningI              2025-03-14 to 2025-05-01  32-ID Technical Comissioning
+
+    Select experiment to tag [0-2] or 'q' to quit: 0
+    2026-03-18 13:34:55,000 - Selected DM experiment: 2026-03-Nikitin-0
+    2026-03-18 13:34:55,100 - Using PI info parsed from DM experiment name (first name, institution, email, badge will be empty)
+    2026-03-18 13:34:55,200 - User/Experiment PV update
+    2026-03-18 13:34:55,201 - Updating pi_name EPICS PV with:
+    2026-03-18 13:34:55,202 - Updating pi_last_name EPICS PV with: Nikitin
+    2026-03-18 13:34:55,203 - Updating pi_affiliation EPICS PV with:
+    2026-03-18 13:34:55,204 - Updating pi_email EPICS PV with:
+    2026-03-18 13:34:55,205 - Updating pi_badge EPICS PV with:
+    2026-03-18 13:34:55,206 - Updating user_info_update_time EPICS PV with: 2026-03-18T13:34:55-06:00
+    2026-03-18 13:34:55,207 - Updating proposal_number EPICS PV with: 0
+    2026-03-18 13:34:55,208 - Updating proposal_title EPICS PV with: Commissioning
+    2026-03-18 13:34:55,209 - Updating experiment_date EPICS PV with: 2026-03
+
+For scheduling-based experiments (non-zero GUP), full PI info is fetched from the
+scheduling system automatically. This command is also useful when you need to switch
+the EPICS PVs to a different user group mid-run without touching the scheduling system.
+
+.. note::
+    For commissioning runs with no scheduling proposal, the typical workflow is:
+
+    1. ``dmagic create-manual`` — create the DM experiment
+    2. ``dmagic tag-manual`` — activate it in the EPICS PVs
+    3. ``dmagic email`` — notify users of their Globus data link (optional)
+    4. ``dmagic daq-start`` — start automated file transfer (optional)
+
+::
+
+    (dm) $ dmagic tag-manual -h
+    usage: dmagic tag-manual [-h] [--set SET] [--config FILE]
+
+    Interactively pick a DM experiment and update user info EPICS PVs
+
+    options:
+      -h, --help     show this help message and exit
+      --set SET      Number of +/- days offset from today for past/future user groups (default: 0)
+      --config FILE  File name of configuration (default: /home/beams/2BMB/dmagic.conf)
+
 DM Experiment Management
 =========================
 
@@ -431,6 +490,7 @@ Command Reference
         init         Create configuration file
         show         Show user and experiment info from the APS schedule
         tag          Update user info EPICS PVs with info from the APS schedule
+        tag-manual   Interactively pick a DM experiment and update user info EPICS PVs
         create       Create a DM experiment from the APS scheduling system
         create-manual
                      Create a DM experiment manually for commissioning runs
