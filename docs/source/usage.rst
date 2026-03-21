@@ -164,7 +164,7 @@ DM Experiment Management
 =========================
 
 The ``create``, ``create-manual``, ``delete``, ``email``, ``daq-start``, ``daq-stop``,
-``add-user``, and ``remove-user`` commands integrate with the APS Data Management (DM) system (Sojourner)
+``add-user``, ``remove-user``, and ``list-users`` commands integrate with the APS Data Management (DM) system (Sojourner)
 to manage experiment records, user data access via Globus, and automated file transfer. These
 commands require the ``[site]`` section of ``~/dmagic.conf`` to be correctly configured
 (see `Initialization`_ above). The ``daq-start`` and ``daq-stop`` commands additionally
@@ -474,6 +474,40 @@ Badge numbers can also be passed directly on the command line::
       --config FILE    File name of configuration (default: /home/beams/2BMB/dmagic.conf)
       --badges BADGES  Comma-separated badge number(s) to add/remove (e.g. 12345 or 12345,67890) (default: )
 
+dmagic list-users
+-----------------
+
+Lists all users currently granted access to a DM experiment, including users added from
+the scheduling proposal and any users added manually with ``dmagic add-user``. Lists all
+station experiments and prompts for selection, then prints each user's DM username, full
+name, and email address::
+
+    (dm) $ dmagic list-users
+    2026-03-06 10:00:00,000 - Found 10 DM experiment(s) for station 2BM:
+      [ 0] 2026-03-Li-1018528                   2026-03-11 to 2026-03-14  Investigation of ...
+      [ 1] 2026-03-Socha-1019623                2026-03-07 to 2026-03-09  Biomechanical ...
+      [ 2] 2026-03-Li-1012039                   2026-03-03 to 2026-03-05  Investigation of ...
+      ...
+
+    Select experiment to list users for [0-9] or 'q' to quit: 2
+    2026-03-06 10:00:05,000 - Users on 2026-03-Li-1012039:
+    2026-03-06 10:00:05,001 -    d49734        Pavel Shevchenko               pshevchenko@anl.gov
+    2026-03-06 10:00:05,002 -    d218262       Francesco DeCarlo              decarlo@anl.gov
+    2026-03-06 10:00:05,003 -    d226531       Tao Li                         tli@university.edu
+    2026-03-06 10:00:05,004 -    d67890        John Doe                       jdoe@lab.gov
+
+::
+
+    (dm) $ dmagic list-users -h
+    usage: dmagic list-users [-h] [--set SET] [--config FILE]
+
+    List all users with access to a DM experiment
+
+    options:
+      -h, --help     show this help message and exit
+      --set SET      Number of +/- days offset from today for past/future user groups (default: 0)
+      --config FILE  File name of configuration (default: /home/beams/2BMB/dmagic.conf)
+
 Command Reference
 =================
 
@@ -501,3 +535,4 @@ Command Reference
         daq-stop     Stop all running file transfers for the current experiment
         add-user     Add users to an existing DM experiment by badge number
         remove-user  Remove users from an existing DM experiment by badge number
+        list-users   List all users with access to a DM experiment

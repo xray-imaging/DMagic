@@ -511,6 +511,36 @@ def add_user(args):
     dm.add_users(exp_obj, username_list)
 
 
+def list_users(args):
+    """
+    Select a DM experiment and list all users currently granted access,
+    including those added from the proposal and any manually added users.
+    """
+    exp_name = _select_experiment(args, 'list users for')
+    if exp_name is None:
+        return
+
+    exp_obj = dm.get_experiment(exp_name)
+    if exp_obj is None:
+        log.error('DM experiment not found: %s' % exp_name)
+        return
+
+    username_list = exp_obj.get('experimentUsernameList', [])
+    if not username_list:
+        log.info('No users on experiment %s' % exp_name)
+        return
+
+    log.info('Users on %s:' % exp_name)
+    for uname in sorted(username_list):
+        user_obj = dm.get_user(uname)
+        if user_obj:
+            name  = dm.make_pretty_user_name(user_obj)
+            email = user_obj.get('email', '')
+            log.info('   %-12s  %-30s  %s' % (uname, name, email))
+        else:
+            log.info('   %s  (name not found)' % uname)
+
+
 def start_daq(args):
     """
     Select a DM experiment and start automated real-time file transfer (DAQ) to Sojourner.
@@ -737,6 +767,7 @@ def main():
         ('daq-stop',      stop_daq,      config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Stop all running file transfers for the current experiment"),
         ('add-user',      add_user,      config.CREATE_PARAMS, config.SITE_SUPPRESS, "Add users to an existing DM experiment by badge number"),
         ('remove-user',   remove_user,   config.CREATE_PARAMS, config.SITE_SUPPRESS, "Remove users from an existing DM experiment by badge number"),
+        ('list-users',    list_users,    config.CREATE_PARAMS, config.SITE_SUPPRESS, "List all users with access to a DM experiment"),
     ]
 
     subparsers = parser.add_subparsers(title="Commands", metavar='')
