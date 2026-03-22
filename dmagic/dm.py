@@ -209,6 +209,14 @@ def make_pretty_user_name(user_obj):
     return ' '.join(parts)
 
 
+def get_user(username):
+    """Return the DM user object for a username, or None on error."""
+    try:
+        return user_api.getUserByUsername(username)
+    except Exception:
+        return None
+
+
 def get_experiment(exp_name):
     """Return the DM experiment object for exp_name, or None if not found."""
     try:
