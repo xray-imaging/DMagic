@@ -148,6 +148,20 @@ def show(args):
         proposal_start_date  = scheduling.get_proposal_starting_date(proposal)
         proposal_start       = dt.datetime.fromisoformat(utils.fix_iso(proposal['startTime']))
         proposal_end         = dt.datetime.fromisoformat(utils.fix_iso(proposal['endTime']))
+
+        beamtime         = proposal.get('beamtime', {})
+        prop_obj         = beamtime.get('proposal', {})
+        prop_type        = prop_obj.get('proposalType', {}).get('display', 'N/A')
+        granted_shifts   = beamtime.get('grantedShifts', 'N/A')
+        scheduled_shifts = beamtime.get('scheduledShifts', 'N/A')
+        proprietary      = prop_obj.get('proprietaryFlag', 'N/A')
+        mail_in          = prop_obj.get('mailInFlag', 'N/A')
+        submitted_raw    = prop_obj.get('submittedDate', '')
+        try:
+            submitted = dt.datetime.fromisoformat(utils.fix_iso(submitted_raw)).strftime('%Y-%m-%d')
+        except Exception:
+            submitted = submitted_raw or 'N/A'
+
         log.info("\tRun: %s" % run)
         log.info("\tPI Name: %s %s" % (pi_name, pi_last_name))
         log.info("\tPI affiliation: %s" % (pi_affiliation))
@@ -155,7 +169,11 @@ def show(args):
         log.info("\tPI badge: %s" % (pi_badge))
         log.info("\tProposal GUP: %s" % (proposal_id))
         log.info("\tProposal Title: %s" % (proposal_title))
-        log.info("\tStart date: %s" % (proposal_start_date))        
+        log.info("\tProposal type: %s" % prop_type)
+        log.info("\tSubmitted: %s" % submitted)
+        log.info("\tGranted shifts: %s  (scheduled: %s)" % (granted_shifts, scheduled_shifts))
+        log.info("\tProprietary: %s  |  Mail-in: %s" % (proprietary, mail_in))
+        log.info("\tStart date: %s" % (proposal_start_date))
         log.info("\tStart time: %s" % (proposal_start))
         log.info("\tEnd Time: %s" % (proposal_end))
         log.info("\tUser email address: ")
