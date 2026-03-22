@@ -64,13 +64,18 @@ Queries the APS scheduling REST API to display the currently active experiment::
     2026-03-04 09:00:00,703 -   PI e-mail: wchen@purdue.edu
     2026-03-04 09:00:00,704 -   PI badge: 226531
     2026-03-04 09:00:00,705 -   Proposal GUP: 66310
-    2026-03-04 09:00:00,706 -   Proposal Title: In-situ visualization of ...
-    2026-03-04 09:00:00,707 -   Start date: 2026_03_03
-    2026-03-04 09:00:00,708 -   Start time: 2026-03-03 08:00:00-06:00
-    2026-03-04 09:00:00,709 -   End Time: 2026-03-05 08:00:00-06:00
-    2026-03-04 09:00:00,710 -   User email address:
-    2026-03-04 09:00:00,711 -        user1@university.edu
-    2026-03-04 09:00:00,712 -        user2@lab.gov
+    2026-03-04 09:00:00,706 -   ESAF number: 289884
+    2026-03-04 09:00:00,707 -   Proposal Title: In-situ visualization of ...
+    2026-03-04 09:00:00,708 -   Proposal type: GUP
+    2026-03-04 09:00:00,709 -   Submitted: 2025-09-15
+    2026-03-04 09:00:00,710 -   Granted shifts: 6  (scheduled: 6)
+    2026-03-04 09:00:00,711 -   Proprietary: N  |  Mail-in: N
+    2026-03-04 09:00:00,712 -   Start date: 2026_03_03
+    2026-03-04 09:00:00,713 -   Start time: 2026-03-03 08:00:00-06:00
+    2026-03-04 09:00:00,714 -   End Time: 2026-03-05 08:00:00-06:00
+    2026-03-04 09:00:00,715 -   User email address:
+    2026-03-04 09:00:00,716 -        user1@university.edu
+    2026-03-04 09:00:00,717 -        user2@lab.gov
 
 Use ``--set N`` to offset the date (negative for past, positive for future)::
 
@@ -93,6 +98,7 @@ Fetches the same scheduling data and writes it to EPICS PVs on the TomoScan IOC:
     2026-03-04 09:00:01,007 - Updating proposal_number EPICS PV with: 66310
     2026-03-04 09:00:01,008 - Updating proposal_title EPICS PV with: In-situ visualization of ...
     2026-03-04 09:00:01,009 - Updating experiment_date EPICS PV with: 2026-03
+    2026-03-04 09:00:01,010 - Updating esaf_number EPICS PV with: 289884
 
 The information will be updated in the medm screen:
 
@@ -135,6 +141,7 @@ to the EPICS PVs::
     2026-03-18 13:34:55,207 - Updating proposal_number EPICS PV with: 0
     2026-03-18 13:34:55,208 - Updating proposal_title EPICS PV with: Commissioning
     2026-03-18 13:34:55,209 - Updating experiment_date EPICS PV with: 2026-03
+    2026-03-18 13:34:55,210 - Updating esaf_number EPICS PV with:
 
 For scheduling-based experiments (non-zero GUP), full PI info is fetched from the
 scheduling system automatically. This command is also useful when you need to switch

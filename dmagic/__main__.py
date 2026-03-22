@@ -98,6 +98,7 @@ def init_PVs(args):
     user_pvs['proposal_title'] = PV(tomoscan_prefix + 'ProposalTitle')
     user_pvs['user_info_update_time'] = PV(tomoscan_prefix + 'UserInfoUpdate')
     user_pvs['experiment_date'] = PV(tomoscan_prefix + 'ExperimentYearMonth')
+    user_pvs['esaf_number'] = PV(tomoscan_prefix + 'ESAFNumber')
     return user_pvs
 
 def init(args):
@@ -167,7 +168,9 @@ def show(args):
         log.info("\tPI affiliation: %s" % (pi_affiliation))
         log.info("\tPI e-mail: %s" % (pi_email))
         log.info("\tPI badge: %s" % (pi_badge))
+        esaf_number = proposal.get('experimentId') or 'N/A'
         log.info("\tProposal GUP: %s" % (proposal_id))
+        log.info("\tESAF number: %s" % esaf_number)
         log.info("\tProposal Title: %s" % (proposal_title))
         log.info("\tProposal type: %s" % prop_type)
         log.info("\tSubmitted: %s" % submitted)
@@ -580,16 +583,17 @@ def stop_daq(args):
     dm.stop_daq(exp_name)
 
 
-def _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date):
+def _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date, esaf_number=''):
     """Initialize EPICS PVs, verify connectivity, and write user/experiment fields.
 
     Parameters
     ----------
-    args         : CLI args (needs tomoscan_prefix, epics_conn_timeout)
-    pi           : dict with keys firstName, lastName, institution, email, badge
-    proposal_num : str — GUP number or manual identifier
+    args           : CLI args (needs tomoscan_prefix, epics_conn_timeout)
+    pi             : dict with keys firstName, lastName, institution, email, badge
+    proposal_num   : str — GUP number or manual identifier
     proposal_title : str
-    exp_date     : str — 'YYYY-MM'
+    exp_date       : str — 'YYYY-MM'
+    esaf_number    : str — ESAF number (empty string if not available)
 
     Returns True on success, False if the IOC is unreachable.
     """
@@ -634,6 +638,8 @@ def _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date):
     log.info('Updating proposal_title EPICS PV with: %s' % proposal_title)
     user_pvs['experiment_date'].put(exp_date)
     log.info('Updating experiment_date EPICS PV with: %s' % exp_date)
+    user_pvs['esaf_number'].put(str(esaf_number))
+    log.info('Updating esaf_number EPICS PV with: %s' % esaf_number)
     return True
 
 
@@ -682,8 +688,9 @@ def tag(args):
     proposal_title = str(scheduling.get_current_proposal_title(proposal))
     start_datetime = datetime.datetime.strptime(utils.fix_iso(proposal['startTime']), '%Y-%m-%dT%H:%M:%S%z')
     exp_date       = start_datetime.strftime('%Y-%m')
+    esaf_number    = str(proposal.get('experimentId') or '')
 
-    _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date)
+    _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date, esaf_number)
 
 
 def tag_manual(args):
@@ -740,12 +747,14 @@ def tag_manual(args):
 
     # For non-zero GUP numbers try to pull full PI info from the scheduling system
     pi = None
+    esaf_number = ''
     if gup_str.isdigit() and int(gup_str) != 0:
         try:
             auth     = authorize.basic(args.credentials)
             beamtime = scheduling.get_beamtime(gup_str, auth, args)
             if beamtime is not None:
                 pi = scheduling.get_current_pi(beamtime)
+                esaf_number = str(beamtime.get('experimentId') or '')
                 log.info('Retrieved full PI info from scheduling system for GUP %s' % gup_str)
         except Exception as e:
             log.warning('Could not retrieve PI info from scheduling system: %s' % str(e))
@@ -754,7 +763,7 @@ def tag_manual(args):
         log.warning('Using PI info parsed from DM experiment name (first name, institution, email, badge will be empty)')
         pi = {'firstName': '', 'lastName': pi_last, 'institution': '', 'email': '', 'badge': ''}
 
-    _update_tag_pvs(args, pi, gup_str, proposal_title, exp_date)
+    _update_tag_pvs(args, pi, gup_str, proposal_title, exp_date, esaf_number)
 
 
 def main():
