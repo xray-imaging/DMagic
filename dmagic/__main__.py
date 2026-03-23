@@ -417,7 +417,9 @@ def email(args):
             log.info('   %d user(s) already emailed previously, %d new user(s) added:'
                      % (len(already_emailed), len(new_users)))
             for u in sorted(new_users):
-                log.info('      %s' % u)
+                user_obj = dm.get_user(u)
+                label = '{} ({})'.format(dm.make_pretty_user_name(user_obj), u) if user_obj else u
+                log.info('      %s' % label)
             while True:
                 resp = input("Email [A]ll users / [N]ew users only / [C]ancel: ").strip().lower()
                 if resp in ('a', 'n', 'c'):
