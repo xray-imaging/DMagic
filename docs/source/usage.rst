@@ -304,9 +304,16 @@ To delete a manually created experiment directly by name (without going through 
 dmagic email
 ------------
 
-Sends a data-access notification email with a Globus link to all users on a DM
+Sends a data-access notification email with a Globus link to users on a DM
 experiment. Lists all station experiments and prompts for selection. Requires that
-``dmagic create`` or ``dmagic create-manual`` has been run first::
+``dmagic create`` or ``dmagic create-manual`` has been run first.
+
+The command tracks which users have already received the email (stored as DM experiment
+metadata). If new users were added to the experiment since the last email was sent, it
+offers to email only the new users or all users. This is useful when users are added
+mid-experiment after the initial notification has already gone out.
+
+**First-time send** (no previous email recorded)::
 
     (dm) $ dmagic email
     2026-03-04 09:05:00,000 - Found 11 DM experiment(s) for station 2BM:
@@ -317,18 +324,40 @@ experiment. Lists all station experiments and prompts for selection. Requires th
     Select experiment to email [0-10] or 'q' to quit: 0
     2026-03-04 09:05:05,000 - Sending e-mail to users on the DM experiment: 2026-03-Li-1018528
     2026-03-04 09:05:05,100 -    Message to users:
-    2026-03-04 09:05:05,200 -    *** All, ...
+    2026-03-04 09:05:05,200 -    *** Subject: Important information for APS experiment ...
+    ...
     Send email to users?
-       *** Yes or No (Y/N): Y
+       *** Yes / No / Test (Y/N/T): Y
     2026-03-04 09:05:06,000 -    Sending informational message to user1@university.edu
     2026-03-04 09:05:06,100 -    Sending informational message to pshevchenko@anl.gov
+
+**Re-send when new users were added**::
+
+    (dm) $ dmagic email
+    ...
+    Select experiment to email [0-10] or 'q' to quit: 0
+    2026-03-04 10:00:00,000 -    3 user(s) already emailed previously, 1 new user(s) added:
+    2026-03-04 10:00:00,100 -       newuser
+    Email [A]ll users / [N]ew users only / [C]ancel: N
+    2026-03-04 10:00:05,000 -    Sending informational message to newuser@university.edu
+    2026-03-04 10:00:05,100 -    Sending informational message to pshevchenko@anl.gov
+
+**Re-send when all users already emailed**::
+
+    (dm) $ dmagic email
+    ...
+    Select experiment to email [0-10] or 'q' to quit: 0
+    2026-03-04 10:00:00,000 -    All 4 user(s) have already been emailed previously.
+    Re-send to [A]ll users / [C]ancel: A
+    2026-03-04 10:00:05,000 -    Sending informational message to user1@university.edu
+    ...
 
 ::
 
     (dm) $ dmagic email -h
     usage: dmagic email [-h] [--config FILE]
 
-    Send data-access email with Globus link to all users on the DM experiment
+    Send data-access email with Globus link to users on the DM experiment
 
     options:
       -h, --help     show this help message and exit
