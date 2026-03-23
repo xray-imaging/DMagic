@@ -406,6 +406,39 @@ def email(args):
     args.presentation_url = tomolog_utils.get_presentation_url(gup, args.tomolog_home)
 
     log.info('Sending e-mail to users on the DM experiment: %s' % args._exp_name)
+
+    # Determine which users need to be emailed
+    all_users      = set(dm.list_users_this_dm_exp(args) or [])
+    already_emailed = dm.get_emailed_users(args._exp_name)
+    new_users      = all_users - already_emailed
+
+    if already_emailed:
+        if new_users:
+            log.info('   %d user(s) already emailed previously, %d new user(s) added:'
+                     % (len(already_emailed), len(new_users)))
+            for u in sorted(new_users):
+                log.info('      %s' % u)
+            while True:
+                resp = input("Email [A]ll users / [N]ew users only / [C]ancel: ").strip().lower()
+                if resp in ('a', 'n', 'c'):
+                    break
+            if resp == 'c':
+                log.info('   Aborted.')
+                return
+            args._user_filter = list(new_users) if resp == 'n' else None
+        else:
+            log.info('   All %d user(s) have already been emailed previously.' % len(already_emailed))
+            while True:
+                resp = input("Re-send to [A]ll users / [C]ancel: ").strip().lower()
+                if resp in ('a', 'c'):
+                    break
+            if resp == 'c':
+                log.info('   Aborted.')
+                return
+            args._user_filter = None
+    else:
+        args._user_filter = None  # first time — email everyone
+
     args.msg = message.message(args)
     log.info('   Message preview:')
     log.info('   ' + '=' * 60)
@@ -418,18 +451,10 @@ def email(args):
             log.info('   %s' % line)
     log.info('   ' + '=' * 60)
 
-    users = dm.list_users_this_dm_exp(args)
-    if users:
-        emails = dm.make_user_email_list(users)
-        for contact in (args.primary_beamline_contact_email,
-                        args.secondary_beamline_contact_email):
-            if contact not in emails:
-                emails.append(contact)
-        log.info('   Recipients:')
-        for em in emails:
-            log.info('      %s' % em)
-
-    message.send_email(args)
+    sent = message.send_email(args)
+    if sent:
+        users_sent = set(args._user_filter) if args._user_filter is not None else all_users
+        dm.set_emailed_users(args._exp_name, already_emailed | users_sent)
 
 
 def _select_experiment(args, prompt_verb):

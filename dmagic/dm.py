@@ -217,6 +217,33 @@ def get_user(username):
         return None
 
 
+def get_emailed_users(exp_name):
+    """Return the set of DM usernames already emailed for this experiment.
+
+    Reads from DM experiment metadata key 'emailedUsers'. Returns an empty
+    set if the metadata has not been set yet or on any error.
+    """
+    try:
+        exp_obj = exp_api.getExperimentByName(exp_name)
+        stored = exp_obj.get('emailedUsers', '')
+        return set(u for u in stored.split(',') if u)
+    except Exception:
+        return set()
+
+
+def set_emailed_users(exp_name, username_set):
+    """Persist the set of emailed DM usernames as experiment metadata.
+
+    Stores under key 'emailedUsers' as a comma-separated string.
+    """
+    value = ','.join(sorted(username_set))
+    try:
+        exp_api.upsertExperimentMetadata('emailedUsers', value, exp_name)
+        log.info('   Updated emailed-users record for %s' % exp_name)
+    except Exception as e:
+        log.warning('   Could not save emailed-users metadata: %s' % str(e))
+
+
 def get_experiment(exp_name):
     """Return the DM experiment object for exp_name, or None if not found."""
     try:
