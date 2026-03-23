@@ -421,13 +421,13 @@ def email(args):
                 label = '{} ({})'.format(dm.make_pretty_user_name(user_obj), u) if user_obj else u
                 log.info('      %s' % label)
             while True:
-                resp = input("Email [A]ll users / [N]ew users only / [C]ancel: ").strip().lower()
-                if resp in ('a', 'n', 'c'):
+                resp = input("Email [A]ll users / [O]nly new users / [C]ancel: ").strip().lower()
+                if resp in ('a', 'o', 'c'):
                     break
             if resp == 'c':
                 log.info('   Aborted.')
                 return
-            args._user_filter = list(new_users) if resp == 'n' else None
+            args._user_filter = list(new_users) if resp == 'o' else None
         else:
             log.info('   All %d user(s) have already been emailed previously.' % len(already_emailed))
             while True:

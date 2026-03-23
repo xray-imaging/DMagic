@@ -337,8 +337,10 @@ mid-experiment after the initial notification has already gone out.
     ...
     Select experiment to email [0-10] or 'q' to quit: 0
     2026-03-04 10:00:00,000 -    3 user(s) already emailed previously, 1 new user(s) added:
-    2026-03-04 10:00:00,100 -       newuser
-    Email [A]ll users / [N]ew users only / [C]ancel: N
+    2026-03-04 10:00:00,100 -       Sarah D. Boyer (d313356)
+    Email [A]ll users / [O]nly new users / [C]ancel: O
+    Send email to users?
+       *** Yes / No / Test (Y/N/T): Y
     2026-03-04 10:00:05,000 -    Sending informational message to newuser@university.edu
     2026-03-04 10:00:05,100 -    Sending informational message to pshevchenko@anl.gov
 
