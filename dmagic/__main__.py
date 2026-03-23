@@ -564,8 +564,10 @@ def list_users(args):
 
 def start_daq(args):
     """
-    Select a DM experiment and start automated real-time file transfer (DAQ) to Sojourner.
-    The DM system will monitor the analysis machine directory for new files and transfer them.
+    Select a DM experiment and start two automated real-time file transfers (DAQs) to Sojourner:
+      - raw data:           analysis_top_dir/<exp_name>      → DM data directory
+      - reconstructed data: analysis_top_dir/<exp_name>_rec  → DM analysis directory
+    The rec DAQ is skipped with a warning if the directory does not yet exist.
     """
     exp_name = _select_experiment(args, 'start DAQ for')
     if exp_name is None:
@@ -581,6 +583,21 @@ def stop_daq(args):
     if exp_name is None:
         return
     dm.stop_daq(exp_name)
+
+
+def upload(args):
+    """
+    Select a DM experiment and perform a one-shot upload of all existing files to Sojourner.
+    Use this when daq-start was not running while data was being collected.
+    Uploads from the same directories as daq-start:
+      - raw data:           analysis_top_dir/<exp_name>      → DM data directory
+      - reconstructed data: analysis_top_dir/<exp_name>_rec  → DM analysis directory
+    The rec upload is skipped with a warning if the directory does not exist.
+    """
+    exp_name = _select_experiment(args, 'upload data for')
+    if exp_name is None:
+        return
+    dm.upload(exp_name, args.analysis, args.analysis_top_dir)
 
 
 def _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date, esaf_number=''):
@@ -790,8 +807,9 @@ def main():
         ('create-manual', create_manual, config.MANUAL_PARAMS, config.SITE_SUPPRESS, "Create a DM experiment manually for commissioning runs"),
         ('delete',        delete,        config.CREATE_PARAMS, config.SITE_SUPPRESS, "Delete a DM experiment from Sojourner"),
         ('email',         email,         config.EMAIL_PARAMS,  config.SITE_SUPPRESS, "Send data-access email with Globus link to all users on the DM experiment"),
-        ('daq-start',     start_daq,     config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Start automated real-time file transfer (DAQ) to Sojourner"),
-        ('daq-stop',      stop_daq,      config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Stop all running file transfers for the current experiment"),
+        ('daq-start',     start_daq,     config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Monitor experiment directories and sync new files to Sojourner in real time"),
+        ('daq-stop',      stop_daq,      config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Stop real-time directory monitoring and file sync for the current experiment"),
+        ('upload',        upload,        config.DAQ_PARAMS,    config.SITE_SUPPRESS, "One-shot sync of all existing files to Sojourner (use when daq-start was not running)"),
         ('add-user',      add_user,      config.CREATE_PARAMS, config.SITE_SUPPRESS, "Add users to an existing DM experiment by badge number"),
         ('remove-user',   remove_user,   config.CREATE_PARAMS, config.SITE_SUPPRESS, "Remove users from an existing DM experiment by badge number"),
         ('list-users',    list_users,    config.CREATE_PARAMS, config.SITE_SUPPRESS, "List all users with access to a DM experiment"),
@@ -840,7 +858,7 @@ def main():
             write_sections = ('site',)
         elif cmd == 'create-manual':
             write_sections = ('manual', 'settings', 'site')
-        elif cmd in ('daq-start', 'daq-stop'):
+        elif cmd in ('daq-start', 'daq-stop', 'upload'):
             write_sections = ('local', 'settings', 'site')
         else:
             write_sections = ('settings', 'site')
