@@ -885,7 +885,7 @@ def main():
             write_sections = ('site',)
         elif cmd == 'create-manual':
             write_sections = ('manual', 'settings', 'site')
-        elif cmd in ('daq-start', 'daq-stop', 'upload'):
+        elif cmd in ('daq-start', 'daq-stop', 'upload', 'show'):
             write_sections = ('local', 'settings', 'site')
         else:
             write_sections = ('settings', 'site')

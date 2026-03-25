@@ -139,7 +139,7 @@ SECTIONS['local'] = {
     }
 
 INIT_PARAMS   = ('site',)
-SHOW_PARAMS   = ('settings',)
+SHOW_PARAMS   = ('settings', 'local')
 TAG_PARAMS    = ('settings',)
 CREATE_PARAMS = ('settings',)
 MANUAL_PARAMS = ('manual',)
