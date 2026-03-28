@@ -26,7 +26,6 @@ beamline before using any other commands::
     credentials = /home/beams/2BMB/.scheduling_credentials
     experiment-type = 2BM
     globus-message-file = message-2bm.txt
-    globus-server-top-dir = /gdata/dm/2BM
     globus-server-uuid = 054a0877-97ca-4d80-947f-47ca522b173e
     primary-beamline-contact-badge = 218262
     primary-beamline-contact-email = pshevchenko@anl.gov
