@@ -98,6 +98,7 @@ def init_PVs(args):
     user_pvs['proposal_title'] = PV(tomoscan_prefix + 'ProposalTitle')
     user_pvs['user_info_update_time'] = PV(tomoscan_prefix + 'UserInfoUpdate')
     user_pvs['experiment_date'] = PV(tomoscan_prefix + 'ExperimentYearMonth')
+    user_pvs['esaf_number'] = PV(tomoscan_prefix + 'ESAFNumber')
     return user_pvs
 
 def init(args):
@@ -167,7 +168,9 @@ def show(args):
         log.info("\tPI affiliation: %s" % (pi_affiliation))
         log.info("\tPI e-mail: %s" % (pi_email))
         log.info("\tPI badge: %s" % (pi_badge))
+        esaf_number = proposal.get('experimentId') or 'N/A'
         log.info("\tProposal GUP: %s" % (proposal_id))
+        log.info("\tESAF number: %s" % esaf_number)
         log.info("\tProposal Title: %s" % (proposal_title))
         log.info("\tProposal type: %s" % prop_type)
         log.info("\tSubmitted: %s" % submitted)
@@ -403,6 +406,41 @@ def email(args):
     args.presentation_url = tomolog_utils.get_presentation_url(gup, args.tomolog_home)
 
     log.info('Sending e-mail to users on the DM experiment: %s' % args._exp_name)
+
+    # Determine which users need to be emailed
+    all_users      = set(dm.list_users_this_dm_exp(args) or [])
+    already_emailed = dm.get_emailed_users(args._exp_name)
+    new_users      = all_users - already_emailed
+
+    if already_emailed:
+        if new_users:
+            log.info('   %d user(s) already emailed previously, %d new user(s) added:'
+                     % (len(already_emailed), len(new_users)))
+            for u in sorted(new_users):
+                user_obj = dm.get_user(u)
+                label = '{} ({})'.format(dm.make_pretty_user_name(user_obj), u) if user_obj else u
+                log.info('      %s' % label)
+            while True:
+                resp = input("Email [A]ll users / [O]nly new users / [C]ancel: ").strip().lower()
+                if resp in ('a', 'o', 'c'):
+                    break
+            if resp == 'c':
+                log.info('   Aborted.')
+                return
+            args._user_filter = list(new_users) if resp == 'o' else None
+        else:
+            log.info('   All %d user(s) have already been emailed previously.' % len(already_emailed))
+            while True:
+                resp = input("Re-send to [A]ll users / [C]ancel: ").strip().lower()
+                if resp in ('a', 'c'):
+                    break
+            if resp == 'c':
+                log.info('   Aborted.')
+                return
+            args._user_filter = None
+    else:
+        args._user_filter = None  # first time — email everyone
+
     args.msg = message.message(args)
     log.info('   Message preview:')
     log.info('   ' + '=' * 60)
@@ -415,18 +453,10 @@ def email(args):
             log.info('   %s' % line)
     log.info('   ' + '=' * 60)
 
-    users = dm.list_users_this_dm_exp(args)
-    if users:
-        emails = dm.make_user_email_list(users)
-        for contact in (args.primary_beamline_contact_email,
-                        args.secondary_beamline_contact_email):
-            if contact not in emails:
-                emails.append(contact)
-        log.info('   Recipients:')
-        for em in emails:
-            log.info('      %s' % em)
-
-    message.send_email(args)
+    sent = message.send_email(args)
+    if sent:
+        users_sent = set(args._user_filter) if args._user_filter is not None else all_users
+        dm.set_emailed_users(args._exp_name, already_emailed | users_sent)
 
 
 def _select_experiment(args, prompt_verb):
@@ -561,8 +591,10 @@ def list_users(args):
 
 def start_daq(args):
     """
-    Select a DM experiment and start automated real-time file transfer (DAQ) to Sojourner.
-    The DM system will monitor the analysis machine directory for new files and transfer them.
+    Select a DM experiment and start two automated real-time file transfers (DAQs) to Sojourner:
+      - raw data:           analysis_top_dir/<exp_name>      → DM data directory
+      - reconstructed data: analysis_top_dir/<exp_name>_rec  → DM analysis directory
+    The rec DAQ is skipped with a warning if the directory does not yet exist.
     """
     exp_name = _select_experiment(args, 'start DAQ for')
     if exp_name is None:
@@ -580,16 +612,32 @@ def stop_daq(args):
     dm.stop_daq(exp_name)
 
 
-def _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date):
+def upload(args):
+    """
+    Select a DM experiment and perform a one-shot upload of all existing files to Sojourner.
+    Use this when daq-start was not running while data was being collected.
+    Uploads from the same directories as daq-start:
+      - raw data:           analysis_top_dir/<exp_name>      → DM data directory
+      - reconstructed data: analysis_top_dir/<exp_name>_rec  → DM analysis directory
+    The rec upload is skipped with a warning if the directory does not exist.
+    """
+    exp_name = _select_experiment(args, 'upload data for')
+    if exp_name is None:
+        return
+    dm.upload(exp_name, args.analysis, args.analysis_top_dir)
+
+
+def _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date, esaf_number=''):
     """Initialize EPICS PVs, verify connectivity, and write user/experiment fields.
 
     Parameters
     ----------
-    args         : CLI args (needs tomoscan_prefix, epics_conn_timeout)
-    pi           : dict with keys firstName, lastName, institution, email, badge
-    proposal_num : str — GUP number or manual identifier
+    args           : CLI args (needs tomoscan_prefix, epics_conn_timeout)
+    pi             : dict with keys firstName, lastName, institution, email, badge
+    proposal_num   : str — GUP number or manual identifier
     proposal_title : str
-    exp_date     : str — 'YYYY-MM'
+    exp_date       : str — 'YYYY-MM'
+    esaf_number    : str — ESAF number (empty string if not available)
 
     Returns True on success, False if the IOC is unreachable.
     """
@@ -634,6 +682,8 @@ def _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date):
     log.info('Updating proposal_title EPICS PV with: %s' % proposal_title)
     user_pvs['experiment_date'].put(exp_date)
     log.info('Updating experiment_date EPICS PV with: %s' % exp_date)
+    user_pvs['esaf_number'].put(str(esaf_number))
+    log.info('Updating esaf_number EPICS PV with: %s' % esaf_number)
     return True
 
 
@@ -682,8 +732,9 @@ def tag(args):
     proposal_title = str(scheduling.get_current_proposal_title(proposal))
     start_datetime = datetime.datetime.strptime(utils.fix_iso(proposal['startTime']), '%Y-%m-%dT%H:%M:%S%z')
     exp_date       = start_datetime.strftime('%Y-%m')
+    esaf_number    = str(proposal.get('experimentId') or '')
 
-    _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date)
+    _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date, esaf_number)
 
 
 def tag_manual(args):
@@ -740,12 +791,14 @@ def tag_manual(args):
 
     # For non-zero GUP numbers try to pull full PI info from the scheduling system
     pi = None
+    esaf_number = ''
     if gup_str.isdigit() and int(gup_str) != 0:
         try:
             auth     = authorize.basic(args.credentials)
             beamtime = scheduling.get_beamtime(gup_str, auth, args)
             if beamtime is not None:
                 pi = scheduling.get_current_pi(beamtime)
+                esaf_number = str(beamtime.get('experimentId') or '')
                 log.info('Retrieved full PI info from scheduling system for GUP %s' % gup_str)
         except Exception as e:
             log.warning('Could not retrieve PI info from scheduling system: %s' % str(e))
@@ -754,7 +807,7 @@ def tag_manual(args):
         log.warning('Using PI info parsed from DM experiment name (first name, institution, email, badge will be empty)')
         pi = {'firstName': '', 'lastName': pi_last, 'institution': '', 'email': '', 'badge': ''}
 
-    _update_tag_pvs(args, pi, gup_str, proposal_title, exp_date)
+    _update_tag_pvs(args, pi, gup_str, proposal_title, exp_date, esaf_number)
 
 
 def main():
@@ -781,8 +834,9 @@ def main():
         ('create-manual', create_manual, config.MANUAL_PARAMS, config.SITE_SUPPRESS, "Create a DM experiment manually for commissioning runs"),
         ('delete',        delete,        config.CREATE_PARAMS, config.SITE_SUPPRESS, "Delete a DM experiment from Sojourner"),
         ('email',         email,         config.EMAIL_PARAMS,  config.SITE_SUPPRESS, "Send data-access email with Globus link to all users on the DM experiment"),
-        ('daq-start',     start_daq,     config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Start automated real-time file transfer (DAQ) to Sojourner"),
-        ('daq-stop',      stop_daq,      config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Stop all running file transfers for the current experiment"),
+        ('daq-start',     start_daq,     config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Monitor experiment directories and sync new files to Sojourner in real time"),
+        ('daq-stop',      stop_daq,      config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Stop real-time directory monitoring and file sync for the current experiment"),
+        ('upload',        upload,        config.DAQ_PARAMS,    config.SITE_SUPPRESS, "One-shot sync of all existing files to Sojourner (use when daq-start was not running)"),
         ('add-user',      add_user,      config.CREATE_PARAMS, config.SITE_SUPPRESS, "Add users to an existing DM experiment by badge number"),
         ('remove-user',   remove_user,   config.CREATE_PARAMS, config.SITE_SUPPRESS, "Remove users from an existing DM experiment by badge number"),
         ('list-users',    list_users,    config.CREATE_PARAMS, config.SITE_SUPPRESS, "List all users with access to a DM experiment"),
@@ -831,7 +885,7 @@ def main():
             write_sections = ('site',)
         elif cmd == 'create-manual':
             write_sections = ('manual', 'settings', 'site')
-        elif cmd in ('daq-start', 'daq-stop'):
+        elif cmd in ('daq-start', 'daq-stop', 'upload', 'show'):
             write_sections = ('local', 'settings', 'site')
         else:
             write_sections = ('settings', 'site')

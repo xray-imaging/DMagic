@@ -54,10 +54,6 @@ SECTIONS['site'] = {
         'type': str,
         'default': 'message-2bm.txt',
         'help': 'Email message template file name sent to users'},
-    'globus-server-top-dir': {
-        'type': str,
-        'default': '/gdata/dm/2BM',
-        'help': 'Path from data storage root to the beamline top directory'},
     'globus-server-uuid': {
         'type': str,
         'default': '054a0877-97ca-4d80-947f-47ca522b173e',
@@ -139,7 +135,7 @@ SECTIONS['local'] = {
     }
 
 INIT_PARAMS   = ('site',)
-SHOW_PARAMS   = ('settings',)
+SHOW_PARAMS   = ('settings', 'local')
 TAG_PARAMS    = ('settings',)
 CREATE_PARAMS = ('settings',)
 MANUAL_PARAMS = ('manual',)

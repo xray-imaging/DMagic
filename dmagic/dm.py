@@ -217,6 +217,33 @@ def get_user(username):
         return None
 
 
+def get_emailed_users(exp_name):
+    """Return the set of DM usernames already emailed for this experiment.
+
+    Reads from DM experiment metadata key 'emailedUsers'. Returns an empty
+    set if the metadata has not been set yet or on any error.
+    """
+    try:
+        exp_obj = exp_api.getExperimentByName(exp_name)
+        stored = exp_obj.get('emailedUsers', '')
+        return set(u for u in stored.split(',') if u)
+    except Exception:
+        return set()
+
+
+def set_emailed_users(exp_name, username_set):
+    """Persist the set of emailed DM usernames as experiment metadata.
+
+    Stores under key 'emailedUsers' as a comma-separated string.
+    """
+    value = ','.join(sorted(username_set))
+    try:
+        exp_api.upsertExperimentMetadata('emailedUsers', value, exp_name)
+        log.info('   Updated emailed-users record for %s' % exp_name)
+    except Exception as e:
+        log.warning('   Could not save emailed-users metadata: %s' % str(e))
+
+
 def get_experiment(exp_name):
     """Return the DM experiment object for exp_name, or None if not found."""
     try:
@@ -290,37 +317,57 @@ def make_data_link(args):
     return link
 
 
-def start_daq(exp_name, analysis, analysis_top_dir):
-    """Start a DM DAQ for exp_name, watching analysis_top_dir/exp_name on the analysis machine.
+def _start_one_daq(exp_name, dm_dir_name, task_info, current_daqs):
+    """Start a single DAQ if not already running for (exp_name, dm_dir_name).
 
-    The DM system will monitor the directory for incoming files and transfer them automatically.
-    Returns True on success, False on error.
+    Returns True if already running or successfully started, False on error.
     """
-    analysis_dir = os.path.join(analysis_top_dir.rstrip('/'), exp_name)
-    dm_dir_name  = '@{:s}:{:s}'.format(analysis, analysis_dir)
+    for d in current_daqs:
+        if (d['experimentName'] == exp_name and d['status'] == 'running'
+                and d['dataDirectory'] == dm_dir_name):
+            log.warning('   DAQ already running for %s' % dm_dir_name)
+            return True
+    log.info('   Watching directory: %s' % dm_dir_name)
+    try:
+        daq_api.startDaq(exp_name, dm_dir_name, task_info)
+        log.info('   DAQ started successfully')
+        return True
+    except Exception as e:
+        log.error('   Could not start DAQ: %s' % str(e))
+        return False
 
-    log.info('Checking for already running DAQ for experiment %s' % exp_name)
+
+def start_daq(exp_name, analysis, analysis_top_dir):
+    """Start two DM DAQs for exp_name:
+      - raw data:          analysis_top_dir/<exp_name>      → DM data directory
+      - reconstructed data: analysis_top_dir/<exp_name>_rec → DM analysis directory
+
+    The rec DAQ is skipped with a warning if the directory does not yet exist.
+    Returns True if at least the raw DAQ started, False on error.
+    """
+    log.info('Checking for already running DAQs for experiment %s' % exp_name)
     try:
         current_daqs = daq_api.listDaqs()
     except Exception as e:
         log.error('   Could not list DAQs: %s' % str(e))
         return False
 
-    for d in current_daqs:
-        if (d['experimentName'] == exp_name and d['status'] == 'running'
-                and d['dataDirectory'] == dm_dir_name):
-            log.warning('   DAQ is already running for %s. Returning.' % exp_name)
-            return True
+    top = analysis_top_dir.rstrip('/')
 
-    log.info('Starting DAQ for experiment %s' % exp_name)
-    log.info('   Watching directory: %s' % dm_dir_name)
-    try:
-        daq_api.startDaq(exp_name, dm_dir_name)
-        log.info('   DAQ started successfully')
-        return True
-    except Exception as e:
-        log.error('   Could not start DAQ: %s' % str(e))
-        return False
+    # Raw data DAQ → DM data directory
+    raw_dir = '@{:s}:{:s}'.format(analysis, os.path.join(top, exp_name))
+    log.info('Starting raw data DAQ for experiment %s' % exp_name)
+    raw_ok = _start_one_daq(exp_name, raw_dir, {}, current_daqs)
+
+    # Reconstructed data DAQ → DM analysis directory
+    rec_dir = '@{:s}:{:s}'.format(analysis, os.path.join(top, exp_name + '_rec'))
+    log.info('Starting reconstructed data DAQ for experiment %s' % exp_name)
+    rec_ok = _start_one_daq(exp_name, rec_dir, {'useAnalysisDirectory': True}, current_daqs)
+    if not rec_ok:
+        log.warning('   Rec DAQ could not be started (directory may not exist yet)')
+        log.warning('   Run "dmagic daq-start" again once reconstruction begins')
+
+    return raw_ok
 
 
 def stop_daq(exp_name):
@@ -350,3 +397,46 @@ def stop_daq(exp_name):
     else:
         log.info('   Stopped %d DAQ(s) for experiment %s' % (count, exp_name))
     return True
+
+
+def upload(exp_name, analysis, analysis_top_dir):
+    """One-shot upload of raw and reconstructed data to the DM experiment.
+
+    Uploads files that exist at the time the command is issued (unlike DAQ,
+    which monitors for new files continuously). Use this when daq-start was
+    not running while data was being collected. Uses the same source directories
+    as daq-start:
+
+      - raw data:           analysis_top_dir/<exp_name>      → DM data directory
+      - reconstructed data: analysis_top_dir/<exp_name>_rec  → DM analysis directory
+
+    The rec upload is skipped with a warning if the directory does not exist.
+    Returns True if at least the raw upload started, False on error.
+    """
+    top = analysis_top_dir.rstrip('/')
+
+    raw_dir = '@{:s}:{:s}'.format(analysis, os.path.join(top, exp_name))
+    rec_dir = '@{:s}:{:s}'.format(analysis, os.path.join(top, exp_name + '_rec'))
+
+    # Raw data → DM data directory
+    log.info('Uploading raw data for experiment %s' % exp_name)
+    log.info('   Source: %s' % raw_dir)
+    raw_ok = False
+    try:
+        daq_api.upload(exp_name, raw_dir)
+        log.info('   Raw data upload started successfully')
+        raw_ok = True
+    except Exception as e:
+        log.error('   Could not start raw data upload: %s' % str(e))
+
+    # Reconstructed data → DM analysis directory
+    log.info('Uploading reconstructed data for experiment %s' % exp_name)
+    log.info('   Source: %s' % rec_dir)
+    try:
+        daq_api.upload(exp_name, rec_dir, {'useAnalysisDirectory': True})
+        log.info('   Reconstructed data upload started successfully')
+    except Exception as e:
+        log.warning('   Could not start reconstructed data upload: %s' % str(e))
+        log.warning('   (directory may not exist yet)')
+
+    return raw_ok

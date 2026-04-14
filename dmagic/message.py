@@ -152,10 +152,15 @@ def send_email(args):
         emails = [args.secondary_beamline_contact_email]
         log.info('   *** TEST mode: sending only to secondary beamline contact')
     else:
-        users = dm.list_users_this_dm_exp(args)
-        if users is None:
-            log.error('   Cannot send email: no DM experiment found. Have you run "dmagic create" yet?')
-            return False
+        # Use pre-filtered user list if set by the caller (e.g. new-users-only mode)
+        user_filter = getattr(args, '_user_filter', None)
+        if user_filter is not None:
+            users = user_filter
+        else:
+            users = dm.list_users_this_dm_exp(args)
+            if users is None:
+                log.error('   Cannot send email: no DM experiment found. Have you run "dmagic create" yet?')
+                return False
 
         emails = dm.make_user_email_list(users)
         if not emails:

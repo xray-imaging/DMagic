@@ -26,7 +26,6 @@ beamline before using any other commands::
     credentials = /home/beams/2BMB/.scheduling_credentials
     experiment-type = 2BM
     globus-message-file = message-2bm.txt
-    globus-server-top-dir = /gdata/dm/2BM
     globus-server-uuid = 054a0877-97ca-4d80-947f-47ca522b173e
     primary-beamline-contact-badge = 218262
     primary-beamline-contact-email = pshevchenko@anl.gov
@@ -64,13 +63,18 @@ Queries the APS scheduling REST API to display the currently active experiment::
     2026-03-04 09:00:00,703 -   PI e-mail: wchen@purdue.edu
     2026-03-04 09:00:00,704 -   PI badge: 226531
     2026-03-04 09:00:00,705 -   Proposal GUP: 66310
-    2026-03-04 09:00:00,706 -   Proposal Title: In-situ visualization of ...
-    2026-03-04 09:00:00,707 -   Start date: 2026_03_03
-    2026-03-04 09:00:00,708 -   Start time: 2026-03-03 08:00:00-06:00
-    2026-03-04 09:00:00,709 -   End Time: 2026-03-05 08:00:00-06:00
-    2026-03-04 09:00:00,710 -   User email address:
-    2026-03-04 09:00:00,711 -        user1@university.edu
-    2026-03-04 09:00:00,712 -        user2@lab.gov
+    2026-03-04 09:00:00,706 -   ESAF number: 289884
+    2026-03-04 09:00:00,707 -   Proposal Title: In-situ visualization of ...
+    2026-03-04 09:00:00,708 -   Proposal type: GUP
+    2026-03-04 09:00:00,709 -   Submitted: 2025-09-15
+    2026-03-04 09:00:00,710 -   Granted shifts: 6  (scheduled: 6)
+    2026-03-04 09:00:00,711 -   Proprietary: N  |  Mail-in: N
+    2026-03-04 09:00:00,712 -   Start date: 2026_03_03
+    2026-03-04 09:00:00,713 -   Start time: 2026-03-03 08:00:00-06:00
+    2026-03-04 09:00:00,714 -   End Time: 2026-03-05 08:00:00-06:00
+    2026-03-04 09:00:00,715 -   User email address:
+    2026-03-04 09:00:00,716 -        user1@university.edu
+    2026-03-04 09:00:00,717 -        user2@lab.gov
 
 Use ``--set N`` to offset the date (negative for past, positive for future)::
 
@@ -93,6 +97,7 @@ Fetches the same scheduling data and writes it to EPICS PVs on the TomoScan IOC:
     2026-03-04 09:00:01,007 - Updating proposal_number EPICS PV with: 66310
     2026-03-04 09:00:01,008 - Updating proposal_title EPICS PV with: In-situ visualization of ...
     2026-03-04 09:00:01,009 - Updating experiment_date EPICS PV with: 2026-03
+    2026-03-04 09:00:01,010 - Updating esaf_number EPICS PV with: 289884
 
 The information will be updated in the medm screen:
 
@@ -135,6 +140,7 @@ to the EPICS PVs::
     2026-03-18 13:34:55,207 - Updating proposal_number EPICS PV with: 0
     2026-03-18 13:34:55,208 - Updating proposal_title EPICS PV with: Commissioning
     2026-03-18 13:34:55,209 - Updating experiment_date EPICS PV with: 2026-03
+    2026-03-18 13:34:55,210 - Updating esaf_number EPICS PV with:
 
 For scheduling-based experiments (non-zero GUP), full PI info is fetched from the
 scheduling system automatically. This command is also useful when you need to switch
@@ -297,9 +303,16 @@ To delete a manually created experiment directly by name (without going through 
 dmagic email
 ------------
 
-Sends a data-access notification email with a Globus link to all users on a DM
+Sends a data-access notification email with a Globus link to users on a DM
 experiment. Lists all station experiments and prompts for selection. Requires that
-``dmagic create`` or ``dmagic create-manual`` has been run first::
+``dmagic create`` or ``dmagic create-manual`` has been run first.
+
+The command tracks which users have already received the email (stored as DM experiment
+metadata). If new users were added to the experiment since the last email was sent, it
+offers to email only the new users or all users. This is useful when users are added
+mid-experiment after the initial notification has already gone out.
+
+**First-time send** (no previous email recorded)::
 
     (dm) $ dmagic email
     2026-03-04 09:05:00,000 - Found 11 DM experiment(s) for station 2BM:
@@ -310,18 +323,42 @@ experiment. Lists all station experiments and prompts for selection. Requires th
     Select experiment to email [0-10] or 'q' to quit: 0
     2026-03-04 09:05:05,000 - Sending e-mail to users on the DM experiment: 2026-03-Li-1018528
     2026-03-04 09:05:05,100 -    Message to users:
-    2026-03-04 09:05:05,200 -    *** All, ...
+    2026-03-04 09:05:05,200 -    *** Subject: Important information for APS experiment ...
+    ...
     Send email to users?
-       *** Yes or No (Y/N): Y
+       *** Yes / No / Test (Y/N/T): Y
     2026-03-04 09:05:06,000 -    Sending informational message to user1@university.edu
     2026-03-04 09:05:06,100 -    Sending informational message to pshevchenko@anl.gov
+
+**Re-send when new users were added**::
+
+    (dm) $ dmagic email
+    ...
+    Select experiment to email [0-10] or 'q' to quit: 0
+    2026-03-04 10:00:00,000 -    3 user(s) already emailed previously, 1 new user(s) added:
+    2026-03-04 10:00:00,100 -       Sarah D. Boyer (d313356)
+    Email [A]ll users / [O]nly new users / [C]ancel: O
+    Send email to users?
+       *** Yes / No / Test (Y/N/T): Y
+    2026-03-04 10:00:05,000 -    Sending informational message to newuser@university.edu
+    2026-03-04 10:00:05,100 -    Sending informational message to pshevchenko@anl.gov
+
+**Re-send when all users already emailed**::
+
+    (dm) $ dmagic email
+    ...
+    Select experiment to email [0-10] or 'q' to quit: 0
+    2026-03-04 10:00:00,000 -    All 4 user(s) have already been emailed previously.
+    Re-send to [A]ll users / [C]ancel: A
+    2026-03-04 10:00:05,000 -    Sending informational message to user1@university.edu
+    ...
 
 ::
 
     (dm) $ dmagic email -h
     usage: dmagic email [-h] [--config FILE]
 
-    Send data-access email with Globus link to all users on the DM experiment
+    Send data-access email with Globus link to users on the DM experiment
 
     options:
       -h, --help     show this help message and exit
@@ -330,9 +367,18 @@ experiment. Lists all station experiments and prompts for selection. Requires th
 dmagic daq-start
 ----------------
 
-Starts automated real-time file transfer (DAQ) to Sojourner. The DM system monitors
-the configured directory on the analysis machine for new files and transfers them
-continuously. Lists all station experiments and prompts for selection::
+Starts real-time directory monitoring and syncs new files to Sojourner continuously.
+Only files created or modified **after** this command is issued are transferred.
+Two DAQ processes are started for each experiment:
+
+- **Raw data**: ``{analysis-top-dir}/{exp-name}`` on the analysis machine → DM ``data/`` directory
+- **Reconstructed data**: ``{analysis-top-dir}/{exp-name}_rec`` → DM ``analysis/`` directory
+
+The rec DAQ is skipped with a warning if the ``_rec`` directory does not yet exist —
+run ``dmagic daq-start`` again once reconstruction begins to pick it up.
+If a DAQ is already running for a given directory it is left untouched.
+
+::
 
     (dm) $ dmagic daq-start
     2026-03-04 09:10:00,000 - Found 11 DM experiment(s) for station 2BM:
@@ -341,16 +387,17 @@ continuously. Lists all station experiments and prompts for selection::
       ...
 
     Select experiment to start DAQ for [0-10] or 'q' to quit: 1
-    2026-03-04 09:10:05,000 - Checking for already running DAQ for experiment 2026-03-Li-1012039
-    2026-03-04 09:10:05,100 - Starting DAQ for experiment 2026-03-Li-1012039
-    2026-03-04 09:10:05,101 -    Watching directory: @tomodata3:/data3/2BM/2026-03-Li-1012039
-    2026-03-04 09:10:06,000 -    DAQ started successfully
+    2026-03-04 09:10:05,000 - Starting raw data DAQ for experiment 2026-03-Li-1012039
+    2026-03-04 09:10:05,100 -    Watching directory: @tomodata3:/data3/2BM/2026-03-Li-1012039
+    2026-03-04 09:10:05,200 -    DAQ started successfully
+    2026-03-04 09:10:05,300 - Starting reconstructed data DAQ for experiment 2026-03-Li-1012039
+    2026-03-04 09:10:05,400 -    Watching directory: @tomodata3:/data3/2BM/2026-03-Li-1012039_rec
+    2026-03-04 09:10:05,500 -    DAQ started successfully
 
 The ``analysis`` and ``analysis-top-dir`` settings in ``~/dmagic.conf`` control which
-host and directory the DM agent monitors. The monitored path is
-``{analysis-top-dir}/{experiment-name}`` on the ``analysis`` host. For best performance,
-point ``analysis`` at the storage node (e.g. ``tomodata3``) that physically hosts the
-data, rather than a compute node that accesses it via NFS.
+host and directories are monitored. For best performance, point ``analysis`` at the
+storage node (e.g. ``tomodata3``) that physically hosts the data rather than a compute
+node that accesses it via NFS.
 
 ::
 
@@ -358,7 +405,7 @@ data, rather than a compute node that accesses it via NFS.
     usage: dmagic daq-start [-h] [--analysis ANALYSIS] [--analysis-top-dir ANALYSIS_TOP_DIR]
                             [--config FILE]
 
-    Start automated real-time file transfer (DAQ) to Sojourner
+    Monitor experiment directories and sync new files to Sojourner in real time
 
     options:
       -h, --help            show this help message and exit
@@ -370,8 +417,7 @@ data, rather than a compute node that accesses it via NFS.
 dmagic daq-stop
 ---------------
 
-Stops all running DAQs for the selected experiment. Lists all station experiments and
-prompts for selection::
+Stops all running DAQ processes (both raw and rec) for the selected experiment::
 
     (dm) $ dmagic daq-stop
     2026-03-04 18:00:00,000 - Found 11 DM experiment(s) for station 2BM:
@@ -382,7 +428,8 @@ prompts for selection::
     Select experiment to stop DAQ for [0-10] or 'q' to quit: 1
     2026-03-04 18:00:05,000 - Stopping all DM DAQs for experiment 2026-03-Li-1012039
     2026-03-04 18:00:05,100 -    Found running DAQ. Stopping now.
-    2026-03-04 18:00:06,000 -    Stopped 1 DAQ(s) for experiment 2026-03-Li-1012039
+    2026-03-04 18:00:05,200 -    Found running DAQ. Stopping now.
+    2026-03-04 18:00:06,000 -    Stopped 2 DAQ(s) for experiment 2026-03-Li-1012039
 
 ::
 
@@ -390,7 +437,52 @@ prompts for selection::
     usage: dmagic daq-stop [-h] [--analysis ANALYSIS] [--analysis-top-dir ANALYSIS_TOP_DIR]
                            [--config FILE]
 
-    Stop all running file transfers for the current experiment
+    Stop real-time directory monitoring and file sync for the current experiment
+
+    options:
+      -h, --help            show this help message and exit
+      --analysis ANALYSIS   Hostname of the data analysis computer (default: tomodata3)
+      --analysis-top-dir ANALYSIS_TOP_DIR
+                            Top-level data directory on the analysis computer (default: /data3/2BM/)
+      --config FILE         File name of configuration (default: /home/beams/2BMB/dmagic.conf)
+
+dmagic upload
+-------------
+
+Performs a one-shot sync of **all files that currently exist** in the experiment
+directories to Sojourner. Use this when ``dmagic daq-start`` was not running while
+data was being collected. Unlike ``daq-start``, which monitors for new files
+continuously, ``upload`` transfers everything present at the moment the command is
+issued and then exits.
+
+The same two directories as ``daq-start`` are used:
+
+- **Raw data**: ``{analysis-top-dir}/{exp-name}`` → DM ``data/`` directory
+- **Reconstructed data**: ``{analysis-top-dir}/{exp-name}_rec`` → DM ``analysis/`` directory
+
+The rec upload is skipped with a warning if the ``_rec`` directory does not exist::
+
+    (dm) $ dmagic upload
+    2026-03-04 10:00:00,000 - Found 11 DM experiment(s) for station 2BM:
+      [ 0] 2026-03-Li-1018528                   2026-03-11 to 2026-03-14  Investigation of ...
+      [ 1] 2026-03-Li-1012039                   2026-03-03 to 2026-03-05  Investigation of ...
+      ...
+
+    Select experiment to upload data for [0-10] or 'q' to quit: 1
+    2026-03-04 10:00:05,000 - Uploading raw data for experiment 2026-03-Li-1012039
+    2026-03-04 10:00:05,100 -    Source: @tomodata3:/data3/2BM/2026-03-Li-1012039
+    2026-03-04 10:00:05,200 -    Raw data upload started successfully
+    2026-03-04 10:00:05,300 - Uploading reconstructed data for experiment 2026-03-Li-1012039
+    2026-03-04 10:00:05,400 -    Source: @tomodata3:/data3/2BM/2026-03-Li-1012039_rec
+    2026-03-04 10:00:05,500 -    Reconstructed data upload started successfully
+
+::
+
+    (dm) $ dmagic upload -h
+    usage: dmagic upload [-h] [--analysis ANALYSIS] [--analysis-top-dir ANALYSIS_TOP_DIR]
+                         [--config FILE]
+
+    One-shot sync of all existing files to Sojourner (use when daq-start was not running)
 
     options:
       -h, --help            show this help message and exit
@@ -531,8 +623,10 @@ Command Reference
                      Create a DM experiment manually for commissioning runs
         delete       Delete a DM experiment from Sojourner
         email        Send data-access email with Globus link to all users on the DM experiment
-        daq-start    Start automated real-time file transfer (DAQ) to Sojourner
-        daq-stop     Stop all running file transfers for the current experiment
+        daq-start    Monitor experiment directories and sync new files to Sojourner in real time
+        daq-stop     Stop real-time directory monitoring and file sync for the current experiment
+        upload       One-shot sync of all existing files to Sojourner (use when daq-start was not running)
         add-user     Add users to an existing DM experiment by badge number
         remove-user  Remove users from an existing DM experiment by badge number
+        upload       One-shot sync of all existing files to Sojourner (use when daq-start was not running)
         list-users   List all users with access to a DM experiment
