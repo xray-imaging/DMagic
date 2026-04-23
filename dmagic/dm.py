@@ -11,17 +11,40 @@ __copyright__ = "Copyright (c) 2020, UChicago Argonne, LLC."
 __docformat__ = 'restructuredtext en'
 
 try:
-    from dm import ExperimentDsApi, UserDsApi, ExperimentDaqApi
+    from dm import ExperimentDsApi, UserDsApi, ExperimentDaqApi, EsafApsDbApi
     from dm.common.exceptions.objectAlreadyExists import ObjectAlreadyExists
     exp_api  = ExperimentDsApi()
     user_api = UserDsApi()
     daq_api  = ExperimentDaqApi()
+    esaf_api = EsafApsDbApi()
     oee      = ObjectAlreadyExists
     _DM_AVAILABLE = True
 except ImportError:
-    exp_api = user_api = daq_api = oee = None
+    exp_api = user_api = daq_api = esaf_api = oee = None
     _DM_AVAILABLE = False
     log.warning('DM SDK not available: create, delete, email, add-user, remove-user, daq-start, daq-stop commands will not work')
+
+
+def get_esaf_users(esaf_id):
+    """Return set of 'd+badge' strings for users listed in the ESAF.
+
+    Uses EsafApsDbApi.getStationEsafById() with the station name from the
+    DM_STATION_NAME environment variable (default '2BM').
+    Returns an empty set if esaf_id is empty, DM is unavailable, or the
+    call fails (e.g. session expired or access denied).
+    """
+    if not esaf_id or not _DM_AVAILABLE:
+        return set()
+    try:
+        station = os.environ.get('DM_STATION_NAME', '2BM')
+        esaf = esaf_api.getStationEsafById(station, int(esaf_id))
+        users = esaf.get('experimentUsers', [])
+        badges = {'d' + str(u['badge']) for u in users if u.get('badge')}
+        log.info('   Found %d user(s) in ESAF %s' % (len(badges), esaf_id))
+        return badges
+    except Exception as e:
+        log.warning('Could not retrieve ESAF users for ESAF %s: %s' % (esaf_id, str(e)))
+        return set()
 
 
 def make_experiment_name(args):
@@ -35,27 +58,32 @@ def make_experiment_name(args):
 
 
 def make_dm_username_list(args):
-    """Make a list of DM usernames 'd+badge#' from the current proposal (GUP number).
+    """Make DM username sets from the proposal (GUP) and ESAF user lists.
 
-    Returns None if the beamtime cannot be found in the scheduling system.
+    Returns (gup_set, esaf_set) where:
+      gup_set  — 'd+badge' strings from proposal experimenters + beamline contacts
+      esaf_set — 'd+badge' strings from ESAF experimenters NOT already in gup_set
+    Returns (None, set()) if the beamtime cannot be found in the scheduling system.
     """
     log.info('Making a list of DM system usernames from target proposal')
     auth = authorize.basic(args.credentials)
     if auth is None:
-        return None
+        return None, set()
     target_prop = scheduling.get_beamtime(str(args.gup_number), auth, args)
     if target_prop is None:
-        return None
+        return None, set()
     users = target_prop['beamtime']['proposal']['experimenters']
     log.info('   Adding the primary beamline contact')
-    user_ids = {'d' + str(args.primary_beamline_contact_badge)}
+    gup_set = {'d' + str(args.primary_beamline_contact_badge)}
     log.info('   Adding the secondary beamline contact')
-    user_ids.add('d' + str(args.secondary_beamline_contact_badge))
+    gup_set.add('d' + str(args.secondary_beamline_contact_badge))
     for u in users:
-        log.info('   Adding user {0}, {1}, badge {2}'.format(
+        log.info('   Adding GUP user {0}, {1}, badge {2}'.format(
                     u['lastName'], u['firstName'], u['badge']))
-        user_ids.add('d' + str(u['badge']))
-    return user_ids
+        gup_set.add('d' + str(u['badge']))
+    esaf_number = getattr(args, 'esaf_number', '') or ''
+    esaf_set = get_esaf_users(esaf_number) - gup_set
+    return gup_set, esaf_set
 
 
 def make_username_list(args):
