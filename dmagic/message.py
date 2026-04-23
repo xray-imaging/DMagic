@@ -172,13 +172,19 @@ def send_email(args):
                 emails.append(contact)
 
     s = smtplib.SMTP('mailhost.anl.gov')
+    any_sent = False
     for em in emails:
         if args.msg['To'] is None:
             args.msg['To'] = em
         else:
             args.msg.replace_header('To', em)
         log.info('   Sending informational message to {:s}'.format(em))
-        s.send_message(args.msg)
+        try:
+            s.send_message(args.msg)
+            any_sent = True
+        except smtplib.SMTPRecipientsRefused as e:
+            for addr, (code, msg) in e.recipients.items():
+                log.warning('   Skipping {:s}: {:d} {:s}'.format(addr, code, msg.decode()))
     s.quit()
 
-    return True
+    return any_sent

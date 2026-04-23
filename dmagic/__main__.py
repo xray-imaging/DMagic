@@ -182,6 +182,12 @@ def show(args):
         log.info("\tUser email address: ")
         for ue in proposal_user_emails:
             log.info("\t\t %s" % (ue))
+        if esaf_number and esaf_number != 'N/A':
+            esaf_users = dm.get_esaf_users(esaf_number)
+            if esaf_users:
+                log.esaf('\tESAF %s users (not in proposal):' % esaf_number)
+                for u in sorted(esaf_users):
+                    log.esaf('\t\t %s' % u)
     else:
         time_now = datetime.datetime.now().astimezone() + dt.timedelta(args.set)
         log.warning('No proposal run on %s during %s' % (time_now, run))
@@ -254,17 +260,24 @@ def create(args):
     args.pi_badge       = bt['pi_badge']
     args.gup_number     = bt['gup_number']
     args.gup_title      = bt['gup_title']
+    args.esaf_number    = bt.get('esaf_number', '')
 
-    user_list = dm.make_dm_username_list(args)
-    exp_name  = dm.make_experiment_name(args)
-    if user_list is None:
+    gup_users, esaf_users = dm.make_dm_username_list(args)
+    exp_name = dm.make_experiment_name(args)
+    if gup_users is None:
         log.warning("GUP %s not found in the scheduling system." % args.gup_number)
         log.warning("Experiment '%s' will be created but no users will be added." % exp_name)
         log.info("To add a user afterwards run: dmagic add-user --badge <badge#>")
-        user_list = set()
+        args._user_list = set()
     else:
-        log.info('Adding users from the current proposal to the DM experiment.')
-    args._user_list = user_list
+        log.info('Users from proposal (GUP %s):' % args.gup_number)
+        for u in sorted(gup_users):
+            log.info('   %s' % u)
+        if esaf_users:
+            log.esaf('Users from ESAF %s (not in proposal):' % args.esaf_number)
+            for u in sorted(esaf_users):
+                log.esaf('   %s' % u)
+        args._user_list = gup_users | esaf_users
     _finish_create(args, exp_name)
 
 

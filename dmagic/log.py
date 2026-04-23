@@ -64,6 +64,9 @@ def error(msg):
 def warning(msg):
     logger.warning(msg)
 
+def esaf(msg):
+    logger.info('\033[96m' + msg + '\033[0m')
+
 def setup_custom_logger(lfname, stream_to_console=True):
     fHandler = logging.FileHandler(lfname)
     logger.setLevel(logging.DEBUG)
@@ -87,6 +90,8 @@ class ColoredLogFormatter(logging.Formatter):
     
     
     def formatMessage(self,record):
+        if record.message.startswith('\033['):
+            return super().formatMessage(record)
         if record.levelname=='INFO':
             record.message = self.__GREEN + record.message + self.__ENDC
         elif record.levelname == 'WARNING':

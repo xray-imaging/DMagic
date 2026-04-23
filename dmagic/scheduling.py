@@ -216,6 +216,7 @@ def list_beamtimes(auth, args):
             'start_time':     item['startTime'],
             'end_time':       item['endTime'],
             'run_name':       run,
+            'esaf_number':    str(item.get('experimentId') or ''),
         })
 
     return beamtimes
