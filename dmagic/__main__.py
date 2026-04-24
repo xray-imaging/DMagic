@@ -99,6 +99,7 @@ def init_PVs(args):
     user_pvs['user_info_update_time'] = PV(tomoscan_prefix + 'UserInfoUpdate')
     user_pvs['experiment_date'] = PV(tomoscan_prefix + 'ExperimentYearMonth')
     user_pvs['esaf_number'] = PV(tomoscan_prefix + 'ESAFNumber')
+    user_pvs['esaf_doi']    = PV(tomoscan_prefix + 'ESAFDOINumber')
     return user_pvs
 
 def init(args):
@@ -171,6 +172,10 @@ def show(args):
         esaf_number = proposal.get('experimentId') or 'N/A'
         log.info("\tProposal GUP: %s" % (proposal_id))
         log.info("\tESAF number: %s" % esaf_number)
+        if esaf_number and esaf_number != 'N/A':
+            esaf_doi = dm.get_esaf_doi(esaf_number)
+            if esaf_doi:
+                log.info("\tESAF DOI: %s" % esaf_doi)
         log.info("\tProposal Title: %s" % (proposal_title))
         log.info("\tProposal type: %s" % prop_type)
         log.info("\tSubmitted: %s" % submitted)
@@ -640,7 +645,7 @@ def upload(args):
     dm.upload(exp_name, args.analysis, args.analysis_top_dir)
 
 
-def _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date, esaf_number=''):
+def _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date, esaf_number='', esaf_doi=''):
     """Initialize EPICS PVs, verify connectivity, and write user/experiment fields.
 
     Parameters
@@ -697,6 +702,11 @@ def _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date, esaf_numbe
     log.info('Updating experiment_date EPICS PV with: %s' % exp_date)
     user_pvs['esaf_number'].put(str(esaf_number))
     log.info('Updating esaf_number EPICS PV with: %s' % esaf_number)
+    try:
+        user_pvs['esaf_doi'].put(str(esaf_doi or '').encode('utf-8'))
+        log.info('Updating esaf_doi EPICS PV with: %s' % esaf_doi)
+    except Exception as e:
+        log.warning('Could not update esaf_doi EPICS PV: %s' % str(e))
     return True
 
 
@@ -746,8 +756,9 @@ def tag(args):
     start_datetime = datetime.datetime.strptime(utils.fix_iso(proposal['startTime']), '%Y-%m-%dT%H:%M:%S%z')
     exp_date       = start_datetime.strftime('%Y-%m')
     esaf_number    = str(proposal.get('experimentId') or '')
+    esaf_doi       = dm.get_esaf_doi(esaf_number)
 
-    _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date, esaf_number)
+    _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date, esaf_number, esaf_doi or '')
 
 
 def tag_manual(args):
@@ -820,7 +831,8 @@ def tag_manual(args):
         log.warning('Using PI info parsed from DM experiment name (first name, institution, email, badge will be empty)')
         pi = {'firstName': '', 'lastName': pi_last, 'institution': '', 'email': '', 'badge': ''}
 
-    _update_tag_pvs(args, pi, gup_str, proposal_title, exp_date, esaf_number)
+    esaf_doi = dm.get_esaf_doi(esaf_number)
+    _update_tag_pvs(args, pi, gup_str, proposal_title, exp_date, esaf_number, esaf_doi or '')
 
 
 def main():

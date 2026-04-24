@@ -47,6 +47,19 @@ def get_esaf_users(esaf_id):
         return set()
 
 
+def get_esaf_doi(esaf_id):
+    """Return the DOI string for the ESAF, or None if unavailable."""
+    if not esaf_id or not _DM_AVAILABLE:
+        return None
+    try:
+        station = os.environ.get('DM_STATION_NAME', '2BM')
+        esaf = esaf_api.getStationEsafById(station, int(esaf_id))
+        return esaf.get('doi') or None
+    except Exception as e:
+        log.warning('Could not retrieve DOI for ESAF %s: %s' % (esaf_id, str(e)))
+        return None
+
+
 def make_experiment_name(args):
     """Build the DM experiment name from proposal metadata.
 
