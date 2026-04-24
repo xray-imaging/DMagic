@@ -703,11 +703,10 @@ def _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date, esaf_numbe
     user_pvs['esaf_number'].put(str(esaf_number))
     log.info('Updating esaf_number EPICS PV with: %s' % esaf_number)
     try:
-        user_pvs['esaf_doi'].put(str(esaf_doi or ''))
+        user_pvs['esaf_doi'].put(str(esaf_doi or '').encode('utf-8'))
         log.info('Updating esaf_doi EPICS PV with: %s' % esaf_doi)
     except Exception as e:
         log.warning('Could not update esaf_doi EPICS PV: %s' % str(e))
-        log.warning('   ESAFDOINumber PV must be a char waveform (FTVL=CHAR, NELM>=80) to hold a full URL')
     return True
 
 
