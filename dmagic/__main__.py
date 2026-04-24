@@ -171,6 +171,10 @@ def show(args):
         esaf_number = proposal.get('experimentId') or 'N/A'
         log.info("\tProposal GUP: %s" % (proposal_id))
         log.info("\tESAF number: %s" % esaf_number)
+        if esaf_number and esaf_number != 'N/A':
+            esaf_doi = dm.get_esaf_doi(esaf_number)
+            if esaf_doi:
+                log.info("\tESAF DOI: %s" % esaf_doi)
         log.info("\tProposal Title: %s" % (proposal_title))
         log.info("\tProposal type: %s" % prop_type)
         log.info("\tSubmitted: %s" % submitted)
