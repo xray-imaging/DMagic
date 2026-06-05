@@ -170,10 +170,11 @@ DM Experiment Management
 =========================
 
 The ``create``, ``create-manual``, ``delete``, ``email``, ``daq-start``, ``daq-stop``,
-``add-user``, ``remove-user``, and ``list-users`` commands integrate with the APS Data Management (DM) system (Sojourner)
-to manage experiment records, user data access via Globus, and automated file transfer. These
-commands require the ``[site]`` section of ``~/dmagic.conf`` to be correctly configured
-(see `Initialization`_ above). The ``daq-start`` and ``daq-stop`` commands additionally
+``add-user``, ``remove-user``, ``list-users``, and ``list-esafs`` commands integrate
+with the APS Data Management (DM) system (Sojourner) to manage experiment records,
+user data access via Globus, automated file transfer, and ESAF queries. These commands
+require the ``[site]`` section of ``~/dmagic.conf`` to be correctly configured (see
+`Initialization`_ above). The ``daq-start`` and ``daq-stop`` commands additionally
 require the ``[local]`` section to be configured with the correct analysis hostname and
 data directory.
 
@@ -617,6 +618,44 @@ name, and email address::
       --set SET      Number of +/- days offset from today for past/future user groups (default: 0)
       --config FILE  File name of configuration (default: /home/beams/2BMB/dmagic.conf)
 
+dmagic list-esafs
+-----------------
+
+Lists ESAFs for the beamline station that fall in a given date range. Wraps
+``EsafApsDbApi.listStationEsafsByDateRange``. The station is taken from the
+``DM_STATION_NAME`` environment variable, falling back to the ``experiment-type``
+value in ``~/dmagic.conf``. If no dates are provided, the range defaults to
+**first day of the current month → today**::
+
+    (dm) $ dmagic list-esafs --start-date 2025-01-01 --end-date 2025-12-31 | head
+    2026-06-05 13:51:08,092 - Listing ESAFs for station 2BM from 2025-01-01 to 2025-12-31
+    2026-06-05 13:51:08,548 -    Found 8 ESAF(s)
+    2026-06-05 13:51:08,548 -    esafId=276896 status=Approved start=2025-03-25 08:00:00 end=2025-05-01 00:00:00 title=2-BM Operations Commissioning
+    2026-06-05 13:51:08,548 -    esafId=278851 status=Approved start=2025-04-10 00:00:00 end=2025-05-01 00:00:00 title=2-BM Technical Commissioning
+    2026-06-05 13:51:08,549 -    esafId=279513 status=Pending  start=2025-06-03 08:00:00 end=2025-08-06 00:00:00 title=2-BM Technical Commissioning
+    ...
+
+.. note::
+    This command requires a DM Python SDK that exposes
+    ``EsafApsDbApi.listStationEsafsByDateRange`` — available in the current production
+    install at ``/home/dm_bm/production/lib/python``. On older DM SDKs the command logs
+    an error and returns no ESAFs. Confirm the method is available with::
+
+        $ python -c "from dm import EsafApsDbApi; print('listStationEsafsByDateRange' in dir(EsafApsDbApi))"
+
+::
+
+    (dm) $ dmagic list-esafs -h
+    usage: dmagic list-esafs [-h] [--start-date START_DATE] [--end-date END_DATE] [--config FILE]
+
+    List ESAFs for the beamline station in a date range
+
+    options:
+      -h, --help               show this help message and exit
+      --start-date START_DATE  Range start date (YYYY-MM-DD); defaults to first day of current month (default: )
+      --end-date END_DATE      Range end date (YYYY-MM-DD); defaults to today (default: )
+      --config FILE            File name of configuration (default: /home/beams/2BMB/dmagic.conf)
+
 Command Reference
 =================
 
@@ -645,5 +684,5 @@ Command Reference
         upload       One-shot sync of all existing files to Sojourner (use when daq-start was not running)
         add-user     Add users to an existing DM experiment by badge number
         remove-user  Remove users from an existing DM experiment by badge number
-        upload       One-shot sync of all existing files to Sojourner (use when daq-start was not running)
         list-users   List all users with access to a DM experiment
+        list-esafs   List ESAFs for the beamline station in a date range

@@ -72,6 +72,16 @@ Key Commands
 - dmagic remove-user   : Removes one or more users from an existing DM experiment by
                          badge number. Shows the current user list before prompting.
 
+- dmagic list-users    : Lists all users currently granted access to a DM experiment,
+                         including their DM username, full name, and email address.
+
+- dmagic list-esafs    : Lists ESAFs for the beamline station in a date range using the
+                         DM EsafApsDbApi. Options:
+                           --start-date  range start in yyyy-mm-dd format
+                                         (default: first day of current month)
+                           --end-date    range end in yyyy-mm-dd format (default: today)
+                         Output: one line per ESAF with id, status, start/end dates, title.
+
 How It Works
 ------------
 
