@@ -54,8 +54,10 @@ Our storage capabilities are limited. It will be deleted permanently after that 
       <a href="https://tomopy.readthedocs.io/en/stable/">tomopy</a></li>
   <li>GPU based reconstruction software:
       <a href="https://tomocupy.readthedocs.io/en/latest/">tomocupy</a></li>
-  <li>Interesting dataset? Submit a pull request at
-      <a href="https://tomobank.readthedocs.io">tomobank.readthedocs.io</a></li>
+  <li>Interesting or challenging dataset? To make it available to the scientific community
+      and help improve our reconstruction software, you can share it at
+      <a href="https://tomobank.readthedocs.io">tomobank.readthedocs.io</a> &mdash;
+      just email <a href="mailto:tomobank@anl.gov">tomobank@anl.gov</a></li>
 </ul>
 
 <p>

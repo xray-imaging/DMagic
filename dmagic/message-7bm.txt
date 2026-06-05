@@ -19,8 +19,7 @@ argos (https://github.com/titusjan/argos)
 To run the reconstruction script you need to install tomopy:
 https://tomocupy.readthedocs.io/en/latest/
 
-If you have some interesting/challenging data set that you would like to share with the community submit a pull request at:
-https://tomobank.readthedocs.io
+Interesting or challenging dataset? To make it available to the scientific community and help improve our reconstruction software, you can share it at tomobank.readthedocs.io — just email tomobank@anl.gov
 
 Remember to send references to any papers written using data from APS to Alan at akastengren@anl.gov and Xiaoyang and lxiaoyang@anl.gov for inclusion in the APS Publications database.  Information on the database and the required acknowledgement statement for the use of APS can be found at https://www.aps.anl.gov/Science/Publications .
 =======

@@ -60,6 +60,26 @@ def get_esaf_doi(esaf_id):
         return None
 
 
+def list_esafs(start_date, end_date, station=None):
+    """Return ESAFs for the station in [start_date, end_date].
+
+    Wraps EsafApsDbApi.listStationEsafsByDateRange(). Dates are YYYY-MM-DD
+    strings. station defaults to DM_STATION_NAME env var (or '2BM').
+    Returns [] if DM is unavailable or the call fails.
+    """
+    if not _DM_AVAILABLE:
+        return []
+    if station is None:
+        station = os.environ.get('DM_STATION_NAME', '2BM')
+    try:
+        result = esaf_api.listStationEsafsByDateRange(
+            station, startDate=start_date, endDate=end_date)
+        return list(result) if result else []
+    except Exception as e:
+        log.error('Could not list ESAFs for station %s: %s' % (station, str(e)))
+        return []
+
+
 def make_experiment_name(args):
     """Build the DM experiment name from proposal metadata.
 
@@ -198,13 +218,13 @@ def add_users(exp_obj, username_list):
             log.error('   Could not find user {:s}: {:s}'.format(uname, str(e)))
             continue
         if uname in existing_unames:
-            log.warning('   User {:s} is already on the experiment'.format(
-                        make_pretty_user_name(user_obj)))
+            log.warning('   User {:s} ({:s}) is already on the experiment'.format(
+                        make_pretty_user_name(user_obj), uname))
             continue
         try:
             user_api.addUserExperimentRole(uname, 'User', exp_obj['name'])
-            log.info('   Added user {:s} to the DM experiment'.format(
-                        make_pretty_user_name(user_obj)))
+            log.info('   Added user {:s} ({:s}) to the DM experiment'.format(
+                        make_pretty_user_name(user_obj), uname))
         except Exception as e:
             log.error('   Could not add user {:s}: {:s}'.format(uname, str(e)))
 
@@ -219,8 +239,8 @@ def remove_users(exp_name, username_list):
             continue
         try:
             user_api.deleteUserExperimentRole(uname, 'User', exp_name)
-            log.info('   Removed user {:s} from the DM experiment'.format(
-                        make_pretty_user_name(user_obj)))
+            log.info('   Removed user {:s} ({:s}) from the DM experiment'.format(
+                        make_pretty_user_name(user_obj), uname))
         except Exception as e:
             log.error('   Could not remove user {:s}: {:s}'.format(uname, str(e)))
 

@@ -124,10 +124,8 @@ def show(args):
     output = scheduling.beamtime_requests(run, auth, args)
     try:
         proposals = output[0]['activities']
-        # pprint.pprint(proposals, compact=True)
-    except IndexError:
-    # if not proposals:
-        log.error('No valid current experimentxxx')
+    except (IndexError, TypeError):
+        log.error('No proposals found for run %s — the run may not exist yet or no beamtime is scheduled' % run)
         return None
     try:
         log.error(proposals['message'])
@@ -190,12 +188,38 @@ def show(args):
         if esaf_number and esaf_number != 'N/A':
             esaf_users = dm.get_esaf_users(esaf_number)
             if esaf_users:
-                log.esaf('\tESAF %s users (not in proposal):' % esaf_number)
+                log.esaf('\tESAF %s users:' % esaf_number)
                 for u in sorted(esaf_users):
                     log.esaf('\t\t %s' % u)
     else:
         time_now = datetime.datetime.now().astimezone() + dt.timedelta(args.set)
         log.warning('No proposal run on %s during %s' % (time_now, run))
+
+
+def list_esafs(args):
+    """List ESAFs for the beamline station in [--start-date, --end-date].
+
+    Defaults: start-date = first day of current month, end-date = today.
+    Station comes from DM_STATION_NAME env var, falling back to
+    args.experiment_type from the config file.
+    """
+    today = datetime.date.today()
+    start = args.start_date or today.replace(day=1).isoformat()
+    end   = args.end_date   or today.isoformat()
+    station = os.environ.get('DM_STATION_NAME') or args.experiment_type
+    log.info('Listing ESAFs for station %s from %s to %s' % (station, start, end))
+    rows = dm.list_esafs(start, end, station=station)
+    if not rows:
+        log.info('   No ESAFs found')
+        return
+    log.info('   Found %d ESAF(s)' % len(rows))
+    for e in rows:
+        log.info('   esafId=%s status=%s start=%s end=%s title=%s' % (
+            e.get('esafId', '?'),
+            e.get('esafStatus', '?'),
+            e.get('experimentStartDate', '?'),
+            e.get('experimentEndDate', '?'),
+            e.get('esafTitle', '')))
 
 
 def _finish_create(args, exp_name):
@@ -300,17 +324,36 @@ def create_manual(args):
             return
     else:
         ref_date = now
-    args.year_month     = ref_date.strftime('%Y-%m')
+
+    if args.start:
+        try:
+            start_date = datetime.datetime.strptime(args.start, '%Y-%m-%d')
+        except ValueError:
+            log.error("Invalid --start '%s': expected format is yyyy-mm-dd (e.g. 2026-05-01)" % args.start)
+            return
+    else:
+        start_date = ref_date.replace(day=1)
+
+    if args.end:
+        try:
+            end_date = datetime.datetime.strptime(args.end, '%Y-%m-%d')
+        except ValueError:
+            log.error("Invalid --end '%s': expected format is yyyy-mm-dd (e.g. 2026-05-14)" % args.end)
+            return
+    else:
+        end_date = start_date + dt.timedelta(days=14)
+
+    args.year_month     = start_date.strftime('%Y-%m')
     args.pi_last_name   = args.name
     args.pi_first_name  = args.first_name
     args.pi_institution = args.institution
     args.pi_email       = args.email
     args.pi_badge       = ''
-    args.gup_number     = '0'
+    args.gup_number     = str(args.gup)
     args.gup_title      = args.title
     args.manual         = True
-    args.manual_start   = ref_date.strftime('%d-%b-%y')
-    args.manual_end     = (ref_date + dt.timedelta(days=14)).strftime('%d-%b-%y')
+    args.manual_start   = start_date.strftime('%d-%b-%y')
+    args.manual_end     = end_date.strftime('%d-%b-%y')
     log.info("Manual experiment: %s-%s, title: %s" % (
               args.year_month, args.pi_last_name, args.gup_title))
 
@@ -865,6 +908,7 @@ def main():
         ('add-user',      add_user,      config.CREATE_PARAMS, config.SITE_SUPPRESS, "Add users to an existing DM experiment by badge number"),
         ('remove-user',   remove_user,   config.CREATE_PARAMS, config.SITE_SUPPRESS, "Remove users from an existing DM experiment by badge number"),
         ('list-users',    list_users,    config.CREATE_PARAMS, config.SITE_SUPPRESS, "List all users with access to a DM experiment"),
+        ('list-esafs',    list_esafs,    config.LIST_ESAFS_PARAMS, config.SITE_SUPPRESS, "List ESAFs for the beamline station in a date range"),
     ]
 
     subparsers = parser.add_subparsers(title="Commands", metavar='')
@@ -914,6 +958,8 @@ def main():
             write_sections = ('local', 'settings', 'site')
         else:
             write_sections = ('settings', 'site')
+        if hasattr(args, 'badges'):
+            args.badges = ''
         config.write(args.config, args=args, sections=write_sections)
     except RuntimeError as e:
         log.error(str(e))

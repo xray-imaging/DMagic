@@ -151,6 +151,20 @@ def send_email(args):
     if choice == 't':
         emails = [args.secondary_beamline_contact_email]
         log.info('   *** TEST mode: sending only to secondary beamline contact')
+        s = smtplib.SMTP('mailhost.anl.gov')
+        for em in emails:
+            if args.msg['To'] is None:
+                args.msg['To'] = em
+            else:
+                args.msg.replace_header('To', em)
+            log.info('   Sending informational message to {:s}'.format(em))
+            try:
+                s.send_message(args.msg)
+            except smtplib.SMTPRecipientsRefused as e:
+                for addr, (code, msg) in e.recipients.items():
+                    log.warning('   Skipping {:s}: {:d} {:s}'.format(addr, code, msg.decode()))
+        s.quit()
+        return False  # test send does not update emailed-users record
     else:
         # Use pre-filtered user list if set by the caller (e.g. new-users-only mode)
         user_filter = getattr(args, '_user_filter', None)

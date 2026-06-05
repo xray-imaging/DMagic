@@ -36,8 +36,20 @@ Key Commands
                          selection, then creates the experiment and adds all proposal users.
 
 - dmagic create-manual : Creates a DM experiment manually for commissioning runs or
-                         staff experiments that have no scheduling proposal. Badge numbers,
-                         PI name, and title are provided on the command line.
+                         staff experiments that have no scheduling proposal. PI name,
+                         title, and optional badge numbers are provided on the command
+                         line. Optional arguments:
+                           --gup   GUP number (default: 0 = no proposal/commissioning)
+                           --date  year-month in yyyy-mm format (default: current month)
+                           --start experiment start date in yyyy-mm-dd format
+                                   (default: first day of --date month)
+                           --end   experiment end date in yyyy-mm-dd format
+                                   (default: 14 days after --start)
+                         Experiment name format: yyyy-mm-{LastName}-{gup}
+                         Example: dmagic create-manual --name DeCarlo
+                                    --first-name Francesco --gup 1
+                                    --start 2026-05-01 --end 2026-05-07
+                                    --title "2-BM commissioning"
 
 - dmagic delete        : Deletes a DM experiment from Sojourner. Lists all experiments
                          for the station (last 2 years, including manually created ones)
@@ -59,6 +71,16 @@ Key Commands
 
 - dmagic remove-user   : Removes one or more users from an existing DM experiment by
                          badge number. Shows the current user list before prompting.
+
+- dmagic list-users    : Lists all users currently granted access to a DM experiment,
+                         including their DM username, full name, and email address.
+
+- dmagic list-esafs    : Lists ESAFs for the beamline station in a date range using the
+                         DM EsafApsDbApi. Options:
+                           --start-date  range start in yyyy-mm-dd format
+                                         (default: first day of current month)
+                           --end-date    range end in yyyy-mm-dd format (default: today)
+                         Output: one line per ESAF with id, status, start/end dates, title.
 
 How It Works
 ------------

@@ -105,10 +105,18 @@ SECTIONS['manual'] = {
         'type': str,
         'default': '',
         'help': 'PI email address'},
+    'end': {
+        'type': str,
+        'default': '',
+        'help': 'Experiment end date in yyyy-mm-dd format (default: 14 days after --start or --date)'},
     'first-name': {
         'type': str,
         'default': '',
         'help': 'PI first name'},
+    'gup': {
+        'type': int,
+        'default': 0,
+        'help': 'GUP number (default: 0 = commissioning/no proposal)'},
     'institution': {
         'type': str,
         'default': '',
@@ -117,6 +125,10 @@ SECTIONS['manual'] = {
         'type': str,
         'default': 'Staff',
         'help': 'PI last name'},
+    'start': {
+        'type': str,
+        'default': '',
+        'help': 'Experiment start date in yyyy-mm-dd format (default: first day of --date month)'},
     'title': {
         'type': str,
         'default': 'Commissioning',
@@ -134,15 +146,27 @@ SECTIONS['local'] = {
         'help': 'Top-level data directory on the analysis computer'},
     }
 
-INIT_PARAMS   = ('site',)
-SHOW_PARAMS   = ('settings', 'local')
-TAG_PARAMS    = ('settings',)
-CREATE_PARAMS = ('settings',)
-MANUAL_PARAMS = ('manual',)
-EMAIL_PARAMS  = ()
-DAQ_PARAMS    = ('local',)
-SITE_SUPPRESS = ('site',)
-NICE_NAMES    = ('General', 'Settings', 'Site', 'Manual', 'Local')
+SECTIONS['query'] = {
+    'start-date': {
+        'type': str,
+        'default': '',
+        'help': 'Range start date (YYYY-MM-DD); defaults to first day of current month'},
+    'end-date': {
+        'type': str,
+        'default': '',
+        'help': 'Range end date (YYYY-MM-DD); defaults to today'},
+    }
+
+INIT_PARAMS       = ('site',)
+SHOW_PARAMS       = ('settings', 'local')
+TAG_PARAMS        = ('settings',)
+CREATE_PARAMS     = ('settings',)
+MANUAL_PARAMS     = ('manual',)
+EMAIL_PARAMS      = ()
+DAQ_PARAMS        = ('local',)
+LIST_ESAFS_PARAMS = ('query',)
+SITE_SUPPRESS     = ('site',)
+NICE_NAMES        = ('General', 'Settings', 'Site', 'Manual', 'Local', 'Query')
 # Note: 'General' section only contains --config which is not logged
 
 
