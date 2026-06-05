@@ -60,6 +60,26 @@ def get_esaf_doi(esaf_id):
         return None
 
 
+def list_esafs(start_date, end_date, station=None):
+    """Return ESAFs for the station in [start_date, end_date].
+
+    Wraps EsafApsDbApi.listStationEsafsByDateRange(). Dates are YYYY-MM-DD
+    strings. station defaults to DM_STATION_NAME env var (or '2BM').
+    Returns [] if DM is unavailable or the call fails.
+    """
+    if not _DM_AVAILABLE:
+        return []
+    if station is None:
+        station = os.environ.get('DM_STATION_NAME', '2BM')
+    try:
+        result = esaf_api.listStationEsafsByDateRange(
+            station, startDate=start_date, endDate=end_date)
+        return list(result) if result else []
+    except Exception as e:
+        log.error('Could not list ESAFs for station %s: %s' % (station, str(e)))
+        return []
+
+
 def make_experiment_name(args):
     """Build the DM experiment name from proposal metadata.
 

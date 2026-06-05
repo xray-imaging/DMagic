@@ -146,15 +146,27 @@ SECTIONS['local'] = {
         'help': 'Top-level data directory on the analysis computer'},
     }
 
-INIT_PARAMS   = ('site',)
-SHOW_PARAMS   = ('settings', 'local')
-TAG_PARAMS    = ('settings',)
-CREATE_PARAMS = ('settings',)
-MANUAL_PARAMS = ('manual',)
-EMAIL_PARAMS  = ()
-DAQ_PARAMS    = ('local',)
-SITE_SUPPRESS = ('site',)
-NICE_NAMES    = ('General', 'Settings', 'Site', 'Manual', 'Local')
+SECTIONS['query'] = {
+    'start-date': {
+        'type': str,
+        'default': '',
+        'help': 'Range start date (YYYY-MM-DD); defaults to first day of current month'},
+    'end-date': {
+        'type': str,
+        'default': '',
+        'help': 'Range end date (YYYY-MM-DD); defaults to today'},
+    }
+
+INIT_PARAMS       = ('site',)
+SHOW_PARAMS       = ('settings', 'local')
+TAG_PARAMS        = ('settings',)
+CREATE_PARAMS     = ('settings',)
+MANUAL_PARAMS     = ('manual',)
+EMAIL_PARAMS      = ()
+DAQ_PARAMS        = ('local',)
+LIST_ESAFS_PARAMS = ('query',)
+SITE_SUPPRESS     = ('site',)
+NICE_NAMES        = ('General', 'Settings', 'Site', 'Manual', 'Local', 'Query')
 # Note: 'General' section only contains --config which is not logged
 
 
