@@ -159,6 +159,10 @@ def list_beamtimes(auth, args):
     """
     List all beamtimes scheduled for the run containing today + args.set days.
 
+    Uses the same `schedule/findByRunNameAndScheduleName` endpoint as
+    beamtime_requests() / `dmagic show`, so the set of beamtimes returned
+    is consistent with what `dmagic show` and `dmagic tag` display.
+
     Parameters
     ----------
     auth : HTTPBasicAuth
@@ -176,7 +180,7 @@ def list_beamtimes(auth, args):
         log.error("Could not determine run for the given --set offset")
         return []
 
-    end_point = "beamline-scheduling/sched-api/activity/findByRunNameAndBeamlineId"
+    end_point = "beamline-scheduling/sched-api/schedule/findByRunNameAndScheduleName"
     api_url = args.url + '/' + end_point + '/' + run + '/' + args.beamline
     reply = requests.get(api_url, auth=auth)
 
@@ -184,8 +188,13 @@ def list_beamtimes(auth, args):
         log.error("No response from the restAPI. Error: %s" % reply.status_code)
         return []
 
+    try:
+        activities = reply.json()[0]['activities']
+    except (IndexError, KeyError, TypeError):
+        return []
+
     beamtimes = []
-    for item in reply.json():
+    for item in activities:
         proposal = item['beamtime']['proposal']
         pi_last_name   = 'Unknown'
         pi_first_name  = ''
