@@ -660,7 +660,8 @@ def start_daq(args):
     exp_name = _select_experiment(args, 'start DAQ for')
     if exp_name is None:
         return
-    dm.start_daq(exp_name, args.analysis, args.analysis_top_dir)
+    dm.start_daq(exp_name, args.analysis, args.analysis_top_dir,
+                 dm_direct_mount=getattr(args, 'dm_direct_mount', False))
 
 
 def stop_daq(args):
@@ -685,7 +686,8 @@ def upload(args):
     exp_name = _select_experiment(args, 'upload data for')
     if exp_name is None:
         return
-    dm.upload(exp_name, args.analysis, args.analysis_top_dir)
+    dm.upload(exp_name, args.analysis, args.analysis_top_dir,
+              dm_direct_mount=getattr(args, 'dm_direct_mount', False))
 
 
 def _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date, esaf_number='', esaf_doi=''):

@@ -82,6 +82,40 @@ Key Commands
                            --end-date    range end in yyyy-mm-dd format (default: today)
                          Output: one line per ESAF with id, status, start/end dates, title.
 
+DM data-directory format
+------------------------
+
+The [local] config knob 'dm-direct-mount' controls how dmagic hands the
+source path to the DM DAQ:
+
+  - dm-direct-mount = False (default): dmagic passes
+    '@{analysis}:{analysis-top-dir}/{exp-name}' — DM rsyncs from the
+    analysis host over SSH.
+
+  - dm-direct-mount = True: dmagic passes the bare local path
+    '{analysis-top-dir}/{exp-name}'. Use this when the DM VM already
+    mounts the analysis filesystem directly (e.g. the 2-BM DM VM has
+    tomodata2:/data2 mounted). Some DM installations have a bug in the
+    '@host:' syntax where the directory scan returns countFiles=0 with
+    "no new files for upload" for a directory that clearly contains
+    files; the bare-path form works correctly there.
+
+Passwordless SSH prerequisite
+-----------------------------
+
+'dmagic upload' and 'dmagic daq-start' pre-check the source directory before
+dispatching to DM. On beamline nodes that already mount the analysis top-dir
+(tomo1, tomo3, tocai, ...) no setup is needed. On a control computer that does
+NOT mount /data2 or /data3 (e.g. arcturus), dmagic falls back to an SSH probe
+on the analysis host — set up passwordless SSH once:
+
+    ssh-keygen -t ed25519 -N '' -f ~/.ssh/id_ed25519    # only if no key yet
+    ssh-copy-id tomodata2
+    ssh-copy-id tomodata3
+
+If SSH is not set up, dmagic prints a warning with the exact commands above
+and dispatches to DM anyway (the pre-check is a safety net, not required).
+
 How It Works
 ------------
 
