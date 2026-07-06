@@ -178,6 +178,54 @@ require the ``[site]`` section of ``~/dmagic.conf`` to be correctly configured (
 require the ``[local]`` section to be configured with the correct analysis hostname and
 data directory.
 
+DM data-directory format: ``dm-direct-mount``
+---------------------------------------------
+
+The ``[local]`` config knob ``dm-direct-mount`` controls how dmagic hands the
+source path to the DM DAQ:
+
+- ``dm-direct-mount = False`` (default) — dmagic passes
+  ``@{analysis}:{analysis-top-dir}/{exp-name}`` to ``daq_api.upload()`` /
+  ``startDaq()``. DM then rsyncs from the analysis host over SSH.
+- ``dm-direct-mount = True`` — dmagic passes the bare local path
+  ``{analysis-top-dir}/{exp-name}``. Use this when the DM VM already mounts
+  the analysis filesystem directly (for example, the 2-BM DM VM has
+  ``tomodata2:/data2`` mounted). On some DM installations the ``@host:``
+  syntax has a bug where ``daq_api.upload()`` returns ``countFiles=0`` with
+  ``"no new files for upload"`` even for a directory that contains matching
+  files; the bare-path form works correctly there.
+
+Passwordless SSH prerequisite (for source pre-check)
+----------------------------------------------------
+
+``dmagic upload`` and ``dmagic daq-start`` inspect the source directory
+(``{analysis-top-dir}/{exp-name}`` and its ``_rec`` sibling) **before** dispatching to
+DM, and warn if it is empty or missing. This is important because the DM DAQ silently
+accepts a nonexistent source and reports "started successfully" while transferring zero
+bytes — a misconfigured ``analysis`` / ``analysis-top-dir`` in ``~/dmagic.conf`` can
+otherwise produce a successful-looking run with an empty destination.
+
+The pre-check works two ways:
+
+- If the host running dmagic already mounts the analysis directory (typical on beamline
+  nodes like ``tomo1``, ``tomo3``, ``tocai``), the check is done locally with no setup.
+
+- If dmagic is run from a control computer that does **not** mount ``/data2`` /
+  ``/data3`` (typical on ``arcturus``), dmagic falls back to an SSH probe on the
+  analysis host. This requires passwordless SSH to be set up **once**::
+
+      # On the control computer, as 2bmb
+      ssh-keygen -t ed25519 -N '' -f ~/.ssh/id_ed25519    # only if you don't have a key yet
+      ssh-copy-id tomodata2
+      ssh-copy-id tomodata3
+      # verify
+      ssh -o BatchMode=yes tomodata2 'echo ok'
+      ssh -o BatchMode=yes tomodata3 'echo ok'
+
+If SSH cannot be used (no key, host unreachable), dmagic logs a warning with the
+setup steps above and dispatches to DM anyway — the pre-check is a safety net, not a
+hard requirement.
+
 dmagic create
 -------------
 

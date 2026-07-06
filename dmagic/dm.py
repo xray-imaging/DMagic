@@ -1,5 +1,6 @@
 import datetime
 import os
+import subprocess
 
 from dmagic import log
 from dmagic import authorize
@@ -378,6 +379,166 @@ def make_data_link(args):
     return link
 
 
+def _inspect_local_source(local_path):
+    """Look at a local source directory that DM would read from.
+
+    Returns (status, count, size_bytes) where status is one of:
+      OK       - directory exists and has files
+      EMPTY    - directory exists but has no files
+      MISSING  - parent mount is visible but the directory is not there
+                 (usually a misconfigured analysis-top-dir or exp-name)
+      UNKNOWN  - parent mount is not visible from this host; caller
+                 should try _inspect_remote_source before giving up.
+    count and size_bytes are None for MISSING/UNKNOWN.
+    """
+    if os.path.isdir(local_path):
+        try:
+            entries = os.listdir(local_path)
+        except OSError:
+            return 'UNKNOWN', None, None
+        if not entries:
+            return 'EMPTY', 0, 0
+        total = 0
+        for name in entries:
+            try:
+                total += os.path.getsize(os.path.join(local_path, name))
+            except OSError:
+                pass
+        return 'OK', len(entries), total
+    parent = os.path.dirname(local_path.rstrip('/'))
+    if parent and os.path.isdir(parent):
+        return 'MISSING', None, None
+    return 'UNKNOWN', None, None
+
+
+_ssh_warned = set()  # hosts we've already emitted the setup warning for
+
+
+def _warn_ssh_setup(host, reason):
+    """Emit an actionable warning explaining how to enable passwordless
+    SSH so future dmagic runs get the source pre-check. Once per host
+    per process — we don't want to spam the same 6 lines for raw+rec.
+    """
+    if host in _ssh_warned:
+        return
+    _ssh_warned.add(host)
+    log.warning('Cannot SSH-check source on %s (%s).' % (host, reason))
+    log.warning('To enable dmagic to pre-check the source directory,')
+    log.warning('set up passwordless SSH from this host to %s once:' % host)
+    log.warning("    ssh-keygen -t ed25519 -N '' -f ~/.ssh/id_ed25519   # if you have no key yet")
+    log.warning('    ssh-copy-id %s' % host)
+    log.warning('    ssh -o BatchMode=yes %s "echo ok"                 # verify' % host)
+    log.warning('Continuing without pre-check; verify destination after transfer.')
+
+
+def _inspect_remote_source(host, path, timeout=5):
+    """Same as _inspect_local_source, but over SSH to `host`.
+
+    Uses BatchMode so it never prompts; if SSH is unusable (no key, host
+    unreachable, timeout) we log an actionable warning (once per host)
+    and return UNKNOWN so DM dispatches as before.
+    """
+    # Once we're SSH-connected we can distinguish three failure modes:
+    #   MISSING     - experiment dir missing, but analysis-top-dir exists
+    #   NO_TOPDIR   - analysis-top-dir itself does not exist on the host
+    #                 (usually the wrong --analysis or --analysis-top-dir)
+    # Never emit UNKNOWN from a successful SSH: we know what's on the host.
+    script = (
+        'p=%(p)s; '
+        'if [ -d "$p" ]; then '
+        '  n=$(find "$p" -maxdepth 1 -type f 2>/dev/null | wc -l); '
+        '  b=$(du -sb "$p" 2>/dev/null | cut -f1); '
+        '  [ "$n" = "0" ] && echo EMPTY || echo "OK $n $b"; '
+        'elif [ -d "$(dirname "$p")" ]; then echo MISSING; '
+        'else echo "NO_TOPDIR $(dirname "$p")"; fi'
+    ) % {'p': _shquote(path)}
+    try:
+        r = subprocess.run(
+            ['ssh', '-o', 'BatchMode=yes',
+             '-o', 'ConnectTimeout=%d' % timeout,
+             '-o', 'StrictHostKeyChecking=accept-new',
+             host, script],
+            capture_output=True, text=True, timeout=timeout + 10)
+    except Exception as e:
+        _warn_ssh_setup(host, str(e))
+        return 'UNKNOWN', None, None
+    if r.returncode != 0:
+        err = (r.stderr or '').strip().splitlines()
+        _warn_ssh_setup(host, err[-1] if err else 'ssh exit %d' % r.returncode)
+        return 'UNKNOWN', None, None
+    out = (r.stdout or '').strip()
+    if not out:
+        _warn_ssh_setup(host, 'empty response from remote probe')
+        return 'UNKNOWN', None, None
+    if out in ('EMPTY', 'MISSING'):
+        return out, (0 if out == 'EMPTY' else None), (0 if out == 'EMPTY' else None)
+    parts = out.split()
+    if len(parts) == 3 and parts[0] == 'OK':
+        try:
+            return 'OK', int(parts[1]), int(parts[2])
+        except ValueError:
+            return 'UNKNOWN', None, None
+    if len(parts) >= 2 and parts[0] == 'NO_TOPDIR':
+        # size_bytes carries the missing parent path so _report_source can name it
+        return 'NO_TOPDIR', None, ' '.join(parts[1:])
+    return 'UNKNOWN', None, None
+
+
+def _shquote(s):
+    """Minimal single-quote shell escaping for a path argument."""
+    return "'" + s.replace("'", "'\\''") + "'"
+
+
+def _inspect_source(host, path):
+    """Inspect a source dir on `host` at `path`.
+
+    Try locally first (works when the analysis mount is visible from the
+    machine running dmagic — beamline-node case). Fall back to SSH into
+    `host` when local returns UNKNOWN (control-computer case, e.g.
+    arcturus, which does not mount /data2 or /data3).
+    """
+    status, n, sz = _inspect_local_source(path)
+    if status != 'UNKNOWN':
+        return status, n, sz
+    return _inspect_remote_source(host, path)
+
+
+def _report_source(local_path, status, count, size_bytes, role):
+    """Log what _inspect_local_source found. role is 'raw' or 'rec'.
+
+    Missing raw is an error (dmagic is misconfigured); missing rec is a
+    warning (recon may not have run yet). Returns True if the caller
+    should proceed with the DM dispatch, False if it should skip.
+    """
+    if status == 'OK':
+        log.info('   Source has %d file(s), %.2f GiB'
+                 % (count, size_bytes / (1024.0 ** 3)))
+        return True
+    if status == 'EMPTY':
+        log.warning('   Source %s is empty; DM will transfer 0 files' % local_path)
+        return True
+    if status == 'MISSING':
+        if role == 'raw':
+            log.error('   Source %s does not exist on this host.' % local_path)
+            log.error('   Check --analysis / --analysis-top-dir; DM would '
+                      'silently accept and transfer nothing. Skipping.')
+        else:
+            log.warning('   Source %s does not exist yet (recon may not have run).'
+                        ' Skipping.' % local_path)
+        return False
+    if status == 'NO_TOPDIR':
+        # size_bytes was repurposed to carry the missing parent path
+        missing_parent = size_bytes or 'analysis-top-dir'
+        log.error('   Analysis top directory %s does not exist on the remote host.'
+                  % missing_parent)
+        log.error('   The --analysis host or --analysis-top-dir in ~/dmagic.conf is'
+                  ' wrong. DM would silently accept and transfer nothing. Skipping.')
+        return False
+    log.info('   Source path not visible from this host (no local mount); '
+             'proceeding without pre-check')
+    return True
+
+
 def _start_one_daq(exp_name, dm_dir_name, task_info, current_daqs):
     """Start a single DAQ if not already running for (exp_name, dm_dir_name).
 
@@ -398,13 +559,27 @@ def _start_one_daq(exp_name, dm_dir_name, task_info, current_daqs):
         return False
 
 
-def start_daq(exp_name, analysis, analysis_top_dir):
+def _dm_data_dir(analysis, local_path, dm_direct_mount):
+    """Format the dataDirectory URL for daq_api calls.
+
+    When dm_direct_mount is True the DM VM already mounts the source
+    filesystem directly, so we pass the bare local path. Otherwise we
+    prepend @{analysis}: for the remote-rsync syntax.
+    """
+    if dm_direct_mount:
+        return local_path
+    return '@{:s}:{:s}'.format(analysis, local_path)
+
+
+def start_daq(exp_name, analysis, analysis_top_dir, dm_direct_mount=False):
     """Start two DM DAQs for exp_name:
       - raw data:          analysis_top_dir/<exp_name>      → DM data directory
       - reconstructed data: analysis_top_dir/<exp_name>_rec → DM analysis directory
 
     The rec DAQ is skipped with a warning if the directory does not yet exist.
-    Returns True if at least the raw DAQ started, False on error.
+    If dm_direct_mount is True, the source URL passed to DM is the bare local
+    path; otherwise it is prefixed with @{analysis}:. Returns True if at least
+    the raw DAQ started, False on error.
     """
     log.info('Checking for already running DAQs for experiment %s' % exp_name)
     try:
@@ -415,17 +590,27 @@ def start_daq(exp_name, analysis, analysis_top_dir):
 
     top = analysis_top_dir.rstrip('/')
 
+    raw_local = os.path.join(top, exp_name)
+    rec_local = os.path.join(top, exp_name + '_rec')
+
     # Raw data DAQ → DM data directory
-    raw_dir = '@{:s}:{:s}'.format(analysis, os.path.join(top, exp_name))
+    raw_dir = _dm_data_dir(analysis, raw_local, dm_direct_mount)
     log.info('Starting raw data DAQ for experiment %s' % exp_name)
+    log.info('   Source: %s' % raw_dir)
+    raw_status, raw_n, raw_sz = _inspect_source(analysis, raw_local)
+    if not _report_source(raw_local, raw_status, raw_n, raw_sz, role='raw'):
+        return False
     raw_ok = _start_one_daq(exp_name, raw_dir, {}, current_daqs)
 
     # Reconstructed data DAQ → DM analysis directory
-    rec_dir = '@{:s}:{:s}'.format(analysis, os.path.join(top, exp_name + '_rec'))
+    rec_dir = _dm_data_dir(analysis, rec_local, dm_direct_mount)
     log.info('Starting reconstructed data DAQ for experiment %s' % exp_name)
-    rec_ok = _start_one_daq(exp_name, rec_dir, {'useAnalysisDirectory': True}, current_daqs)
+    log.info('   Source: %s' % rec_dir)
+    rec_status, rec_n, rec_sz = _inspect_source(analysis, rec_local)
+    rec_ok = False
+    if _report_source(rec_local, rec_status, rec_n, rec_sz, role='rec'):
+        rec_ok = _start_one_daq(exp_name, rec_dir, {'useAnalysisDirectory': True}, current_daqs)
     if not rec_ok:
-        log.warning('   Rec DAQ could not be started (directory may not exist yet)')
         log.warning('   Run "dmagic daq-start" again once reconstruction begins')
 
     return raw_ok
@@ -460,7 +645,7 @@ def stop_daq(exp_name):
     return True
 
 
-def upload(exp_name, analysis, analysis_top_dir):
+def upload(exp_name, analysis, analysis_top_dir, dm_direct_mount=False):
     """One-shot upload of raw and reconstructed data to the DM experiment.
 
     Uploads files that exist at the time the command is issued (unlike DAQ,
@@ -472,32 +657,39 @@ def upload(exp_name, analysis, analysis_top_dir):
       - reconstructed data: analysis_top_dir/<exp_name>_rec  → DM analysis directory
 
     The rec upload is skipped with a warning if the directory does not exist.
-    Returns True if at least the raw upload started, False on error.
+    If dm_direct_mount is True, the source URL passed to DM is the bare local
+    path; otherwise it is prefixed with @{analysis}:. Returns True if at
+    least the raw upload started, False on error.
     """
     top = analysis_top_dir.rstrip('/')
 
-    raw_dir = '@{:s}:{:s}'.format(analysis, os.path.join(top, exp_name))
-    rec_dir = '@{:s}:{:s}'.format(analysis, os.path.join(top, exp_name + '_rec'))
+    raw_local = os.path.join(top, exp_name)
+    rec_local = os.path.join(top, exp_name + '_rec')
+    raw_dir = _dm_data_dir(analysis, raw_local, dm_direct_mount)
+    rec_dir = _dm_data_dir(analysis, rec_local, dm_direct_mount)
 
     # Raw data → DM data directory
     log.info('Uploading raw data for experiment %s' % exp_name)
     log.info('   Source: %s' % raw_dir)
     raw_ok = False
-    try:
-        daq_api.upload(exp_name, raw_dir)
-        log.info('   Raw data upload started successfully')
-        raw_ok = True
-    except Exception as e:
-        log.error('   Could not start raw data upload: %s' % str(e))
+    raw_status, raw_n, raw_sz = _inspect_source(analysis, raw_local)
+    if _report_source(raw_local, raw_status, raw_n, raw_sz, role='raw'):
+        try:
+            daq_api.upload(exp_name, raw_dir)
+            log.info('   Raw data upload dispatched to DM')
+            raw_ok = True
+        except Exception as e:
+            log.error('   Could not start raw data upload: %s' % str(e))
 
     # Reconstructed data → DM analysis directory
     log.info('Uploading reconstructed data for experiment %s' % exp_name)
     log.info('   Source: %s' % rec_dir)
-    try:
-        daq_api.upload(exp_name, rec_dir, {'useAnalysisDirectory': True})
-        log.info('   Reconstructed data upload started successfully')
-    except Exception as e:
-        log.warning('   Could not start reconstructed data upload: %s' % str(e))
-        log.warning('   (directory may not exist yet)')
+    rec_status, rec_n, rec_sz = _inspect_source(analysis, rec_local)
+    if _report_source(rec_local, rec_status, rec_n, rec_sz, role='rec'):
+        try:
+            daq_api.upload(exp_name, rec_dir, {'useAnalysisDirectory': True})
+            log.info('   Reconstructed data upload dispatched to DM')
+        except Exception as e:
+            log.warning('   Could not start reconstructed data upload: %s' % str(e))
 
     return raw_ok
