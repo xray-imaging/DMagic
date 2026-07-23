@@ -145,13 +145,15 @@ SECTIONS['local'] = {
         'default': '/data3/2BM/',
         'help': 'Top-level data directory on the analysis computer'},
     'dm-direct-mount': {
-        'default': False,
+        'default': True,
         'action': 'store_true',
-        'help': 'True if the DM VM has the analysis-top-dir mounted '
-                'directly; when set, dmagic passes the bare local path '
-                '(e.g. /data2/2BM/exp) to daq_api.upload() / startDaq() '
-                'instead of prepending @{analysis}:. Works around a bug '
-                'in the @host: syntax on some DM installations.'},
+        'help': 'True (default at 2-BM) if the DM VM has the '
+                'analysis-top-dir mounted directly; dmagic passes the '
+                'bare local path (e.g. /data2/2BM/exp) to '
+                'daq_api.upload() / startDaq() instead of prepending '
+                '@{analysis}:. Works around a bug in the @host: syntax '
+                'on the 2-BM DM installation. To temporarily send the '
+                '@host: form, edit this default to False.'},
     }
 
 SECTIONS['query'] = {
