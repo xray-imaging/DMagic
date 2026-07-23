@@ -666,12 +666,68 @@ def start_daq(args):
 
 def stop_daq(args):
     """
-    Select a DM experiment and stop all running DAQs for it.
+    Stop all running DM DAQs for a selected experiment.
+    Only lists experiments that currently have running DAQs.
     """
-    exp_name = _select_experiment(args, 'stop DAQ for')
-    if exp_name is None:
+    daqs = dm.list_running_daqs(args.experiment_type)
+    if not daqs:
+        log.info('No running DM DAQs for station %s.' % args.experiment_type)
         return
-    dm.stop_daq(exp_name)
+
+    by_exp = {}
+    for d in daqs:
+        by_exp.setdefault(d.get('experimentName', '?'), []).append(d)
+    exp_names = sorted(by_exp.keys())
+
+    log.info('Found %d experiment(s) with running DAQ(s) for station %s:' % (
+             len(exp_names), args.experiment_type))
+    for i, name in enumerate(exp_names):
+        entries = by_exp[name]
+        dirs = ', '.join(d.get('dataDirectory', '?') for d in entries)
+        print("  [%2d] %-35s  %d DAQ(s)  %s" % (i, name, len(entries), dirs))
+
+    while True:
+        try:
+            choice = input("\nSelect experiment to stop DAQ for [0-%d] or 'q' to quit: " % (
+                           len(exp_names) - 1)).strip()
+            if choice.lower() == 'q':
+                log.info('No experiment selected. Exiting.')
+                return
+            choice = int(choice)
+            if 0 <= choice < len(exp_names):
+                dm.stop_daq(exp_names[choice])
+                return
+            print("Please enter a number between 0 and %d" % (len(exp_names) - 1))
+        except (ValueError, EOFError):
+            print("Invalid input. Please enter a number or 'q' to quit.")
+
+
+def daq_status(args):
+    """
+    List all currently running DM DAQs for the current station.
+    Read-only: does not start or stop any DAQ.
+    """
+    daqs = dm.list_running_daqs(args.experiment_type)
+    if not daqs:
+        log.info('No running DM DAQs for station %s.' % args.experiment_type)
+        return
+    log.info('Found %d running DM DAQ(s) for station %s:' % (
+             len(daqs), args.experiment_type))
+    for d in daqs:
+        pct = d.get('percentageComplete', 0) or 0
+        try:
+            pct = float(pct)
+        except (TypeError, ValueError):
+            pct = 0.0
+        log.info('   %s' % d.get('experimentName', '?'))
+        log.info('     dir      : %s' % d.get('dataDirectory', '?'))
+        log.info('     files    : %s / %s  (%.2f%%)' % (
+                 d.get('nCompletedFiles', 0),
+                 d.get('countFiles', 0),
+                 pct))
+        log.info('     runtime  : %.0fs' % (d.get('runTime', 0) or 0))
+        log.info('     started  : %s' % d.get('startTimestamp', '?'))
+        log.info('     id       : %s' % d.get('id', '?'))
 
 
 def upload(args):
@@ -904,9 +960,10 @@ def main():
         ('create-manual', create_manual, config.MANUAL_PARAMS, config.SITE_SUPPRESS, "Create a DM experiment manually for commissioning runs"),
         ('delete',        delete,        config.CREATE_PARAMS, config.SITE_SUPPRESS, "Delete a DM experiment from Sojourner"),
         ('email',         email,         config.EMAIL_PARAMS,  config.SITE_SUPPRESS, "Send data-access email with Globus link to all users on the DM experiment"),
-        ('daq-start',     start_daq,     config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Monitor experiment directories and sync new files to Sojourner in real time"),
-        ('daq-stop',      stop_daq,      config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Stop real-time directory monitoring and file sync for the current experiment"),
-        ('upload',        upload,        config.DAQ_PARAMS,    config.SITE_SUPPRESS, "One-shot sync of all existing files to Sojourner (use when daq-start was not running)"),
+        ('daq-start',     start_daq,     config.DAQ_PARAMS,    config.SITE_SUPPRESS, "Upload all existing files in the experiment directory and continue to sync new files as they arrive"),
+        ('daq-stop',      stop_daq,      (),                   config.SITE_SUPPRESS, "List experiments with active DAQs and stop the one you select"),
+        ('daq-status',    daq_status,    (),                   config.SITE_SUPPRESS, "List all running DM DAQs for the current station"),
+        ('upload',        upload,        config.DAQ_PARAMS,    config.SITE_SUPPRESS, "One-shot upload of all existing files to Sojourner (fallback for when daq-start was not running during data collection)"),
         ('add-user',      add_user,      config.CREATE_PARAMS, config.SITE_SUPPRESS, "Add users to an existing DM experiment by badge number"),
         ('remove-user',   remove_user,   config.CREATE_PARAMS, config.SITE_SUPPRESS, "Remove users from an existing DM experiment by badge number"),
         ('list-users',    list_users,    config.CREATE_PARAMS, config.SITE_SUPPRESS, "List all users with access to a DM experiment"),

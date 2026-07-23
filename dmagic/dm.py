@@ -600,7 +600,7 @@ def start_daq(exp_name, analysis, analysis_top_dir, dm_direct_mount=False):
     raw_status, raw_n, raw_sz = _inspect_source(analysis, raw_local)
     if not _report_source(raw_local, raw_status, raw_n, raw_sz, role='raw'):
         return False
-    raw_ok = _start_one_daq(exp_name, raw_dir, {}, current_daqs)
+    raw_ok = _start_one_daq(exp_name, raw_dir, {'processExistingFiles': True}, current_daqs)
 
     # Reconstructed data DAQ → DM analysis directory
     rec_dir = _dm_data_dir(analysis, rec_local, dm_direct_mount)
@@ -609,7 +609,7 @@ def start_daq(exp_name, analysis, analysis_top_dir, dm_direct_mount=False):
     rec_status, rec_n, rec_sz = _inspect_source(analysis, rec_local)
     rec_ok = False
     if _report_source(rec_local, rec_status, rec_n, rec_sz, role='rec'):
-        rec_ok = _start_one_daq(exp_name, rec_dir, {'useAnalysisDirectory': True}, current_daqs)
+        rec_ok = _start_one_daq(exp_name, rec_dir, {'useAnalysisDirectory': True, 'processExistingFiles': True}, current_daqs)
     if not rec_ok:
         log.warning('   Run "dmagic daq-start" again once reconstruction begins')
 
@@ -643,6 +643,23 @@ def stop_daq(exp_name):
     else:
         log.info('   Stopped %d DAQ(s) for experiment %s' % (count, exp_name))
     return True
+
+
+def list_running_daqs(station):
+    """Return all currently running DM DAQs for the given station.
+
+    Filters daq_api.listDaqs() to entries with status='running' and
+    experimentStationName matching the given station (e.g. '2BM').
+    Returns [] on API error or if none are running.
+    """
+    try:
+        all_daqs = daq_api.listDaqs()
+    except Exception as e:
+        log.error('   Could not list DAQs: %s' % str(e))
+        return []
+    return [d for d in all_daqs
+            if d.get('status') == 'running'
+            and d.get('experimentStationName') == station]
 
 
 def upload(exp_name, analysis, analysis_top_dir, dm_direct_mount=False):
