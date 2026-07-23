@@ -170,13 +170,14 @@ DM Experiment Management
 =========================
 
 The ``create``, ``create-manual``, ``delete``, ``email``, ``daq-start``, ``daq-stop``,
-``add-user``, ``remove-user``, ``list-users``, and ``list-esafs`` commands integrate
-with the APS Data Management (DM) system (Sojourner) to manage experiment records,
-user data access via Globus, automated file transfer, and ESAF queries. These commands
-require the ``[site]`` section of ``~/dmagic.conf`` to be correctly configured (see
-`Initialization`_ above). The ``daq-start`` and ``daq-stop`` commands additionally
-require the ``[local]`` section to be configured with the correct analysis hostname and
-data directory.
+``daq-status``, ``upload``, ``add-user``, ``remove-user``, ``list-users``, and
+``list-esafs`` commands integrate with the APS Data Management (DM) system (Sojourner)
+to manage experiment records, user data access via Globus, automated file transfer,
+and ESAF queries. These commands require the ``[site]`` section of ``~/dmagic.conf``
+to be correctly configured (see `Initialization`_ above). The ``daq-start`` and
+``upload`` commands additionally require the ``[local]`` section to be configured with
+the correct analysis hostname and data directory (``daq-stop`` and ``daq-status`` do
+not — they read source info from the running DAQ records themselves).
 
 DM data-directory format: ``dm-direct-mount``
 ---------------------------------------------
@@ -184,16 +185,17 @@ DM data-directory format: ``dm-direct-mount``
 The ``[local]`` config knob ``dm-direct-mount`` controls how dmagic hands the
 source path to the DM DAQ:
 
-- ``dm-direct-mount = False`` (default) — dmagic passes
-  ``@{analysis}:{analysis-top-dir}/{exp-name}`` to ``daq_api.upload()`` /
-  ``startDaq()``. DM then rsyncs from the analysis host over SSH.
-- ``dm-direct-mount = True`` — dmagic passes the bare local path
-  ``{analysis-top-dir}/{exp-name}``. Use this when the DM VM already mounts
-  the analysis filesystem directly (for example, the 2-BM DM VM has
-  ``tomodata2:/data2`` mounted). On some DM installations the ``@host:``
-  syntax has a bug where ``daq_api.upload()`` returns ``countFiles=0`` with
-  ``"no new files for upload"`` even for a directory that contains matching
-  files; the bare-path form works correctly there.
+- ``dm-direct-mount = True`` (default at 2-BM) — dmagic passes the bare local
+  path ``{analysis-top-dir}/{exp-name}`` to ``daq_api.upload()`` /
+  ``startDaq()``. Correct when the DM VM already mounts the analysis
+  filesystem directly (the 2-BM DM VM has both ``tomodata2:/data2`` and
+  ``tomodata3:/data3`` mounted).
+- ``dm-direct-mount = False`` — dmagic passes
+  ``@{analysis}:{analysis-top-dir}/{exp-name}``. DM then rsyncs from the
+  analysis host over SSH. This form has a bug on the 2-BM DM installation
+  where ``daq_api.upload()`` returns ``countFiles=0`` with
+  ``"no new files for upload"`` even for directories that contain matching
+  files, so leave the default ``True`` unless a future DM release fixes it.
 
 Passwordless SSH prerequisite (for source pre-check)
 ----------------------------------------------------
@@ -433,9 +435,13 @@ mid-experiment after the initial notification has already gone out.
 dmagic daq-start
 ----------------
 
-Starts real-time directory monitoring and syncs new files to Sojourner continuously.
-Only files created or modified **after** this command is issued are transferred.
-Two DAQ processes are started for each experiment:
+Starts automated file transfer (DAQ) to Sojourner. On start, the DM system uploads
+every file already present in the experiment directory, then continues to sync
+new or changed files as they arrive. Runs until stopped with ``dmagic daq-stop``.
+
+Because it also handles pre-existing files, ``daq-start`` can be issued at any point —
+before, during, or after data collection — and will still catch every file in the
+directory. Two DAQ processes are started for each experiment:
 
 - **Raw data**: ``{analysis-top-dir}/{exp-name}`` on the analysis machine → DM ``data/`` directory
 - **Reconstructed data**: ``{analysis-top-dir}/{exp-name}_rec`` → DM ``analysis/`` directory
@@ -447,81 +453,89 @@ If a DAQ is already running for a given directory it is left untouched.
 ::
 
     (dm) $ dmagic daq-start
-    2026-03-04 09:10:00,000 - Found 11 DM experiment(s) for station 2BM:
-      [ 0] 2026-03-Li-1018528                   2026-03-11 to 2026-03-14  Investigation of ...
-      [ 1] 2026-03-Li-1012039                   2026-03-03 to 2026-03-05  Investigation of ...
+    2026-07-22 09:10:00,000 - Found 11 DM experiment(s) for station 2BM:
+      [ 0] 2026-07-DeCarlo-0                    2026-07-20 to 2026-08-03  delete_test
+      [ 1] 2026-07-Liu-0                        2026-07-18 to 2026-08-01  Test_root
       ...
 
-    Select experiment to start DAQ for [0-10] or 'q' to quit: 1
-    2026-03-04 09:10:05,000 - Starting raw data DAQ for experiment 2026-03-Li-1012039
-    2026-03-04 09:10:05,100 -    Watching directory: @tomodata3:/data3/2BM/2026-03-Li-1012039
-    2026-03-04 09:10:05,200 -    DAQ started successfully
-    2026-03-04 09:10:05,300 - Starting reconstructed data DAQ for experiment 2026-03-Li-1012039
-    2026-03-04 09:10:05,400 -    Watching directory: @tomodata3:/data3/2BM/2026-03-Li-1012039_rec
-    2026-03-04 09:10:05,500 -    DAQ started successfully
+    Select experiment to start DAQ for [0-10] or 'q' to quit: 0
+    2026-07-22 09:10:05,000 - Starting raw data DAQ for experiment 2026-07-DeCarlo-0
+    2026-07-22 09:10:05,100 -    Watching directory: /data3/2BM/2026-07-DeCarlo-0
+    2026-07-22 09:10:05,200 -    DAQ started successfully
 
 The ``analysis`` and ``analysis-top-dir`` settings in ``~/dmagic.conf`` control which
 host and directories are monitored. For best performance, point ``analysis`` at the
 storage node (e.g. ``tomodata3``) that physically hosts the data rather than a compute
-node that accesses it via NFS.
+node that accesses it via NFS. Internally ``dmagic`` passes ``processExistingFiles=True``
+to ``daq_api.startDaq()`` so both pre-existing and newly-arriving files are transferred.
 
 ::
 
     (dm) $ dmagic daq-start -h
     usage: dmagic daq-start [-h] [--analysis ANALYSIS] [--analysis-top-dir ANALYSIS_TOP_DIR]
-                            [--config FILE]
+                            [--dm-direct-mount] [--config FILE]
 
-    Monitor experiment directories and sync new files to Sojourner in real time
-
-    options:
-      -h, --help            show this help message and exit
-      --analysis ANALYSIS   Hostname of the data analysis computer (default: tomodata3)
-      --analysis-top-dir ANALYSIS_TOP_DIR
-                            Top-level data directory on the analysis computer (default: /data3/2BM/)
-      --config FILE         File name of configuration (default: /home/beams/2BMB/dmagic.conf)
+    Upload all existing files in the experiment directory and continue to sync
+    new files as they arrive
 
 dmagic daq-stop
 ---------------
 
-Stops all running DAQ processes (both raw and rec) for the selected experiment::
+Lists only experiments that currently have running DAQs for the station (skipping the
+full experiment list) and stops all DAQs for the one you select. If no DAQs are
+running, exits cleanly with a message and no prompt::
 
     (dm) $ dmagic daq-stop
-    2026-03-04 18:00:00,000 - Found 11 DM experiment(s) for station 2BM:
-      [ 0] 2026-03-Li-1018528                   2026-03-11 to 2026-03-14  Investigation of ...
-      [ 1] 2026-03-Li-1012039                   2026-03-03 to 2026-03-05  Investigation of ...
-      ...
+    2026-07-22 18:00:00,000 - Found 1 experiment(s) with running DAQ(s) for station 2BM:
+      [ 0] 2026-07-DeCarlo-0                    1 DAQ(s)  /data3/2BM/2026-07-DeCarlo-0
 
-    Select experiment to stop DAQ for [0-10] or 'q' to quit: 1
-    2026-03-04 18:00:05,000 - Stopping all DM DAQs for experiment 2026-03-Li-1012039
-    2026-03-04 18:00:05,100 -    Found running DAQ. Stopping now.
-    2026-03-04 18:00:05,200 -    Found running DAQ. Stopping now.
-    2026-03-04 18:00:06,000 -    Stopped 2 DAQ(s) for experiment 2026-03-Li-1012039
+    Select experiment to stop DAQ for [0-0] or 'q' to quit: 0
+    2026-07-22 18:00:05,000 - Stopping all DM DAQs for experiment 2026-07-DeCarlo-0
+    2026-07-22 18:00:05,100 -    Found running DAQ. Stopping now.
+    2026-07-22 18:00:06,000 -    Stopped 1 DAQ(s) for experiment 2026-07-DeCarlo-0
 
 ::
 
     (dm) $ dmagic daq-stop -h
-    usage: dmagic daq-stop [-h] [--analysis ANALYSIS] [--analysis-top-dir ANALYSIS_TOP_DIR]
-                           [--config FILE]
+    usage: dmagic daq-stop [-h] [--config FILE]
 
-    Stop real-time directory monitoring and file sync for the current experiment
+    List experiments with active DAQs and stop the one you select
 
-    options:
-      -h, --help            show this help message and exit
-      --analysis ANALYSIS   Hostname of the data analysis computer (default: tomodata3)
-      --analysis-top-dir ANALYSIS_TOP_DIR
-                            Top-level data directory on the analysis computer (default: /data3/2BM/)
-      --config FILE         File name of configuration (default: /home/beams/2BMB/dmagic.conf)
+dmagic daq-status
+-----------------
+
+Read-only. Lists every currently-running DM DAQ for the station: experiment name,
+source directory, files completed / total, percentage complete, runtime, DAQ start
+timestamp, and DAQ id. Useful before ``daq-stop`` to see what is running, or during a
+long-running acquisition to confirm files are being processed::
+
+    (dm) $ dmagic daq-status
+    2026-07-22 21:07:17,226 - Found 1 running DM DAQ(s) for station 2BM:
+    2026-07-22 21:07:17,226 -    2026-07-DeCarlo-0
+    2026-07-22 21:07:17,226 -      dir      : /data3/2BM/2026-07-DeCarlo-0
+    2026-07-22 21:07:17,226 -      files    : 1 / 1  (100.00%)
+    2026-07-22 21:07:17,226 -      runtime  : 782s
+    2026-07-22 21:07:17,226 -      started  : 2026/07/22 20:54:13 CDT
+    2026-07-22 21:07:17,226 -      id       : 910d0df6-f0c6-4e95-b450-60ae4283462d
+
+::
+
+    (dm) $ dmagic daq-status -h
+    usage: dmagic daq-status [-h] [--config FILE]
+
+    List all running DM DAQs for the current station
 
 dmagic upload
 -------------
 
-Performs a one-shot sync of **all files that currently exist** in the experiment
-directories to Sojourner. Use this when ``dmagic daq-start`` was not running while
-data was being collected. Unlike ``daq-start``, which monitors for new files
-continuously, ``upload`` transfers everything present at the moment the command is
-issued and then exits.
+Now largely redundant with ``dmagic daq-start`` — kept as a **fallback** for the case
+where ``daq-start`` was not running while data was being collected and you want to
+one-shot transfer everything currently on disk without registering a persistent DAQ.
 
-The same two directories as ``daq-start`` are used:
+Under the hood: ``upload()`` transfers every file present at the moment the command
+runs, then exits. ``daq-start`` now uploads the same set (thanks to
+``processExistingFiles=True``) **and** keeps watching for new files, so for normal
+operation prefer ``daq-start``. The same two directories are used:
 
 - **Raw data**: ``{analysis-top-dir}/{exp-name}`` → DM ``data/`` directory
 - **Reconstructed data**: ``{analysis-top-dir}/{exp-name}_rec`` → DM ``analysis/`` directory
@@ -529,33 +543,23 @@ The same two directories as ``daq-start`` are used:
 The rec upload is skipped with a warning if the ``_rec`` directory does not exist::
 
     (dm) $ dmagic upload
-    2026-03-04 10:00:00,000 - Found 11 DM experiment(s) for station 2BM:
-      [ 0] 2026-03-Li-1018528                   2026-03-11 to 2026-03-14  Investigation of ...
-      [ 1] 2026-03-Li-1012039                   2026-03-03 to 2026-03-05  Investigation of ...
+    2026-07-22 10:00:00,000 - Found 11 DM experiment(s) for station 2BM:
+      [ 0] 2026-07-DeCarlo-0                    2026-07-20 to 2026-08-03  delete_test
       ...
 
-    Select experiment to upload data for [0-10] or 'q' to quit: 1
-    2026-03-04 10:00:05,000 - Uploading raw data for experiment 2026-03-Li-1012039
-    2026-03-04 10:00:05,100 -    Source: @tomodata3:/data3/2BM/2026-03-Li-1012039
-    2026-03-04 10:00:05,200 -    Raw data upload started successfully
-    2026-03-04 10:00:05,300 - Uploading reconstructed data for experiment 2026-03-Li-1012039
-    2026-03-04 10:00:05,400 -    Source: @tomodata3:/data3/2BM/2026-03-Li-1012039_rec
-    2026-03-04 10:00:05,500 -    Reconstructed data upload started successfully
+    Select experiment to upload data for [0-10] or 'q' to quit: 0
+    2026-07-22 10:00:05,000 - Uploading raw data for experiment 2026-07-DeCarlo-0
+    2026-07-22 10:00:05,100 -    Source: /data3/2BM/2026-07-DeCarlo-0
+    2026-07-22 10:00:05,200 -    Raw data upload dispatched to DM
 
 ::
 
     (dm) $ dmagic upload -h
     usage: dmagic upload [-h] [--analysis ANALYSIS] [--analysis-top-dir ANALYSIS_TOP_DIR]
-                         [--config FILE]
+                         [--dm-direct-mount] [--config FILE]
 
-    One-shot sync of all existing files to Sojourner (use when daq-start was not running)
-
-    options:
-      -h, --help            show this help message and exit
-      --analysis ANALYSIS   Hostname of the data analysis computer (default: tomodata3)
-      --analysis-top-dir ANALYSIS_TOP_DIR
-                            Top-level data directory on the analysis computer (default: /data3/2BM/)
-      --config FILE         File name of configuration (default: /home/beams/2BMB/dmagic.conf)
+    One-shot upload of all existing files to Sojourner (fallback for when daq-start
+    was not running during data collection)
 
 dmagic add-user
 ---------------
@@ -727,9 +731,10 @@ Command Reference
                      Create a DM experiment manually for commissioning runs
         delete       Delete a DM experiment from Sojourner
         email        Send data-access email with Globus link to all users on the DM experiment
-        daq-start    Monitor experiment directories and sync new files to Sojourner in real time
-        daq-stop     Stop real-time directory monitoring and file sync for the current experiment
-        upload       One-shot sync of all existing files to Sojourner (use when daq-start was not running)
+        daq-start    Upload all existing files in the experiment directory and continue to sync new files as they arrive
+        daq-stop     List experiments with active DAQs and stop the one you select
+        daq-status   List all running DM DAQs for the current station
+        upload       One-shot upload of all existing files to Sojourner (fallback for when daq-start was not running during data collection)
         add-user     Add users to an existing DM experiment by badge number
         remove-user  Remove users from an existing DM experiment by badge number
         list-users   List all users with access to a DM experiment
