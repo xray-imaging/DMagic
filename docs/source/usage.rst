@@ -47,6 +47,59 @@ beamline before using any other commands::
     The ``[site]`` and ``[local]`` sections only need to be configured once per beamline
     installation. The ``[manual]`` section provides defaults for ``dmagic create-manual``.
 
+Configuring for a different beamline
+------------------------------------
+
+The defaults baked into ``config.py`` are 2-BM values. To install DMagic at another
+station, run ``dmagic init`` and then edit ``~/dmagic.conf`` — the ``[site]`` and
+``[local]`` sections both need beamline-specific values.
+
+**Known-good values for currently supported beamlines** (copy the column for your
+station into your ``~/dmagic.conf``):
+
++----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
+| Key (``[site]``)                       | 2-BM                                    | 7-BM                                    | 32-ID                                   |
++========================================+=========================================+=========================================+=========================================+
+| ``beamline``                           | ``2-BM-A,B``                            | ``7-BM-B``                              | ``32-ID-B,C``                           |
++----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
+| ``experiment-type``                    | ``2BM``                                 | ``7BM``                                 | ``32ID``                                |
++----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
+| ``globus-server-uuid``                 | ``054a0877-97ca-4d80-947f-47ca522b173e``| ``f7918e02-adb9-4012-b50a-8a70ff2d89c0``| ``480d21c2-8275-4603-b99e-5be328941b2a``|
++----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
+| ``globus-message-file``                | ``message-2bm.txt``                     | ``message-7bm.txt``                     | ``message-32id.txt``                    |
++----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
+| ``primary-beamline-contact-badge``     | ``218262``                              | ``56788``                               | ``324083``                              |
++----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
+| ``primary-beamline-contact-email``     | ``pshevchenko@anl.gov``                 | ``akastengren@anl.gov``                 | ``amittone@anl.gov``                    |
++----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
+| ``secondary-beamline-contact-badge``   | ``49734``                               | ``296791``                              | ``293228``                              |
++----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
+| ``secondary-beamline-contact-email``   | ``decarlo@anl.gov``                     | ``lxiaoyang@anl.gov``                   | ``vnikitin@anl.gov``                    |
++----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
+| ``tomoscan-prefix``                    | ``2bmb:TomoScan:``                      | ``7bmtomo:TomoScan:``                   | ``32id:TomoScan:``                      |
++----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
+| ``tomolog-home``                       | ``/home/beams/2BMB``                    | ``/home/beams/7BMB``                    | ``/home/beams/USERTXM``                 |
++----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
+
+The ``[local]`` section (``analysis`` host and ``analysis-top-dir``) is host- and
+data-layout-specific and must be set per install — the defaults in the fork point
+at 2-BM's ``tomodata3:/data3/2BM/``. Ask the beamline staff for the correct values.
+
+**Adding a new beamline** (e.g. 19-BM when it comes online):
+
+1. Ask ``dm-admin@aps.anl.gov`` for the beamline's Globus endpoint UUID and
+   the DM ``experiment_type`` name it should use.
+2. Find the beamline's primary/secondary staff contacts (badge + email).
+3. Confirm the beamline's ``tomoscan_prefix`` (EPICS IOC prefix) with the on-site team.
+4. Extend the table above with the new column and set those values in
+   ``~/dmagic.conf`` on the beamline's install host.
+
+.. note::
+    ``[site]`` options are suppressed from per-command ``--help`` output for brevity,
+    but they are still valid CLI flags — for example
+    ``dmagic email --globus-server-uuid <uuid>`` works if you want to override a
+    single value for one invocation without editing ``~/dmagic.conf``.
+
 Scheduling System Commands
 ==========================
 
