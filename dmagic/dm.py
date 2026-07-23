@@ -609,7 +609,7 @@ def start_daq(exp_name, analysis, analysis_top_dir, dm_direct_mount=False):
     rec_status, rec_n, rec_sz = _inspect_source(analysis, rec_local)
     rec_ok = False
     if _report_source(rec_local, rec_status, rec_n, rec_sz, role='rec'):
-        rec_ok = _start_one_daq(exp_name, rec_dir, {'useAnalysisDirectory': True, 'processExistingFiles': True}, current_daqs)
+        rec_ok = _start_one_daq(exp_name, rec_dir, {'useAnalysisDirectoryAsRoot': True, 'processExistingFiles': True}, current_daqs)
     if not rec_ok:
         log.warning('   Run "dmagic daq-start" again once reconstruction begins')
 
@@ -704,7 +704,7 @@ def upload(exp_name, analysis, analysis_top_dir, dm_direct_mount=False):
     rec_status, rec_n, rec_sz = _inspect_source(analysis, rec_local)
     if _report_source(rec_local, rec_status, rec_n, rec_sz, role='rec'):
         try:
-            daq_api.upload(exp_name, rec_dir, {'useAnalysisDirectory': True})
+            daq_api.upload(exp_name, rec_dir, {'useAnalysisDirectoryAsRoot': True})
             log.info('   Reconstructed data upload dispatched to DM')
         except Exception as e:
             log.warning('   Could not start reconstructed data upload: %s' % str(e))
