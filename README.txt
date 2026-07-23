@@ -59,11 +59,27 @@ Key Commands
                          all users on a DM experiment. Lists station experiments and
                          prompts for selection.
 
-- dmagic daq-start     : Starts automated real-time file transfer (DAQ) to Sojourner.
-                         The DM system monitors the configured directory on the analysis
-                         machine for new files and transfers them continuously.
+- dmagic daq-start     : Starts automated file transfer (DAQ) to Sojourner. On start,
+                         the DM system uploads every file already present in the
+                         experiment directory (raw and _rec), then continues to sync
+                         new/changed files as they arrive. Runs until stopped with
+                         'dmagic daq-stop'. Because it also handles pre-existing files,
+                         it can be started at any time — before, during, or after the
+                         acquisition — and will still catch every file.
 
-- dmagic daq-stop      : Stops all running DAQs for a selected experiment.
+- dmagic daq-stop      : Lists experiments that currently have running DAQs for the
+                         station (skipping the full experiment list), and stops all
+                         DAQs for the one you select. Exits cleanly if none are running.
+
+- dmagic daq-status    : Lists all currently running DM DAQs for the station: experiment
+                         name, source directory, files processed / total, percentage
+                         complete, runtime, and DAQ id. Read-only.
+
+- dmagic upload        : One-shot upload of all existing files in an experiment
+                         directory to Sojourner. Now essentially redundant with
+                         'dmagic daq-start' (which also uploads pre-existing files);
+                         kept as a fallback for cases where daq-start was not running
+                         during data collection.
 
 - dmagic add-user      : Adds one or more users to an existing DM experiment by badge
                          number. Prompts interactively if no badges are provided on the
@@ -88,17 +104,17 @@ DM data-directory format
 The [local] config knob 'dm-direct-mount' controls how dmagic hands the
 source path to the DM DAQ:
 
-  - dm-direct-mount = False (default): dmagic passes
-    '@{analysis}:{analysis-top-dir}/{exp-name}' — DM rsyncs from the
-    analysis host over SSH.
+  - dm-direct-mount = True (default at 2-BM): dmagic passes the bare local
+    path '{analysis-top-dir}/{exp-name}'. Correct when the DM VM already
+    mounts the analysis filesystem directly (2-BM DM VM has both
+    tomodata2:/data2 and tomodata3:/data3 mounted).
 
-  - dm-direct-mount = True: dmagic passes the bare local path
-    '{analysis-top-dir}/{exp-name}'. Use this when the DM VM already
-    mounts the analysis filesystem directly (e.g. the 2-BM DM VM has
-    tomodata2:/data2 mounted). Some DM installations have a bug in the
-    '@host:' syntax where the directory scan returns countFiles=0 with
-    "no new files for upload" for a directory that clearly contains
-    files; the bare-path form works correctly there.
+  - dm-direct-mount = False: dmagic passes
+    '@{analysis}:{analysis-top-dir}/{exp-name}' — DM rsyncs from the
+    analysis host over SSH. This form has a bug on the 2-BM DM installation
+    where directory scans silently return countFiles=0 with
+    "no new files for upload" even for directories with matching files,
+    so leave the default (True) unless a future DM release fixes that.
 
 Passwordless SSH prerequisite
 -----------------------------
