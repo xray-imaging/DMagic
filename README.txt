@@ -98,6 +98,19 @@ Key Commands
                            --end-date    range end in yyyy-mm-dd format (default: today)
                          Output: one line per ESAF with id, status, start/end dates, title.
 
+Per-beamline configuration (2-BM, 7-BM, 32-ID, ...)
+---------------------------------------------------
+
+Defaults baked into config.py are 2-BM values. To install at another beamline,
+run 'dmagic init' and then edit the [site] and [local] sections of
+~/dmagic.conf with beamline-specific values (globus-server-uuid,
+experiment-type, globus-message-file, primary/secondary contact badges and
+emails, tomoscan-prefix, tomolog-home, plus [local] analysis host and top-dir).
+
+Full per-beamline lookup table (with Globus UUIDs and staff contacts for
+2-BM, 7-BM, and 32-ID) and instructions for adding a new beamline are in
+docs/source/usage.rst under 'Configuring for a different beamline'.
+
 DM data-directory format
 ------------------------
 
