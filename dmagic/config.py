@@ -146,14 +146,16 @@ SECTIONS['local'] = {
         'help': 'Top-level data directory on the analysis computer'},
     'dm-direct-mount': {
         'default': True,
-        'action': 'store_true',
+        'action': argparse.BooleanOptionalAction,
         'help': 'True (default at 2-BM) if the DM VM has the '
                 'analysis-top-dir mounted directly; dmagic passes the '
                 'bare local path (e.g. /data2/2BM/exp) to '
                 'daq_api.upload() / startDaq() instead of prepending '
                 '@{analysis}:. Works around a bug in the @host: syntax '
-                'on the 2-BM DM installation. To temporarily send the '
-                '@host: form, edit this default to False.'},
+                'on the 2-BM DM installation. Pass --no-dm-direct-mount '
+                '(or set dm-direct-mount = False in ~/dmagic.conf) to '
+                'force the @host: form on installations where the DM VM '
+                'does not mount the analysis top-dir directly.'},
     }
 
 SECTIONS['query'] = {
@@ -231,11 +233,19 @@ def config_to_list(config_name=CONFIG_FILE_NAME):
             if value != '' and value != 'None':
                 action = opts.get('action', None)
 
-                if action == 'store_true' and value == 'True':
-                    # Only the key is on the command line for this action
-                    result.append('--{}'.format(name))
-
-                if not action == 'store_true':
+                if action == 'store_true':
+                    if value == 'True':
+                        # Only the key is on the command line for this action
+                        result.append('--{}'.format(name))
+                elif action is argparse.BooleanOptionalAction:
+                    # BooleanOptionalAction defines both --<name> (True)
+                    # and --no-<name> (False); inject the one matching the
+                    # config value.
+                    if value == 'True':
+                        result.append('--{}'.format(name))
+                    elif value == 'False':
+                        result.append('--no-{}'.format(name))
+                else:
                     if opts.get('nargs', None) == '+':
                         result.append('--{}'.format(name))
                         result.extend((v.strip() for v in value.split(',')))
