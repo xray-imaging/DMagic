@@ -40,8 +40,8 @@ beamline before using any other commands::
     title = Commissioning
 
     [local]
-    analysis = tomodata3
-    analysis-top-dir = /data3/2BM/
+    data-host = tomodata3
+    data-top-dir = /data3/2BM/
 
 .. note::
     The ``[site]`` and ``[local]`` sections only need to be configured once per beamline
@@ -81,7 +81,7 @@ station into your ``~/dmagic.conf``):
 | ``tomolog-home``                       | ``/home/beams/2BMB``                    | ``/home/beams/7BMB``                    | ``/home/beams/USERTXM``                 |
 +----------------------------------------+-----------------------------------------+-----------------------------------------+-----------------------------------------+
 
-The ``[local]`` section (``analysis`` host and ``analysis-top-dir``) is host- and
+The ``[local]`` section (``data-host`` and ``data-top-dir``) is host- and
 data-layout-specific and must be set per install — the defaults in the fork point
 at 2-BM's ``tomodata3:/data3/2BM/``. Ask the beamline staff for the correct values.
 
@@ -229,7 +229,7 @@ to manage experiment records, user data access via Globus, automated file transf
 and ESAF queries. These commands require the ``[site]`` section of ``~/dmagic.conf``
 to be correctly configured (see `Initialization`_ above). The ``daq-start`` and
 ``upload`` commands additionally require the ``[local]`` section to be configured with
-the correct analysis hostname and data directory (``daq-stop`` and ``daq-status`` do
+the correct ``data-host`` and ``data-top-dir`` (``daq-stop`` and ``daq-status`` do
 not — they read source info from the running DAQ records themselves).
 
 DM data-directory format: ``dm-direct-mount``
@@ -239,13 +239,13 @@ The ``[local]`` config knob ``dm-direct-mount`` controls how dmagic hands the
 source path to the DM DAQ:
 
 - ``dm-direct-mount = True`` (default at 2-BM) — dmagic passes the bare local
-  path ``{analysis-top-dir}/{exp-name}`` to ``daq_api.upload()`` /
-  ``startDaq()``. Correct when the DM VM already mounts the analysis
+  path ``{data-top-dir}/{exp-name}`` to ``daq_api.upload()`` /
+  ``startDaq()``. Correct when the DM VM already mounts the data
   filesystem directly (the 2-BM DM VM has both ``tomodata2:/data2`` and
   ``tomodata3:/data3`` mounted).
 - ``dm-direct-mount = False`` — dmagic passes
-  ``@{analysis}:{analysis-top-dir}/{exp-name}``. DM then rsyncs from the
-  analysis host over SSH. This form has a bug on the 2-BM DM installation
+  ``@{data-host}:{data-top-dir}/{exp-name}``. DM then rsyncs from the
+  data host over SSH. This form has a bug on the 2-BM DM installation
   where ``daq_api.upload()`` returns ``countFiles=0`` with
   ``"no new files for upload"`` even for directories that contain matching
   files, so leave the default ``True`` unless a future DM release fixes it.
@@ -254,20 +254,20 @@ Passwordless SSH prerequisite (for source pre-check)
 ----------------------------------------------------
 
 ``dmagic upload`` and ``dmagic daq-start`` inspect the source directory
-(``{analysis-top-dir}/{exp-name}`` and its ``_rec`` sibling) **before** dispatching to
+(``{data-top-dir}/{exp-name}`` and its ``_rec`` sibling) **before** dispatching to
 DM, and warn if it is empty or missing. This is important because the DM DAQ silently
 accepts a nonexistent source and reports "started successfully" while transferring zero
-bytes — a misconfigured ``analysis`` / ``analysis-top-dir`` in ``~/dmagic.conf`` can
+bytes — a misconfigured ``data-host`` / ``data-top-dir`` in ``~/dmagic.conf`` can
 otherwise produce a successful-looking run with an empty destination.
 
 The pre-check works two ways:
 
-- If the host running dmagic already mounts the analysis directory (typical on beamline
+- If the host running dmagic already mounts the data directory (typical on beamline
   nodes like ``tomo1``, ``tomo3``, ``tocai``), the check is done locally with no setup.
 
 - If dmagic is run from a control computer that does **not** mount ``/data2`` /
   ``/data3`` (typical on ``arcturus``), dmagic falls back to an SSH probe on the
-  analysis host. This requires passwordless SSH to be set up **once**::
+  data host. This requires passwordless SSH to be set up **once**::
 
       # On the control computer, as 2bmb
       ssh-keygen -t ed25519 -N '' -f ~/.ssh/id_ed25519    # only if you don't have a key yet
@@ -496,8 +496,8 @@ Because it also handles pre-existing files, ``daq-start`` can be issued at any p
 before, during, or after data collection — and will still catch every file in the
 directory. Two DAQ processes are started for each experiment:
 
-- **Raw data**: ``{analysis-top-dir}/{exp-name}`` on the analysis machine → DM ``data/`` directory
-- **Reconstructed data**: ``{analysis-top-dir}/{exp-name}_rec`` → DM ``analysis/`` directory
+- **Raw data**: ``{data-top-dir}/{exp-name}`` on the data host → DM ``data/`` directory
+- **Reconstructed data**: ``{data-top-dir}/{exp-name}_rec`` → DM ``analysis/`` directory
 
 The rec DAQ is skipped with a warning if the ``_rec`` directory does not yet exist —
 run ``dmagic daq-start`` again once reconstruction begins to pick it up.
@@ -516,8 +516,8 @@ If a DAQ is already running for a given directory it is left untouched.
     2026-07-22 09:10:05,100 -    Watching directory: /data3/2BM/2026-07-DeCarlo-0
     2026-07-22 09:10:05,200 -    DAQ started successfully
 
-The ``analysis`` and ``analysis-top-dir`` settings in ``~/dmagic.conf`` control which
-host and directories are monitored. For best performance, point ``analysis`` at the
+The ``data-host`` and ``data-top-dir`` settings in ``~/dmagic.conf`` control which
+host and directories are monitored. For best performance, point ``data-host`` at the
 storage node (e.g. ``tomodata3``) that physically hosts the data rather than a compute
 node that accesses it via NFS. Internally ``dmagic`` passes ``processExistingFiles=True``
 to ``daq_api.startDaq()`` so both pre-existing and newly-arriving files are transferred.
@@ -525,8 +525,8 @@ to ``daq_api.startDaq()`` so both pre-existing and newly-arriving files are tran
 ::
 
     (dm) $ dmagic daq-start -h
-    usage: dmagic daq-start [-h] [--analysis ANALYSIS] [--analysis-top-dir ANALYSIS_TOP_DIR]
-                            [--dm-direct-mount] [--config FILE]
+    usage: dmagic daq-start [-h] [--data-host DATA_HOST] [--data-top-dir DATA_TOP_DIR]
+                            [--dm-direct-mount | --no-dm-direct-mount] [--config FILE]
 
     Upload all existing files in the experiment directory and continue to sync
     new files as they arrive
@@ -590,8 +590,8 @@ runs, then exits. ``daq-start`` now uploads the same set (thanks to
 ``processExistingFiles=True``) **and** keeps watching for new files, so for normal
 operation prefer ``daq-start``. The same two directories are used:
 
-- **Raw data**: ``{analysis-top-dir}/{exp-name}`` → DM ``data/`` directory
-- **Reconstructed data**: ``{analysis-top-dir}/{exp-name}_rec`` → DM ``analysis/`` directory
+- **Raw data**: ``{data-top-dir}/{exp-name}`` → DM ``data/`` directory
+- **Reconstructed data**: ``{data-top-dir}/{exp-name}_rec`` → DM ``analysis/`` directory
 
 The rec upload is skipped with a warning if the ``_rec`` directory does not exist::
 
@@ -608,8 +608,8 @@ The rec upload is skipped with a warning if the ``_rec`` directory does not exis
 ::
 
     (dm) $ dmagic upload -h
-    usage: dmagic upload [-h] [--analysis ANALYSIS] [--analysis-top-dir ANALYSIS_TOP_DIR]
-                         [--dm-direct-mount] [--config FILE]
+    usage: dmagic upload [-h] [--data-host DATA_HOST] [--data-top-dir DATA_TOP_DIR]
+                         [--dm-direct-mount | --no-dm-direct-mount] [--config FILE]
 
     One-shot upload of all existing files to Sojourner (fallback for when daq-start
     was not running during data collection)
