@@ -382,9 +382,15 @@ def make_data_link(args):
 def _inspect_local_source(local_path):
     """Look at a local source directory that DM would read from.
 
+    Walks the tree recursively so a directory that contains only
+    subfolders of files (typical for reconstruction output — each
+    _rec/ scan is a folder of tiffs) is reported OK, not EMPTY.
+
     Returns (status, count, size_bytes) where status is one of:
-      OK       - directory exists and has files
-      EMPTY    - directory exists but has no files
+      OK       - directory exists and has at least one file
+                 (count = number of regular files at any depth,
+                 size_bytes = sum of their sizes)
+      EMPTY    - directory exists but has no files at any depth
       MISSING  - parent mount is visible but the directory is not there
                  (usually a misconfigured analysis-top-dir or exp-name)
       UNKNOWN  - parent mount is not visible from this host; caller
@@ -392,19 +398,21 @@ def _inspect_local_source(local_path):
     count and size_bytes are None for MISSING/UNKNOWN.
     """
     if os.path.isdir(local_path):
+        count = 0
+        total = 0
         try:
-            entries = os.listdir(local_path)
+            for root, dirs, files in os.walk(local_path):
+                for name in files:
+                    try:
+                        total += os.path.getsize(os.path.join(root, name))
+                        count += 1
+                    except OSError:
+                        pass
         except OSError:
             return 'UNKNOWN', None, None
-        if not entries:
+        if count == 0:
             return 'EMPTY', 0, 0
-        total = 0
-        for name in entries:
-            try:
-                total += os.path.getsize(os.path.join(local_path, name))
-            except OSError:
-                pass
-        return 'OK', len(entries), total
+        return 'OK', count, total
     parent = os.path.dirname(local_path.rstrip('/'))
     if parent and os.path.isdir(parent):
         return 'MISSING', None, None
@@ -443,10 +451,14 @@ def _inspect_remote_source(host, path, timeout=5):
     #   NO_TOPDIR   - analysis-top-dir itself does not exist on the host
     #                 (usually the wrong --analysis or --analysis-top-dir)
     # Never emit UNKNOWN from a successful SSH: we know what's on the host.
+    # Count files recursively (any depth) so a dir whose top-level
+    # entries are all subdirectories — typical for reconstruction
+    # output (_rec/ containing 10_000_rec/, 10_001_rec/, try_center/) —
+    # is reported OK, not EMPTY. Matches _inspect_local_source semantics.
     script = (
         'p=%(p)s; '
         'if [ -d "$p" ]; then '
-        '  n=$(find "$p" -maxdepth 1 -type f 2>/dev/null | wc -l); '
+        '  n=$(find "$p" -type f 2>/dev/null | wc -l); '
         '  b=$(du -sb "$p" 2>/dev/null | cut -f1); '
         '  [ "$n" = "0" ] && echo EMPTY || echo "OK $n $b"; '
         'elif [ -d "$(dirname "$p")" ]; then echo MISSING; '
