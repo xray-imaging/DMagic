@@ -392,7 +392,7 @@ def _inspect_local_source(local_path):
                  size_bytes = sum of their sizes)
       EMPTY    - directory exists but has no files at any depth
       MISSING  - parent mount is visible but the directory is not there
-                 (usually a misconfigured analysis-top-dir or exp-name)
+                 (usually a misconfigured data-top-dir or exp-name)
       UNKNOWN  - parent mount is not visible from this host; caller
                  should try _inspect_remote_source before giving up.
     count and size_bytes are None for MISSING/UNKNOWN.
@@ -447,9 +447,9 @@ def _inspect_remote_source(host, path, timeout=5):
     and return UNKNOWN so DM dispatches as before.
     """
     # Once we're SSH-connected we can distinguish three failure modes:
-    #   MISSING     - experiment dir missing, but analysis-top-dir exists
-    #   NO_TOPDIR   - analysis-top-dir itself does not exist on the host
-    #                 (usually the wrong --analysis or --analysis-top-dir)
+    #   MISSING     - experiment dir missing, but data-top-dir exists
+    #   NO_TOPDIR   - data-top-dir itself does not exist on the host
+    #                 (usually the wrong --data-host or --data-top-dir)
     # Never emit UNKNOWN from a successful SSH: we know what's on the host.
     # Count files recursively (any depth) so a dir whose top-level
     # entries are all subdirectories — typical for reconstruction
@@ -504,7 +504,7 @@ def _shquote(s):
 def _inspect_source(host, path):
     """Inspect a source dir on `host` at `path`.
 
-    Try locally first (works when the analysis mount is visible from the
+    Try locally first (works when the data mount is visible from the
     machine running dmagic — beamline-node case). Fall back to SSH into
     `host` when local returns UNKNOWN (control-computer case, e.g.
     arcturus, which does not mount /data2 or /data3).
@@ -532,7 +532,7 @@ def _report_source(local_path, status, count, size_bytes, role):
     if status == 'MISSING':
         if role == 'raw':
             log.error('   Source %s does not exist on this host.' % local_path)
-            log.error('   Check --analysis / --analysis-top-dir; DM would '
+            log.error('   Check --data-host / --data-top-dir; DM would '
                       'silently accept and transfer nothing. Skipping.')
         else:
             log.warning('   Source %s does not exist yet (recon may not have run).'
@@ -540,10 +540,10 @@ def _report_source(local_path, status, count, size_bytes, role):
         return False
     if status == 'NO_TOPDIR':
         # size_bytes was repurposed to carry the missing parent path
-        missing_parent = size_bytes or 'analysis-top-dir'
+        missing_parent = size_bytes or 'data-top-dir'
         log.error('   Analysis top directory %s does not exist on the remote host.'
                   % missing_parent)
-        log.error('   The --analysis host or --analysis-top-dir in ~/dmagic.conf is'
+        log.error('   The --data-host or --data-top-dir in ~/dmagic.conf is'
                   ' wrong. DM would silently accept and transfer nothing. Skipping.')
         return False
     log.info('   Source path not visible from this host (no local mount); '
@@ -571,26 +571,26 @@ def _start_one_daq(exp_name, dm_dir_name, task_info, current_daqs):
         return False
 
 
-def _dm_data_dir(analysis, local_path, dm_direct_mount):
+def _dm_data_dir(data_host, local_path, dm_direct_mount):
     """Format the dataDirectory URL for daq_api calls.
 
     When dm_direct_mount is True the DM VM already mounts the source
     filesystem directly, so we pass the bare local path. Otherwise we
-    prepend @{analysis}: for the remote-rsync syntax.
+    prepend @{data-host}: for the remote-rsync syntax.
     """
     if dm_direct_mount:
         return local_path
-    return '@{:s}:{:s}'.format(analysis, local_path)
+    return '@{:s}:{:s}'.format(data_host, local_path)
 
 
-def start_daq(exp_name, analysis, analysis_top_dir, dm_direct_mount=False):
+def start_daq(exp_name, data_host, data_top_dir, dm_direct_mount=False):
     """Start two DM DAQs for exp_name:
-      - raw data:          analysis_top_dir/<exp_name>      → DM data directory
-      - reconstructed data: analysis_top_dir/<exp_name>_rec → DM analysis directory
+      - raw data:          data_top_dir/<exp_name>      → DM data directory
+      - reconstructed data: data_top_dir/<exp_name>_rec → DM analysis directory
 
     The rec DAQ is skipped with a warning if the directory does not yet exist.
     If dm_direct_mount is True, the source URL passed to DM is the bare local
-    path; otherwise it is prefixed with @{analysis}:. Returns True if at least
+    path; otherwise it is prefixed with @{data-host}:. Returns True if at least
     the raw DAQ started, False on error.
     """
     log.info('Checking for already running DAQs for experiment %s' % exp_name)
@@ -600,25 +600,25 @@ def start_daq(exp_name, analysis, analysis_top_dir, dm_direct_mount=False):
         log.error('   Could not list DAQs: %s' % str(e))
         return False
 
-    top = analysis_top_dir.rstrip('/')
+    top = data_top_dir.rstrip('/')
 
     raw_local = os.path.join(top, exp_name)
     rec_local = os.path.join(top, exp_name + '_rec')
 
     # Raw data DAQ → DM data directory
-    raw_dir = _dm_data_dir(analysis, raw_local, dm_direct_mount)
+    raw_dir = _dm_data_dir(data_host, raw_local, dm_direct_mount)
     log.info('Starting raw data DAQ for experiment %s' % exp_name)
     log.info('   Source: %s' % raw_dir)
-    raw_status, raw_n, raw_sz = _inspect_source(analysis, raw_local)
+    raw_status, raw_n, raw_sz = _inspect_source(data_host, raw_local)
     if not _report_source(raw_local, raw_status, raw_n, raw_sz, role='raw'):
         return False
     raw_ok = _start_one_daq(exp_name, raw_dir, {'processExistingFiles': True}, current_daqs)
 
     # Reconstructed data DAQ → DM analysis directory
-    rec_dir = _dm_data_dir(analysis, rec_local, dm_direct_mount)
+    rec_dir = _dm_data_dir(data_host, rec_local, dm_direct_mount)
     log.info('Starting reconstructed data DAQ for experiment %s' % exp_name)
     log.info('   Source: %s' % rec_dir)
-    rec_status, rec_n, rec_sz = _inspect_source(analysis, rec_local)
+    rec_status, rec_n, rec_sz = _inspect_source(data_host, rec_local)
     rec_ok = False
     if _report_source(rec_local, rec_status, rec_n, rec_sz, role='rec'):
         rec_ok = _start_one_daq(exp_name, rec_dir, {'useAnalysisDirectoryAsRoot': True, 'processExistingFiles': True}, current_daqs)
@@ -674,7 +674,7 @@ def list_running_daqs(station):
             and d.get('experimentStationName') == station]
 
 
-def upload(exp_name, analysis, analysis_top_dir, dm_direct_mount=False):
+def upload(exp_name, data_host, data_top_dir, dm_direct_mount=False):
     """One-shot upload of raw and reconstructed data to the DM experiment.
 
     Uploads files that exist at the time the command is issued (unlike DAQ,
@@ -682,26 +682,26 @@ def upload(exp_name, analysis, analysis_top_dir, dm_direct_mount=False):
     not running while data was being collected. Uses the same source directories
     as daq-start:
 
-      - raw data:           analysis_top_dir/<exp_name>      → DM data directory
-      - reconstructed data: analysis_top_dir/<exp_name>_rec  → DM analysis directory
+      - raw data:           data_top_dir/<exp_name>      → DM data directory
+      - reconstructed data: data_top_dir/<exp_name>_rec  → DM analysis directory
 
     The rec upload is skipped with a warning if the directory does not exist.
     If dm_direct_mount is True, the source URL passed to DM is the bare local
-    path; otherwise it is prefixed with @{analysis}:. Returns True if at
+    path; otherwise it is prefixed with @{data-host}:. Returns True if at
     least the raw upload started, False on error.
     """
-    top = analysis_top_dir.rstrip('/')
+    top = data_top_dir.rstrip('/')
 
     raw_local = os.path.join(top, exp_name)
     rec_local = os.path.join(top, exp_name + '_rec')
-    raw_dir = _dm_data_dir(analysis, raw_local, dm_direct_mount)
-    rec_dir = _dm_data_dir(analysis, rec_local, dm_direct_mount)
+    raw_dir = _dm_data_dir(data_host, raw_local, dm_direct_mount)
+    rec_dir = _dm_data_dir(data_host, rec_local, dm_direct_mount)
 
     # Raw data → DM data directory
     log.info('Uploading raw data for experiment %s' % exp_name)
     log.info('   Source: %s' % raw_dir)
     raw_ok = False
-    raw_status, raw_n, raw_sz = _inspect_source(analysis, raw_local)
+    raw_status, raw_n, raw_sz = _inspect_source(data_host, raw_local)
     if _report_source(raw_local, raw_status, raw_n, raw_sz, role='raw'):
         try:
             daq_api.upload(exp_name, raw_dir)
@@ -713,7 +713,7 @@ def upload(exp_name, analysis, analysis_top_dir, dm_direct_mount=False):
     # Reconstructed data → DM analysis directory
     log.info('Uploading reconstructed data for experiment %s' % exp_name)
     log.info('   Source: %s' % rec_dir)
-    rec_status, rec_n, rec_sz = _inspect_source(analysis, rec_local)
+    rec_status, rec_n, rec_sz = _inspect_source(data_host, rec_local)
     if _report_source(rec_local, rec_status, rec_n, rec_sz, role='rec'):
         try:
             daq_api.upload(exp_name, rec_dir, {'useAnalysisDirectoryAsRoot': True})

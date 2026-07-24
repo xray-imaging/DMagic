@@ -136,26 +136,26 @@ SECTIONS['manual'] = {
     }
 
 SECTIONS['local'] = {
-    'analysis': {
+    'data-host': {
         'type': str,
         'default': 'tomodata3',
-        'help': 'Hostname of the data analysis computer'},
-    'analysis-top-dir': {
+        'help': 'Hostname of the machine that stores the raw data'},
+    'data-top-dir': {
         'type': str,
         'default': '/data3/2BM/',
-        'help': 'Top-level data directory on the analysis computer'},
+        'help': 'Top-level directory on data-host where experiment folders live'},
     'dm-direct-mount': {
         'default': True,
         'action': argparse.BooleanOptionalAction,
         'help': 'True (default at 2-BM) if the DM VM has the '
-                'analysis-top-dir mounted directly; dmagic passes the '
+                'data-top-dir mounted directly; dmagic passes the '
                 'bare local path (e.g. /data2/2BM/exp) to '
                 'daq_api.upload() / startDaq() instead of prepending '
-                '@{analysis}:. Works around a bug in the @host: syntax '
+                '@{data-host}:. Works around a bug in the @host: syntax '
                 'on the 2-BM DM installation. Pass --no-dm-direct-mount '
                 '(or set dm-direct-mount = False in ~/dmagic.conf) to '
                 'force the @host: form on installations where the DM VM '
-                'does not mount the analysis top-dir directly.'},
+                'does not mount the data top-dir directly.'},
     }
 
 SECTIONS['query'] = {

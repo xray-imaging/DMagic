@@ -105,7 +105,7 @@ Defaults baked into config.py are 2-BM values. To install at another beamline,
 run 'dmagic init' and then edit the [site] and [local] sections of
 ~/dmagic.conf with beamline-specific values (globus-server-uuid,
 experiment-type, globus-message-file, primary/secondary contact badges and
-emails, tomoscan-prefix, tomolog-home, plus [local] analysis host and top-dir).
+emails, tomoscan-prefix, tomolog-home, plus [local] data-host and data-top-dir).
 
 Full per-beamline lookup table (with Globus UUIDs and staff contacts for
 2-BM, 7-BM, and 32-ID) and instructions for adding a new beamline are in
@@ -118,13 +118,13 @@ The [local] config knob 'dm-direct-mount' controls how dmagic hands the
 source path to the DM DAQ:
 
   - dm-direct-mount = True (default at 2-BM): dmagic passes the bare local
-    path '{analysis-top-dir}/{exp-name}'. Correct when the DM VM already
-    mounts the analysis filesystem directly (2-BM DM VM has both
+    path '{data-top-dir}/{exp-name}'. Correct when the DM VM already
+    mounts the data filesystem directly (2-BM DM VM has both
     tomodata2:/data2 and tomodata3:/data3 mounted).
 
   - dm-direct-mount = False: dmagic passes
-    '@{analysis}:{analysis-top-dir}/{exp-name}' — DM rsyncs from the
-    analysis host over SSH. This form has a bug on the 2-BM DM installation
+    '@{data-host}:{data-top-dir}/{exp-name}' — DM rsyncs from the
+    data host over SSH. This form has a bug on the 2-BM DM installation
     where directory scans silently return countFiles=0 with
     "no new files for upload" even for directories with matching files,
     so leave the default (True) unless a future DM release fixes that.
@@ -133,10 +133,10 @@ Passwordless SSH prerequisite
 -----------------------------
 
 'dmagic upload' and 'dmagic daq-start' pre-check the source directory before
-dispatching to DM. On beamline nodes that already mount the analysis top-dir
+dispatching to DM. On beamline nodes that already mount the data top-dir
 (tomo1, tomo3, tocai, ...) no setup is needed. On a control computer that does
 NOT mount /data2 or /data3 (e.g. arcturus), dmagic falls back to an SSH probe
-on the analysis host — set up passwordless SSH once:
+on the data host — set up passwordless SSH once:
 
     ssh-keygen -t ed25519 -N '' -f ~/.ssh/id_ed25519    # only if no key yet
     ssh-copy-id tomodata2

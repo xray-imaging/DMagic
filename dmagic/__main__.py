@@ -653,14 +653,14 @@ def list_users(args):
 def start_daq(args):
     """
     Select a DM experiment and start two automated real-time file transfers (DAQs) to Sojourner:
-      - raw data:           analysis_top_dir/<exp_name>      → DM data directory
-      - reconstructed data: analysis_top_dir/<exp_name>_rec  → DM analysis directory
+      - raw data:           data_top_dir/<exp_name>      → DM data directory
+      - reconstructed data: data_top_dir/<exp_name>_rec  → DM analysis directory
     The rec DAQ is skipped with a warning if the directory does not yet exist.
     """
     exp_name = _select_experiment(args, 'start DAQ for')
     if exp_name is None:
         return
-    dm.start_daq(exp_name, args.analysis, args.analysis_top_dir,
+    dm.start_daq(exp_name, args.data_host, args.data_top_dir,
                  dm_direct_mount=getattr(args, 'dm_direct_mount', False))
 
 
@@ -735,14 +735,14 @@ def upload(args):
     Select a DM experiment and perform a one-shot upload of all existing files to Sojourner.
     Use this when daq-start was not running while data was being collected.
     Uploads from the same directories as daq-start:
-      - raw data:           analysis_top_dir/<exp_name>      → DM data directory
-      - reconstructed data: analysis_top_dir/<exp_name>_rec  → DM analysis directory
+      - raw data:           data_top_dir/<exp_name>      → DM data directory
+      - reconstructed data: data_top_dir/<exp_name>_rec  → DM analysis directory
     The rec upload is skipped with a warning if the directory does not exist.
     """
     exp_name = _select_experiment(args, 'upload data for')
     if exp_name is None:
         return
-    dm.upload(exp_name, args.analysis, args.analysis_top_dir,
+    dm.upload(exp_name, args.data_host, args.data_top_dir,
               dm_direct_mount=getattr(args, 'dm_direct_mount', False))
 
 
