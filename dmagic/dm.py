@@ -515,13 +515,21 @@ def _inspect_source(host, path):
     return _inspect_remote_source(host, path)
 
 
-def _report_source(local_path, status, count, size_bytes, role):
-    """Log what _inspect_local_source found. role is 'raw' or 'rec'.
+def _report_source(local_path, host, status, count, size_bytes, role):
+    """Log what _inspect_source found. role is 'raw' or 'rec'.
+
+    `host` is the data-host value used for the inspection — included in
+    MISSING / NO_TOPDIR messages so users see immediately which host
+    was probed.
 
     Missing raw is an error (dmagic is misconfigured); missing rec is a
     warning (recon may not have run yet). Returns True if the caller
     should proceed with the DM dispatch, False if it should skip.
     """
+    fix_hint = ('Check data-host / data-top-dir in ~/dmagic.conf, or pass '
+                '--data-host / --data-top-dir on the CLI. DM would silently '
+                'transfer nothing. Skipping.')
+
     if status == 'OK':
         log.info('   Source has %d file(s), %.2f GiB'
                  % (count, size_bytes / (1024.0 ** 3)))
@@ -531,20 +539,20 @@ def _report_source(local_path, status, count, size_bytes, role):
         return True
     if status == 'MISSING':
         if role == 'raw':
-            log.error('   Source %s does not exist on this host.' % local_path)
-            log.error('   Check --data-host / --data-top-dir; DM would '
-                      'silently accept and transfer nothing. Skipping.')
+            log.error('   Source %s does not exist on data-host=%s.'
+                      % (local_path, host))
+            log.error('   %s' % fix_hint)
         else:
-            log.warning('   Source %s does not exist yet (recon may not have run).'
-                        ' Skipping.' % local_path)
+            log.warning('   Source %s does not exist on data-host=%s yet'
+                        ' (recon may not have run). Skipping.'
+                        % (local_path, host))
         return False
     if status == 'NO_TOPDIR':
         # size_bytes was repurposed to carry the missing parent path
         missing_parent = size_bytes or 'data-top-dir'
-        log.error('   Analysis top directory %s does not exist on the remote host.'
-                  % missing_parent)
-        log.error('   The --data-host or --data-top-dir in ~/dmagic.conf is'
-                  ' wrong. DM would silently accept and transfer nothing. Skipping.')
+        log.error('   Data top directory %s does not exist on data-host=%s.'
+                  % (missing_parent, host))
+        log.error('   %s' % fix_hint)
         return False
     log.info('   Source path not visible from this host (no local mount); '
              'proceeding without pre-check')
@@ -610,7 +618,7 @@ def start_daq(exp_name, data_host, data_top_dir, dm_direct_mount=False):
     log.info('Starting raw data DAQ for experiment %s' % exp_name)
     log.info('   Source: %s' % raw_dir)
     raw_status, raw_n, raw_sz = _inspect_source(data_host, raw_local)
-    if not _report_source(raw_local, raw_status, raw_n, raw_sz, role='raw'):
+    if not _report_source(raw_local, data_host, raw_status, raw_n, raw_sz, role='raw'):
         return False
     raw_ok = _start_one_daq(exp_name, raw_dir, {'processExistingFiles': True}, current_daqs)
 
@@ -620,7 +628,7 @@ def start_daq(exp_name, data_host, data_top_dir, dm_direct_mount=False):
     log.info('   Source: %s' % rec_dir)
     rec_status, rec_n, rec_sz = _inspect_source(data_host, rec_local)
     rec_ok = False
-    if _report_source(rec_local, rec_status, rec_n, rec_sz, role='rec'):
+    if _report_source(rec_local, data_host, rec_status, rec_n, rec_sz, role='rec'):
         rec_ok = _start_one_daq(exp_name, rec_dir, {'useAnalysisDirectoryAsRoot': True, 'processExistingFiles': True}, current_daqs)
     if not rec_ok:
         log.warning('   Run "dmagic daq-start" again once reconstruction begins')
@@ -702,7 +710,7 @@ def upload(exp_name, data_host, data_top_dir, dm_direct_mount=False):
     log.info('   Source: %s' % raw_dir)
     raw_ok = False
     raw_status, raw_n, raw_sz = _inspect_source(data_host, raw_local)
-    if _report_source(raw_local, raw_status, raw_n, raw_sz, role='raw'):
+    if _report_source(raw_local, data_host, raw_status, raw_n, raw_sz, role='raw'):
         try:
             daq_api.upload(exp_name, raw_dir)
             log.info('   Raw data upload dispatched to DM')
@@ -714,7 +722,7 @@ def upload(exp_name, data_host, data_top_dir, dm_direct_mount=False):
     log.info('Uploading reconstructed data for experiment %s' % exp_name)
     log.info('   Source: %s' % rec_dir)
     rec_status, rec_n, rec_sz = _inspect_source(data_host, rec_local)
-    if _report_source(rec_local, rec_status, rec_n, rec_sz, role='rec'):
+    if _report_source(rec_local, data_host, rec_status, rec_n, rec_sz, role='rec'):
         try:
             daq_api.upload(exp_name, rec_dir, {'useAnalysisDirectoryAsRoot': True})
             log.info('   Reconstructed data upload dispatched to DM')
