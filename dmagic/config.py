@@ -284,20 +284,46 @@ class Params(object):
 
 def write(config_file, args=None, sections=None):
     """
-    Write *config_file* with values from *args* if they are specified,
-    otherwise use the defaults. If *sections* are specified, write values from
-    *args* only to those sections, use the defaults on the remaining ones.
+    Write *config_file*, preserving existing values for sections not in
+    *sections*.
+
+    For sections listed in *sections*, values come from *args* if the
+    attribute is present, otherwise the code default. For sections NOT
+    in *sections*, the existing value in *config_file* is preserved
+    verbatim; only if the file has no value for a key do we fall back
+    to the code default. This prevents subcommands whose params don't
+    include a section (e.g. daq-stop, which no longer parses [local])
+    from silently rewriting that section with code defaults on every
+    invocation.
     """
+    existing = configparser.ConfigParser()
+    try:
+        existing.read(config_file)
+    except configparser.Error:
+        existing = configparser.ConfigParser()
+
     config = configparser.ConfigParser()
 
     for section in SECTIONS:
         config.add_section(section)
         for name, opts in SECTIONS[section].items():
-            if args and sections and section in sections and hasattr(args, name.replace('-', '_')):
-                value = getattr(args, name.replace('-', '_'))
+            arg_name = name.replace('-', '_')
+            uses_args = (args is not None
+                         and sections is not None
+                         and section in sections
+                         and hasattr(args, arg_name))
+
+            if uses_args:
+                value = getattr(args, arg_name)
                 if isinstance(value, list):
-                    print(type(value), value)
                     value = ', '.join(value)
+            elif existing.has_option(section, name):
+                # Preserve the value already in the file for sections
+                # this command is not authoritative for.
+                value = existing.get(section, name)
+            elif existing.has_option(section, '# ' + name):
+                # Same, but the file had it commented out.
+                value = existing.get(section, '# ' + name)
             else:
                 value = opts['default'] if opts['default'] is not None else ''
 
