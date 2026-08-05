@@ -228,6 +228,10 @@ def list_beamtimes(auth, args):
             'esaf_number':    str(item.get('experimentId') or ''),
         })
 
+    # The scheduling REST API does not guarantee a stable order — sort by
+    # startTime ascending so run-to-run indices are reproducible for the
+    # operator selecting a beamtime.
+    beamtimes.sort(key=lambda b: dt.datetime.fromisoformat(utils.fix_iso(b['start_time'])))
     return beamtimes
 
 
