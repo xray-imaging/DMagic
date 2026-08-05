@@ -229,9 +229,11 @@ def list_beamtimes(auth, args):
         })
 
     # The scheduling REST API does not guarantee a stable order — sort by
-    # startTime ascending so run-to-run indices are reproducible for the
-    # operator selecting a beamtime.
-    beamtimes.sort(key=lambda b: dt.datetime.fromisoformat(utils.fix_iso(b['start_time'])))
+    # startTime descending (newest first) so the currently-active or most
+    # recent beamtime lands at index [0], matching the DESC order used by
+    # every other dmagic command that lists DM experiments.
+    beamtimes.sort(key=lambda b: dt.datetime.fromisoformat(utils.fix_iso(b['start_time'])),
+                   reverse=True)
     return beamtimes
 
 
