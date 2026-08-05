@@ -320,7 +320,11 @@ def get_experiment(exp_name):
 def list_experiments_by_station(station, years=2):
     """Return DM experiment objects for the station from the last `years` calendar years.
 
-    Uses getExperimentsByStation(stationName=station). Sorted newest first.
+    Uses getExperimentsByStation(stationName=station). Sorted newest first
+    by startDate, with experiment name as a secondary tiebreaker so
+    experiments started on the same day (or in the same month, when
+    startDate is missing) appear in a stable order run-to-run —
+    getExperimentsByStation itself does not guarantee ordering.
     Returns [] on error or no results.
     """
     try:
@@ -337,7 +341,14 @@ def list_experiments_by_station(station, years=2):
                     filtered.append(e)
             except (ValueError, IndexError):
                 pass
-        return sorted(filtered, key=lambda e: e.get('rootPath', ''), reverse=True)
+        # Primary key: startDate descending (newest first). Secondary key:
+        # experiment name ascending so ties within the same startDate — or
+        # experiments without a startDate — still land in a stable order.
+        # Sort by name first (ascending) then by startDate (descending);
+        # Python's stable sort preserves the name order within a startDate.
+        filtered.sort(key=lambda e: e.get('name', ''))
+        filtered.sort(key=lambda e: e.get('startDate', '') or '', reverse=True)
+        return filtered
     except Exception as e:
         error_msg = str(e)
         log.error('Could not list DM experiments for station %s: %s' % (station, error_msg))

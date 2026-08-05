@@ -213,6 +213,12 @@ def list_esafs(args):
         log.info('   No ESAFs found')
         return
     log.info('   Found %d ESAF(s)' % len(rows))
+    # Sort by experimentStartDate descending (newest first) so the display
+    # order matches every other dmagic list command.
+    rows = sorted(rows,
+                  key=lambda e: (str(e.get('experimentStartDate', '') or ''),
+                                 str(e.get('esafId', '') or '')),
+                  reverse=True)
     for e in rows:
         log.info('   esafId=%s status=%s start=%s end=%s title=%s' % (
             e.get('esafId', '?'),
@@ -677,7 +683,9 @@ def stop_daq(args):
     by_exp = {}
     for d in daqs:
         by_exp.setdefault(d.get('experimentName', '?'), []).append(d)
-    exp_names = sorted(by_exp.keys())
+    # Names start with YYYY-MM so reverse-alphabetical == newest first,
+    # matching the DESC order used by every other dmagic list command.
+    exp_names = sorted(by_exp.keys(), reverse=True)
 
     log.info('Found %d experiment(s) with running DAQ(s) for station %s:' % (
              len(exp_names), args.experiment_type))
