@@ -474,16 +474,30 @@ mid-experiment after the initial notification has already gone out.
     2026-03-04 10:00:05,000 -    Sending informational message to user1@university.edu
     ...
 
+The email includes a Google Slides presentation URL. dmagic looks it up in
+``{tomolog-home}/.tomolog`` (a YAML history file written by ``tomolog``)
+using the GUP number in the experiment name — most recent entry wins. If
+tomolog has not been run for this experiment, or you want to override
+the lookup with a specific deck, pass ``--presentation-url``::
+
+    (dm) $ dmagic email --presentation-url \
+             'https://docs.google.com/presentation/d/XXXXXXXXXXXX/edit?usp=sharing'
+
 ::
 
     (dm) $ dmagic email -h
-    usage: dmagic email [-h] [--config FILE]
+    usage: dmagic email [-h] [--config FILE] [--presentation-url URL]
 
     Send data-access email with Globus link to users on the DM experiment
 
     options:
-      -h, --help     show this help message and exit
-      --config FILE  File name of configuration (default: /home/beams/2BMB/dmagic.conf)
+      -h, --help              show this help message and exit
+      --config FILE           File name of configuration (default: /home/beams/2BMB/dmagic.conf)
+      --presentation-url URL  Google Slides URL to include in the email. If omitted
+                              (default), dmagic looks the URL up in
+                              {tomolog-home}/.tomolog by GUP number. Pass this when
+                              tomolog was not run yet or you want to email a
+                              specific deck.
 
 dmagic daq-start
 ----------------

@@ -469,8 +469,13 @@ def email(args):
     args._exp_name   = exps[choice]['name']
     args._year_month = exps[choice].get('rootPath', '')
 
-    gup = args._exp_name.rsplit('-', 1)[-1]
-    args.presentation_url = tomolog_utils.get_presentation_url(gup, args.tomolog_home)
+    cli_url = (getattr(args, 'presentation_url', '') or '').strip()
+    if cli_url:
+        log.info('Using presentation URL from --presentation-url: %s' % cli_url)
+        args.presentation_url = cli_url
+    else:
+        gup = args._exp_name.rsplit('-', 1)[-1]
+        args.presentation_url = tomolog_utils.get_presentation_url(gup, args.tomolog_home)
 
     log.info('Sending e-mail to users on the DM experiment: %s' % args._exp_name)
 
@@ -995,6 +1000,14 @@ def main():
             cmd_parser.add_argument(
                 '--badges', default='', type=str, metavar='BADGES',
                 help='Comma-separated badge number(s) to add/remove (e.g. 12345 or 12345,67890)')
+        if cmd == 'email':
+            cmd_parser.add_argument(
+                '--presentation-url', default='', type=str, metavar='URL',
+                help='Google Slides URL to include in the email. '
+                     'If omitted (default), dmagic looks the URL up in '
+                     '{tomolog-home}/.tomolog by GUP number. Pass this '
+                     'when tomolog was not run yet or you want to email '
+                     'a specific deck.')
         cmd_parser.set_defaults(_func=func)
 
     args = config.parse_known_args(parser, subparser=True)
