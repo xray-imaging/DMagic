@@ -57,7 +57,11 @@ Key Commands
 
 - dmagic email         : Sends a data-access notification email with a Globus link to
                          all users on a DM experiment. Lists station experiments and
-                         prompts for selection.
+                         prompts for selection. The email includes a Google Slides
+                         presentation URL, looked up in {tomolog-home}/.tomolog by
+                         GUP number (most recent entry wins). Override with
+                         --presentation-url URL when tomolog was not run yet or you
+                         want to email a specific deck.
 
 - dmagic daq-start     : Starts automated file transfer (DAQ) to Sojourner. On start,
                          the DM system uploads every file already present in the
