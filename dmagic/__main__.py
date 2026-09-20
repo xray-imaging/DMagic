@@ -196,6 +196,100 @@ def show(args):
         log.warning('No proposal run on %s during %s' % (time_now, run))
 
 
+def list_beamtimes(args):
+    """List all beamtimes scheduled on this beamline that overlap
+    [--start-date, --end-date] via the APS scheduling REST API.
+
+    Defaults: start-date = Jan 1 of current year, end-date = today.
+    Beamline comes from the [site] section of ~/dmagic.conf.
+    """
+    today = datetime.date.today()
+    start = args.start_date or today.replace(month=1, day=1).isoformat()
+    end   = args.end_date   or today.isoformat()
+    log.info('Listing beamtimes for %s from %s to %s' % (args.beamline, start, end))
+    auth = authorize.basic(args.credentials)
+    if auth is None:
+        return
+    rows = scheduling.list_beamtimes_in_range(start, end, auth, args)
+    if not rows:
+        log.info('   No beamtimes found')
+        return
+    log.info('   Found %d beamtime(s)' % len(rows))
+    for b in rows:
+        log.info('   %s to %s  run=%s  GUP=%s  PI=%s %s  title=%s' % (
+            b.get('start_time', '?')[:10],
+            b.get('end_time',   '?')[:10],
+            b.get('run_name', '?'),
+            b.get('gup_number', '?'),
+            b.get('pi_first_name', '') or '',
+            b.get('pi_last_name', '?'),
+            (b.get('gup_title', '') or '')[:60]))
+
+
+def collected(args):
+    """For each beamtime scheduled in [--start-date, --end-date], show the
+    matching DM experiment on Sojourner (or "(no DM experiment)" if
+    nothing was created).
+
+    Beamtimes come from the APS scheduling REST API (same source as
+    dmagic list-beamtimes). DM experiments come from
+    ExperimentDsApi.getExperimentsByStation (same source as dmagic
+    add-user/list-users). GUP is used as the join key; where a GUP has
+    more than one DM experiment (typically one per YYYY-MM), we prefer
+    the one whose rootPath equals the beamtime's start month, otherwise
+    the first match wins.
+
+    Reports only what DM can authoritatively answer — whether the DM
+    experiment exists — not how many files landed under /gdata (that
+    requires filesystem access and would silently report 0 on hosts
+    that do not mount /gdata).
+    """
+    today = datetime.date.today()
+    start = args.start_date or today.replace(month=1, day=1).isoformat()
+    end   = args.end_date   or today.isoformat()
+
+    log.info('Collected-data report for %s from %s to %s'
+             % (args.beamline, start, end))
+    auth = authorize.basic(args.credentials)
+    if auth is None:
+        return
+
+    beamtimes = scheduling.list_beamtimes_in_range(start, end, auth, args)
+    if not beamtimes:
+        log.info('   No beamtimes found')
+        return
+
+    # Widen the DM lookup window to cover the earliest beamtime start.
+    start_year = int(start.split('-')[0])
+    years_back = max(2, today.year - start_year + 1)
+    gup_index  = dm.build_gup_experiment_index(args.experiment_type,
+                                               years=years_back)
+
+    log.info('   %-24s  %-8s  %-19s  %s' % (
+        'PI', 'GUP', 'Beamtime', 'DM experiment'))
+    log.info('   ' + '-' * 90)
+
+    for b in beamtimes:
+        pi_full = ('%s %s' % (b.get('pi_first_name', '') or '',
+                              b.get('pi_last_name',  '') or '')).strip() or 'Unknown'
+        gup     = b.get('gup_number', '')
+        bt_month = (b.get('start_time', '') or '')[:7]   # YYYY-MM
+        bt_short = '%s→%s' % ((b.get('start_time','') or '?')[:10],
+                              (b.get('end_time',  '') or '?????')[5:10])
+
+        candidates = gup_index.get(gup, [])
+        exp = None
+        for e in candidates:
+            if (e.get('rootPath', '') or '') == bt_month:
+                exp = e; break
+        if exp is None and candidates:
+            exp = candidates[0]
+
+        exp_name = exp.get('name', '') if exp else '(no DM experiment)'
+        log.info('   %-24s  %-8s  %-19s  %s' % (
+            pi_full[:24], gup, bt_short[:19], exp_name))
+
+
 def list_esafs(args):
     """List ESAFs for the beamline station in [--start-date, --end-date].
 
@@ -960,7 +1054,12 @@ def main():
     lfname = logs_home + 'dmagic_' + datetime.datetime.strftime(datetime.datetime.now(), "%Y-%m-%d_%H:%M:%S") + '.log'
     log.setup_custom_logger(lfname)
 
-    parser = argparse.ArgumentParser()
+    # allow_abbrev=False: config_to_list appends every section's values as CLI
+    # args to the shared parse pass. Without this flag argparse would match a
+    # value from one section to a longer option in another section by prefix
+    # (e.g. [manual] `start = ...` silently overriding [query] `--start-date`
+    # on list-esafs / list-beamtimes).
+    parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--config', **config.SECTIONS['general']['config'])
 
     # (sections shown in -h, sections suppressed in -h but still parsed, help text)
@@ -980,14 +1079,18 @@ def main():
         ('add-user',      add_user,      config.CREATE_PARAMS, config.SITE_SUPPRESS, "Add users to an existing DM experiment by badge number"),
         ('remove-user',   remove_user,   config.CREATE_PARAMS, config.SITE_SUPPRESS, "Remove users from an existing DM experiment by badge number"),
         ('list-users',    list_users,    config.CREATE_PARAMS, config.SITE_SUPPRESS, "List all users with access to a DM experiment"),
-        ('list-esafs',    list_esafs,    config.LIST_ESAFS_PARAMS, config.SITE_SUPPRESS, "List ESAFs for the beamline station in a date range"),
+        ('list-esafs',      list_esafs,      config.LIST_ESAFS_PARAMS,     config.SITE_SUPPRESS, "List ESAFs for the beamline station in a date range"),
+        ('list-beamtimes',  list_beamtimes,  config.LIST_BEAMTIMES_PARAMS, config.SITE_SUPPRESS, "List all beamtimes scheduled on this beamline in a date range"),
+        ('collected',       collected,       config.COLLECTED_PARAMS,      config.SITE_SUPPRESS, "For each scheduled beamtime, show DM experiment + raw/rec file counts"),
     ]
 
     subparsers = parser.add_subparsers(title="Commands", metavar='')
 
     for cmd, func, sections, suppress, text in cmd_parsers:
         cmd_params = config.Params(sections=sections, suppress_sections=suppress)
-        cmd_parser = subparsers.add_parser(cmd, help=text, description=text, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        cmd_parser = subparsers.add_parser(cmd, help=text, description=text,
+                                           formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+                                           allow_abbrev=False)
         cmd_parser = cmd_params.add_arguments(cmd_parser)
         if cmd == 'delete':
             cmd_parser.add_argument(

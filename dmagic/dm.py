@@ -363,6 +363,26 @@ def list_experiments_by_station(station, years=2):
         return []
 
 
+def build_gup_experiment_index(station, years=3):
+    """Return {gup_str: [experiment_obj, ...]} for DM experiments at station.
+
+    Uses list_experiments_by_station (which itself caps at `years` calendar
+    years back). GUP is parsed from the last '-'-separated field of the
+    experiment name (matches the YYYY-MM-Lastname-GUP convention). Manual
+    commissioning experiments with a trailing '-0' end up under key '0',
+    which will never match a real beamtime GUP — that's the intended
+    behaviour.
+    """
+    exps = list_experiments_by_station(station, years=years)
+    index = {}
+    for e in exps:
+        name = e.get('name', '') or ''
+        parts = name.rsplit('-', 1)
+        if len(parts) == 2 and parts[1].isdigit():
+            index.setdefault(parts[1], []).append(e)
+    return index
+
+
 def delete_experiment(exp_name):
     """Delete a DM experiment from Sojourner by name.
 

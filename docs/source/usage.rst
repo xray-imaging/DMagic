@@ -775,6 +775,83 @@ value in ``~/dmagic.conf``. If no dates are provided, the range defaults to
       --end-date END_DATE      Range end date (YYYY-MM-DD); defaults to today (default: )
       --config FILE            File name of configuration (default: /home/beams/2BMB/dmagic.conf)
 
+dmagic list-beamtimes
+---------------------
+
+Lists every beamtime scheduled on this beamline whose window overlaps
+``[--start-date, --end-date]``, aggregated across all APS runs that touch
+the range. Uses the APS scheduling REST API (not DM), so a beamtime shows
+up whether or not a DM experiment was ever created for it. The beamline is
+taken from the ``[site]`` section of ``~/dmagic.conf``. If no dates are
+provided the range defaults to **January 1 of the current year → today**::
+
+    (dm) $ dmagic list-beamtimes --start-date 2026-01-01 --end-date 2026-08-05 | head
+    2026-08-05 15:00:00,000 - Listing beamtimes for 32-ID-B,C from 2026-01-01 to 2026-08-05
+    2026-08-05 15:00:01,500 -    Found 34 beamtime(s)
+    2026-08-05 15:00:01,500 -    2026-07-31 to 2026-08-05  run=2026-2  GUP=1022117  PI=Rajmund Mokso  title=A new holotomographic scheme with multilayer laue lenses
+    2026-08-05 15:00:01,500 -    2026-07-29 to 2026-07-31  run=2026-2  GUP=1015240  PI=Rebecca Scharnagl  title=eBERlight: Tracking seasonal changes in the interti
+    ...
+
+Sorted newest first, matching every other dmagic list command.
+
+::
+
+    (dm) $ dmagic list-beamtimes -h
+    usage: dmagic list-beamtimes [-h] [--start-date START_DATE] [--end-date END_DATE] [--config FILE]
+
+    List all beamtimes scheduled on this beamline in a date range
+
+    options:
+      -h, --help               show this help message and exit
+      --start-date START_DATE  Range start date (YYYY-MM-DD); defaults to first day of current month (default: )
+      --end-date END_DATE      Range end date (YYYY-MM-DD); defaults to today (default: )
+      --config FILE            File name of configuration (default: /home/beams/2BMB/dmagic.conf)
+
+dmagic collected
+----------------
+
+For each beamtime scheduled in ``[--start-date, --end-date]``, reports
+whether a matching DM experiment on Sojourner exists (and its name), or
+shows ``(no DM experiment)`` if nothing was created. Joins scheduling
+beamtimes to DM experiments by GUP, preferring same-month matches when a
+GUP has more than one DM experiment (e.g. Pickering-1008279 with two DM
+entries ``2026-03-Pickering-1008279`` and ``2026-07-Pickering-1008279``)::
+
+    (dm) $ dmagic collected --start-date 2026-01-01
+    2026-08-14 13:55:00,000 - Collected-data report for 2-BM-A,B from 2026-01-01 to 2026-08-14
+    2026-08-14 13:55:03,000 -    PI                        GUP       Beamtime             DM experiment
+    2026-08-14 13:55:03,000 -    ------------------------------------------------------------------------------------------
+    2026-08-14 13:55:03,000 -    Yara Haridy               1015116   2026-08-03→08-05     2026-08-Haridy-1015116
+    2026-08-14 13:55:03,000 -    Ling Li                   1014288   2026-07-29→08-02     2026-07-Li-1014288
+    2026-08-14 13:55:03,000 -    Devin Rippner             1011312   2026-07-15→07-18     (no DM experiment)
+    ...
+
+Rows shown as ``(no DM experiment)`` had a scheduled beamtime but no DM
+experiment was ever created on Sojourner for that GUP — someone would
+need to run ``dmagic create`` (or the equivalent manual copy) if that
+data should be catalogued.
+
+Reports only what DM can authoritatively answer. Counting the files
+that actually landed under ``/gdata/dm/{station}/{YYYY-MM}/{exp}/data``
+and ``.../analysis`` requires filesystem access to ``/gdata`` — a
+separate constraint from DM auth, and one this command does not
+attempt so it does not silently report ``0`` files on hosts that lack
+that mount. Use ``du -sh`` or a dedicated tool for that side of the
+question.
+
+::
+
+    (dm) $ dmagic collected -h
+    usage: dmagic collected [-h] [--start-date START_DATE] [--end-date END_DATE] [--config FILE]
+
+    For each scheduled beamtime, show DM experiment + raw/rec file counts
+
+    options:
+      -h, --help               show this help message and exit
+      --start-date START_DATE  Range start date (YYYY-MM-DD); defaults to first day of current month (default: )
+      --end-date END_DATE      Range end date (YYYY-MM-DD); defaults to today (default: )
+      --config FILE            File name of configuration (default: /home/beams/2BMB/dmagic.conf)
+
 Command Reference
 =================
 
@@ -806,3 +883,6 @@ Command Reference
         remove-user  Remove users from an existing DM experiment by badge number
         list-users   List all users with access to a DM experiment
         list-esafs   List ESAFs for the beamline station in a date range
+        list-beamtimes
+                     List all beamtimes scheduled on this beamline in a date range
+        collected    For each scheduled beamtime, show DM experiment + raw/rec file counts

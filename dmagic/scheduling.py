@@ -155,37 +155,20 @@ def beamtime_requests(run, auth, args):
         return reply.json()
 
 
-def list_beamtimes(auth, args):
+def _fetch_beamtimes_for_run(run, auth, args):
+    """Fetch beamtime dicts for one named run from the schedule endpoint.
+
+    Extracted from list_beamtimes() so both list_beamtimes() (single-run,
+    keyed on --set offset) and list_beamtimes_in_range() (multi-run,
+    keyed on date range) can share the parsing loop.
     """
-    List all beamtimes scheduled for the run containing today + args.set days.
-
-    Uses the same `schedule/findByRunNameAndScheduleName` endpoint as
-    beamtime_requests() / `dmagic show`, so the set of beamtimes returned
-    is consistent with what `dmagic show` and `dmagic tag` display.
-
-    Parameters
-    ----------
-    auth : HTTPBasicAuth
-        Basic http authorization.
-
-    Returns
-    -------
-    list of dict
-        Each dict contains: gup_number, gup_title, pi_last_name, pi_first_name,
-        pi_institution, pi_email, pi_badge, year_month, start_time, end_time, run_name.
-        Returns an empty list if none are found.
-    """
-    run = current_run(auth, args)
-    if run is None:
-        log.error("Could not determine run for the given --set offset")
-        return []
-
     end_point = "beamline-scheduling/sched-api/schedule/findByRunNameAndScheduleName"
     api_url = args.url + '/' + end_point + '/' + run + '/' + args.beamline
     reply = requests.get(api_url, auth=auth)
 
     if reply.status_code != 200:
-        log.error("No response from the restAPI. Error: %s" % reply.status_code)
+        log.error("No response from the restAPI (run %s). Error: %s"
+                  % (run, reply.status_code))
         return []
 
     try:
@@ -227,6 +210,35 @@ def list_beamtimes(auth, args):
             'run_name':       run,
             'esaf_number':    str(item.get('experimentId') or ''),
         })
+    return beamtimes
+
+
+def list_beamtimes(auth, args):
+    """
+    List all beamtimes scheduled for the run containing today + args.set days.
+
+    Uses the same `schedule/findByRunNameAndScheduleName` endpoint as
+    beamtime_requests() / `dmagic show`, so the set of beamtimes returned
+    is consistent with what `dmagic show` and `dmagic tag` display.
+
+    Parameters
+    ----------
+    auth : HTTPBasicAuth
+        Basic http authorization.
+
+    Returns
+    -------
+    list of dict
+        Each dict contains: gup_number, gup_title, pi_last_name, pi_first_name,
+        pi_institution, pi_email, pi_badge, year_month, start_time, end_time, run_name.
+        Returns an empty list if none are found.
+    """
+    run = current_run(auth, args)
+    if run is None:
+        log.error("Could not determine run for the given --set offset")
+        return []
+
+    beamtimes = _fetch_beamtimes_for_run(run, auth, args)
 
     # The scheduling REST API does not guarantee a stable order — sort by
     # startTime descending (newest first) so the currently-active or most
@@ -235,6 +247,56 @@ def list_beamtimes(auth, args):
     beamtimes.sort(key=lambda b: dt.datetime.fromisoformat(utils.fix_iso(b['start_time'])),
                    reverse=True)
     return beamtimes
+
+
+def list_beamtimes_in_range(start_date, end_date, auth, args):
+    """List all beamtimes scheduled on this beamline that overlap
+    [start_date, end_date] (both inclusive, YYYY-MM-DD strings).
+
+    Walks every APS run whose window overlaps the date range and
+    aggregates each run's schedule-endpoint response. Beamtimes are
+    then filtered so only those whose own start/end also overlap the
+    requested range are returned, and sorted DESC by start_time.
+    """
+    end_point = "beamline-scheduling/sched-api/run/getAllRuns"
+    reply = requests.get(args.url + '/' + end_point, auth=auth)
+    if reply.status_code != 200:
+        log.error("Could not fetch runs list from the scheduling API. Error: %s"
+                  % reply.status_code)
+        return []
+
+    tz    = pytz.timezone('America/Chicago')
+    start = tz.localize(dt.datetime.strptime(start_date, '%Y-%m-%d'))
+    end   = tz.localize(dt.datetime.strptime(end_date,   '%Y-%m-%d')
+                         + dt.timedelta(days=1))  # end-inclusive
+
+    matching_runs = []
+    for r in reply.json():
+        try:
+            r_start = dt.datetime.fromisoformat(utils.fix_iso(r['startTime']))
+            r_end   = dt.datetime.fromisoformat(utils.fix_iso(r['endTime']))
+        except (KeyError, ValueError):
+            continue
+        if r_end >= start and r_start <= end:
+            matching_runs.append(r['runName'])
+
+    all_beamtimes = []
+    for run in matching_runs:
+        all_beamtimes.extend(_fetch_beamtimes_for_run(run, auth, args))
+
+    # Filter each beamtime to those actually overlapping the requested window.
+    def bt_overlaps(bt):
+        try:
+            bt_start = dt.datetime.fromisoformat(utils.fix_iso(bt['start_time']))
+            bt_end   = dt.datetime.fromisoformat(utils.fix_iso(bt['end_time']))
+        except (KeyError, ValueError):
+            return False
+        return bt_end >= start and bt_start <= end
+
+    filtered = [b for b in all_beamtimes if bt_overlaps(b)]
+    filtered.sort(key=lambda b: dt.datetime.fromisoformat(utils.fix_iso(b['start_time'])),
+                  reverse=True)
+    return filtered
 
 
 def get_beamtime(gup_number, auth, args):
