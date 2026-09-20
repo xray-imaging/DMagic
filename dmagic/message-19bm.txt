@@ -1,0 +1,70 @@
+<html>
+<body style="font-family: Arial, sans-serif; font-size: 14px; color: #222;">
+
+<p>All,</p>
+
+<p>Please use this link to access your beamtime log slides:</p>
+
+<p>%%SLIDES_LINK%%</p>
+
+<p style="color: red;"><strong>Please make sure it is copied from our account 3 months from today.
+The number of presentations under a single account is limited.
+It will be deleted permanently after that time.</strong></p>
+
+<p>Your experiment data has been uploaded to our Globus server. Download it using the instructions below.</p>
+
+<p>Data link: %%DATA_LINK%%</p>
+
+<p><strong>Important:</strong> APS grants access to your data using the email address you provided
+during user registration. Your Globus account must be linked to that same email address.
+If it is not, please link it before proceeding:
+<ol type="a">
+  <li>Log into <a href="https://www.globus.org">globus.org</a> with your existing Globus account</li>
+  <li>Go to <strong>Settings &rarr; Account &rarr; Identities</strong> and click <strong>Link Another Identity</strong></li>
+  <li>Select your institution, or choose to link by email if your institution is not listed</li>
+  <li>Enter the email used for APS user registration and follow the verification steps</li>
+</ol>
+</p>
+
+<ol>
+  <li>Login into Globus with your personal Globus credential</li>
+  <li>Login to the APS data management system using your Globus account when prompted</li>
+  <li>Set an endpoint on your computer (see
+      <a href="https://www.globus.org/globus-connect-personal">Globus EndPoint</a>)</li>
+  <li>Raw files are in the <strong>data</strong> folder and reconstructed files in the <strong>analysis</strong> folder,
+      together with the try_center folder</li>
+  <li>Download the data!</li>
+</ol>
+
+<p style="color: red;"><strong>Please make sure all your data is downloaded 3 months from today.
+Our storage capabilities are limited. It will be deleted permanently after that time.</strong></p>
+
+<p>Below are other useful links:</p>
+
+<ul>
+  <li>Beamline documentation and support:
+      <a href="https://docs19bm.readthedocs.io/">https://docs19bm.readthedocs.io/</a></li>
+  <li>Raw data viewers:
+      <a href="https://imagej.net/Fiji">Fiji</a> with the
+      <a href="https://github.com/paulscherrerinstitute/ch.psi.imagej.hdf5">HDF plugin</a>,
+      <a href="https://support.hdfgroup.org/products/java/hdfview/">HDFView</a>,
+      <a href="https://github.com/titusjan/argos">Argos</a></li>
+  <li>CPU based reconstruction software:
+      <a href="https://github.com/tomography/tomopy-cli">tomopy-cli</a> and
+      <a href="https://tomopy.readthedocs.io/en/stable/">tomopy</a></li>
+  <li>GPU based reconstruction software:
+      <a href="https://tomocupy.readthedocs.io/en/latest/">tomocupy</a></li>
+  <li>Interesting or challenging dataset? To make it available to the scientific community
+      and help improve our reconstruction software, you can share it at
+      <a href="https://tomobank.readthedocs.io">tomobank.readthedocs.io</a> &mdash;
+      just email <a href="mailto:tomobank@anl.gov">tomobank@anl.gov</a></li>
+</ul>
+
+<p>
+Alan L. Kastengren<br>
+<a href="mailto:akastengren@anl.gov">akastengren@anl.gov</a><br>
+Advanced Photon Source
+</p>
+
+</body>
+</html>
