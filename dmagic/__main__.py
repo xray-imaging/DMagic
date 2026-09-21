@@ -918,6 +918,31 @@ def _update_tag_pvs(args, pi, proposal_num, proposal_title, exp_date, esaf_numbe
     return True
 
 
+def _report_tag_status(args, status):
+    """Write a short status string to the tomoscan UserInfoUpdate PV.
+
+    tag() is normally launched from a button on the beamline's MEDM screen,
+    where nobody is watching a terminal. On the failure paths the operator
+    otherwise sees nothing at all: the log lines go to a window that may not
+    exist, and the user-info panel keeps displaying the previous experiment
+    as though it were current. Putting the failure where the success
+    timestamp goes means the panel itself says something is wrong.
+
+    UserInfoUpdate is a stringout, so 39 characters are usable and the rest
+    is discarded by Channel Access. Callers keep messages short; this
+    truncates as a backstop rather than letting CA do it silently.
+    """
+    try:
+        pv = PV(args.tomoscan_prefix + 'UserInfoUpdate')
+        if not pv.wait_for_connection(timeout=getattr(args, 'epics_conn_timeout', 1.0)):
+            log.warning('Could not report status: %s not reachable' % pv.pvname)
+            return
+        pv.put(status[:39])
+        log.info('Updating user_info_update_time EPICS PV with: %s' % status[:39])
+    except Exception as e:
+        log.warning('Could not report status to EPICS: %s' % str(e))
+
+
 def tag(args):
     """
     Update the EPICS PVs with user and experiment information associated with the current experiment
@@ -939,14 +964,22 @@ def tag(args):
     except (IndexError, TypeError):
         pass
 
+    # The date the schedule was actually searched, which is today shifted by
+    # --set. Reporting it is what makes a forgotten or wrong --set visible:
+    # the panel shows which day came back empty, not merely that one did.
+    searched = (datetime.datetime.now(zoneinfo.ZoneInfo("America/Chicago"))
+                + dt.timedelta(args.set)).strftime('%Y-%m-%d %H:%M')
+
     if not proposals:
         log.error('No proposal found in the scheduling system for this run')
         log.error("If you have a scheduled proposal: run 'dmagic create' to create the DM experiment")
         log.error("For commissioning or manual runs: run 'dmagic create-manual' instead")
         log.error("Then run 'dmagic tag-manual' to select the experiment and update the EPICS PVs")
+        _report_tag_status(args, 'No proposal found %s' % searched)
         return None
     try:
         log.error(proposals['message'])
+        _report_tag_status(args, 'Scheduling error %s' % searched)
         return None
     except Exception:
         pass
@@ -956,6 +989,9 @@ def tag(args):
         time_now = datetime.datetime.now().astimezone() + dt.timedelta(args.set)
         log.warning('No proposal active on %s during run %s' % (time_now, run))
         log.warning("Use 'dmagic tag-manual' to select an experiment manually")
+        # Distinct from "not found": the run has beamtime, none of it covers
+        # the searched date. This is the shape a wrong --set usually takes.
+        _report_tag_status(args, 'No proposal active %s' % searched)
         return None
 
     pi             = scheduling.get_current_pi(proposal)
