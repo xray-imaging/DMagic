@@ -22,11 +22,20 @@ Clone and install DMagic::
     (dm) $ git clone https://github.com/xray-imaging/DMagic DMagic
     (dm) $ cd DMagic
     (dm) $ pip install .
-    (dm) $ pip install pytz pyyaml requests pyepics
+
+``pyyaml``, ``requests``, ``pytz``, ``numpy`` and ``pyepics`` are pulled in
+automatically. Older instructions here asked for them to be installed by hand,
+because ``setup.py`` declared only ``pyyaml`` and the first import then failed;
+that is no longer necessary.
 
 Install the APS Data Management SDK::
 
     (dm) $ conda install apsu::aps-dm-api
+
+.. note::
+    The SDK is also published on the ``aps-anl-tag`` channel. Both carry the
+    same package -- 2-BM and 19-BM run ``aps-dm-api`` 10.1.0 installed from
+    ``aps-anl-tag`` and ``apsu`` respectively -- so either channel works.
 
 .. note::
     The DM SDK is required for ``create``, ``delete``, ``email``, ``add-user``,
@@ -64,6 +73,19 @@ then add them to ``~/.bashrc``::
     export DM_STATION_NAME=<STATION>          # e.g. 2BM or 32ID
     export DM_LOGIN_FILE=/home/dm_id/etc/.<login-file>
     export DM_BEAMLINE_NAME=<beamline>        # e.g. 2-BM-A,B or 32-ID-B,C
+
+.. warning::
+    Keep the ``export``. Written as bare assignments these are shell variables
+    only, invisible to python, and the SDK does not complain: it falls back to
+    ``127.0.0.1``, imports cleanly, and fails at the first DM call with
+
+    ::
+
+        Could not list DAQs: URL https://127.0.0.1:33336 refused connection.
+
+    Nothing looks wrong until then, so this is worth checking before declaring
+    an installation finished. ``dmagic daq-status`` is a read-only command that
+    exercises the SDK and will show the problem immediately.
 
 DMagic configuration file
 --------------------------
