@@ -166,6 +166,26 @@ exits cleanly with a message::
     2026-03-18 13:36:07,892 - For commissioning or manual runs: run 'dmagic create-manual' instead
     2026-03-18 13:36:07,893 - Then run 'dmagic tag-manual' to select the experiment and update the EPICS PVs
 
+No EPICS PV is written in that case, so the user-info panel keeps whatever it
+held before. Because ``dmagic tag`` is often launched from a button on the
+beamline MEDM screen, where nobody is reading a terminal, the reason is also
+written to ``UserInfoUpdate`` -- the same field that carries the update
+timestamp on success:
+
+=============================  ================================================
+``No proposal found <date>``   no beamtime at all for the run
+``No proposal active <date>``  beamtime exists, none covering that date
+``Scheduling error <date>``    the scheduling API returned a message
+=============================  ================================================
+
+``<date>`` is the date actually searched: today shifted by ``--set``. A
+forgotten or mistyped ``--set`` is otherwise indistinguishable from an empty
+schedule, since both simply produce no proposal; with the searched date on
+screen it reads as the wrong day.
+
+``UserInfoUpdate`` is a ``stringout``, so these messages are trimmed to the
+39 characters the record holds.
+
 dmagic tag-manual
 -----------------
 
